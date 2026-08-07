@@ -43,6 +43,10 @@ tryCatch({
 message("Snapshotting dependencies...")
 renv::snapshot(prompt = FALSE)
 
+# Regenerate spatial outputs
+message("Regenerating spatial outputs...")
+source("scripts/00_downloads/00_download_spatial.R")
+
 # Run tests
 message("Running Stage 0 tests...")
 res <- testthat::test_dir("tests", stop_on_failure = TRUE)

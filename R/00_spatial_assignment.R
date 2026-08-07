@@ -17,11 +17,7 @@ assign_station <- function(lat, lon, subregions_file = "config/spatial/hydrograp
   # Return NA if coordinates are missing
   out_ids <- rep(NA_character_, length(lat))
   valid_idx <- which(!is.na(lat) & !is.na(lon))
-  
   if (length(valid_idx) == 0) return(out_ids)
-  
-  old_s2 <- sf::sf_use_s2(FALSE)
-  on.exit(sf::sf_use_s2(old_s2), add = TRUE)
   
   regions <- sf::st_read(subregions_file, quiet = TRUE)
   # Create point geometry

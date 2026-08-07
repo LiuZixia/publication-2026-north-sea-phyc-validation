@@ -20,11 +20,19 @@ test_that("Deterministic spatial assignments", {
   sub_file <- file.path(proj_root, "config", "spatial", "hydrographic_subregions.geojson")
   expect_true(file.exists(sub_file))
   
-  # Assert topological validity
-  old_s2 <- sf_use_s2(FALSE)
-  on.exit(sf_use_s2(old_s2), add = TRUE)
+  # Assert CRS and validity
   regions <- st_read(sub_file, quiet = TRUE)
+  expect_equal(st_crs(regions)$epsg, 4326)
   expect_true(all(st_is_valid(regions)))
+  
+  # Assert there are exactly two regions (no duplicates)
+  expect_equal(nrow(regions), 2)
+  expect_setequal(regions$subregion_id, c("southern_and_central_north_sea", "skagerrak_kattegat"))
+  
+  # Assert plausible bounds (must be roughly within Europe, not meters)
+  bbox <- st_bbox(regions)
+  expect_true(bbox["xmin"] > -20 && bbox["xmax"] < 30)
+  expect_true(bbox["ymin"] > 45 && bbox["ymax"] < 70)
   
   # Southern and Central North Sea point (approx 2E, 54N)
   # Skagerrak/Kattegat point (approx 11E, 57.5N)

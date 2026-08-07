@@ -88,5 +88,11 @@ download_with_retry <- function(url, dest_file, max_tries = 3) {
     stop("Failed to create temporary download file.")
   }
   
-  calculate_checksum(dest_file)
+  chk <- calculate_checksum(dest_file)
+  
+  list(
+    checksum = chk,
+    status = httr2::resp_status(resp),
+    size = file.info(dest_file)$size
+  )
 }
