@@ -24,7 +24,8 @@ venv/
 *.secret
 
 # Large or regenerable research artifacts
-data/raw/*
+# data/raw is a local symlink to the external HDD raw-data store.
+/data/raw
 data/interim/*
 data/processed/*
 outputs/*
