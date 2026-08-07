@@ -194,4 +194,4 @@ Only `phaeocystis_handoff_pass` authorizes PhyC use in 02B, 02C, or the *Phaeocy
 - generic and *Phaeocystis*-specific decisions reported separately;
 - publication-ready manuscript centred only on concurrent bloom-proxy validity.
 
-See [docs/CONTEXT.md](docs/CONTEXT.md), [docs/DATASET_SYSTEMATIC_SEARCH.md](docs/DATASET_SYSTEMATIC_SEARCH.md), [docs/OUTCOME_AND_LIFEFORM_PROTOCOL.md](docs/OUTCOME_AND_LIFEFORM_PROTOCOL.md), and the [staged work plan](docs/STAGED_WORK_PLAN.md).
+See [docs/CONTEXT.md](docs/CONTEXT.md), [docs/DATASET_SYSTEMATIC_SEARCH.md](docs/DATASET_SYSTEMATIC_SEARCH.md), [docs/OUTCOME_AND_LIFEFORM_PROTOCOL.md](docs/OUTCOME_AND_LIFEFORM_PROTOCOL.md), the [Stage 0 governance record](docs/STAGE0_GOVERNANCE.md), and the [staged work plan](docs/STAGED_WORK_PLAN.md).

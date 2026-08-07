@@ -1,0 +1,2 @@
+# Frozen immutable ICES spatial acquisition for Stage 0 derivation.
+SPATIAL-ICES-20260807T174114Z

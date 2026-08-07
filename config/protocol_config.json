@@ -3,12 +3,25 @@
     "name": "Greater North Sea",
     "spatial_source": "ICES Ecoregions (Greater North Sea)",
     "crs": "EPSG:4326",
+    "coastline_and_land_mask": "none_separate_ICES_marine_polygon_boundary_is_authoritative",
     "depth_convention": "positive_down_meters",
     "time_convention": {
       "timezone": "UTC",
       "format": "%Y-%m-%dT%H:%M:%SZ"
     },
-    "station_assignment_rule": "point_in_polygon_with_0.05deg_buffer_centroid_tiebreak",
+    "station_assignment": {
+      "method": "zero_polygon_distance_else_nearest_polygon",
+      "maximum_distance_m": 5500,
+      "boundary_inclusion": "zero_distance_including_shared_boundaries",
+      "distance_tie_tolerance_m": 0.000001,
+      "multiple_candidate_tiebreak": [
+        "minimum_distance_to_polygon",
+        "minimum_distance_to_polygon_centroid",
+        "lexicographic_subregion_id"
+      ],
+      "missing_coordinate_state": "unknown",
+      "invalid_coordinate_action": "error"
+    },
     "regions": {
       "southern_and_central_north_sea": "core-domain",
       "skagerrak_kattegat": "external-transfer"

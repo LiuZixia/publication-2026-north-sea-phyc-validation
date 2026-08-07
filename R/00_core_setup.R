@@ -1,98 +1,111 @@
-#' Core Setup and Helper Functions
-#'
-#' This script contains reusable R helpers that verify the `data/raw` symlink target, 
-#' available storage, atomic downloads, checksums, logging, retries, and secret-safe failures.
+# Core setup and acquisition helpers used by scripted pipeline stages.
 
-if (!requireNamespace("digest", quietly = TRUE)) install.packages("digest")
-if (!requireNamespace("httr2", quietly = TRUE)) install.packages("httr2")
-
-#' Verify raw data target and check available space
-#' 
-#' @param required_gb Minimum required free space in GB (default 1)
-#' @return TRUE if valid, otherwise stops execution
-verify_raw_data_target <- function(required_gb = 1) {
-  raw_dir <- "data/raw"
-  expected_target <- "/mnt/hdd/publication-2026-north-sea-phyc-validation"
-  
-  if (!file.exists(raw_dir)) {
-    stop(sprintf("Directory/symlink %s does not exist.", raw_dir))
+required_namespace <- function(package) {
+  if (!requireNamespace(package, quietly = TRUE)) {
+    stop(
+      sprintf("Required package '%s' is unavailable; restore the locked environment with renv::restore().", package),
+      call. = FALSE
+    )
   }
-  
-  # Check if it's a symlink (or just check the normalized path)
-  actual_target <- normalizePath(raw_dir, mustWork = TRUE)
-  expected_target_norm <- normalizePath(expected_target, mustWork = FALSE)
-  
-  # Note: normalizePath might add trailing slashes, so we use grepl or exact match after stripping
-  actual_target <- sub("/$", "", actual_target)
-  expected_target_norm <- sub("/$", "", expected_target_norm)
-  
-  if (actual_target != expected_target_norm) {
-    stop(sprintf("Target %s does not resolve to exactly %s", raw_dir, expected_target))
-  }
-  
-  if (file.access(actual_target, mode = 2) != 0) {
-    stop(sprintf("Target %s is not writable.", actual_target))
-  }
-  
-  # We can't robustly check free space on all OS without extra packages (e.g. fs) 
-  # but we can try using system call if on linux
-  if (Sys.info()[["sysname"]] == "Linux") {
-    df_out <- system(sprintf("df -k %s", actual_target), intern = TRUE)
-    if (length(df_out) >= 2) {
-      free_kb <- as.numeric(strsplit(trimws(df_out[2]), "\\s+")[[1]][4])
-      free_gb <- free_kb / (1024 * 1024)
-      if (free_gb < required_gb) {
-        stop(sprintf("Target %s has insufficient space (%.2f GB < %.2f GB required)", actual_target, free_gb, required_gb))
-      }
-    }
-  }
-  
-  message("Raw data target verified successfully.")
-  return(TRUE)
 }
 
-#' Calculate SHA-256 checksum of a file
-#' 
-#' @param file_path Path to the file
-#' @return Checksum string
+# Verify that raw artifacts can only be written to the declared external mount.
+verify_raw_data_target <- function(required_gb = 1) {
+  raw_dir <- file.path("data", "raw")
+  expected_target <- "/mnt/hdd/publication-2026-north-sea-phyc-validation"
+
+  if (!nzchar(Sys.readlink(raw_dir))) {
+    stop("data/raw must exist and must be a symbolic link.", call. = FALSE)
+  }
+
+  actual_target <- normalizePath(raw_dir, mustWork = TRUE)
+  expected_target <- normalizePath(expected_target, mustWork = TRUE)
+  if (!identical(actual_target, expected_target)) {
+    stop(sprintf("data/raw resolves to '%s', not the required target '%s'.", actual_target, expected_target), call. = FALSE)
+  }
+
+  mount_info <- system2(
+    "findmnt",
+    c("-T", shQuote(actual_target), "-n", "-o", "TARGET,SOURCE,FSTYPE,OPTIONS"),
+    stdout = TRUE,
+    stderr = TRUE
+  )
+  if (!length(mount_info) || !nzchar(trimws(mount_info[[1]]))) {
+    stop(sprintf("No mounted filesystem contains raw-data target '%s'.", actual_target), call. = FALSE)
+  }
+  if (file.access(actual_target, mode = 2) != 0) {
+    stop(sprintf("Raw-data target '%s' is not writable.", actual_target), call. = FALSE)
+  }
+
+  df_out <- system2("df", c("-Pk", shQuote(actual_target)), stdout = TRUE, stderr = TRUE)
+  if (length(df_out) < 2L) {
+    stop("Unable to determine free space for the raw-data target.", call. = FALSE)
+  }
+  free_kb <- suppressWarnings(as.numeric(strsplit(trimws(df_out[[2]]), "[[:space:]]+")[[1]][4]))
+  if (is.na(free_kb)) {
+    stop("Unable to parse free space for the raw-data target.", call. = FALSE)
+  }
+  free_gb <- free_kb / (1024^2)
+  if (free_gb < required_gb) {
+    stop(sprintf("Raw-data target has %.2f GB free; %.2f GB is required.", free_gb, required_gb), call. = FALSE)
+  }
+
+  invisible(list(path = actual_target, mount = mount_info[[1]], free_gb = free_gb))
+}
+
+# Calculate the required SHA-256 checksum without loading the file into memory.
 calculate_checksum <- function(file_path) {
-  if (!file.exists(file_path)) {
-    stop("File does not exist for checksum calculation.")
+  required_namespace("digest")
+  if (!file.exists(file_path) || dir.exists(file_path)) {
+    stop(sprintf("Checksum input is not a file: %s", file_path), call. = FALSE)
   }
   digest::digest(algo = "sha256", file = file_path)
 }
 
-#' Download with retry, atomic save, and checksum calculation
-#' 
-#' @param url Target URL
-#' @param dest_file Destination file path
-#' @param max_tries Maximum number of attempts
-#' @return Checksum of the downloaded file
-download_with_retry <- function(url, dest_file, max_tries = 3) {
-  req <- httr2::request(url)
-  
-  # create temp file
-  temp_dest <- paste0(dest_file, ".tmp")
-  
-  # Perform request with retry
-  resp <- httr2::req_perform(
-    req |> httr2::req_retry(max_tries = max_tries, max_seconds = 60),
-    path = temp_dest
-  )
-  
-  # Atomic rename if successful
-  if (file.exists(temp_dest)) {
-    file.rename(temp_dest, dest_file)
-    message(sprintf("Successfully downloaded to %s", dest_file))
-  } else {
-    stop("Failed to create temporary download file.")
+# Download to a same-directory partial file, validate the response, and rename atomically.
+download_with_retry <- function(url, dest_file, max_tries = 3, minimum_bytes = 1) {
+  required_namespace("httr2")
+  if (file.exists(dest_file)) {
+    stop(sprintf("Refusing to overwrite immutable raw artifact: %s", dest_file), call. = FALSE)
   }
-  
-  chk <- calculate_checksum(dest_file)
-  
+  dir.create(dirname(dest_file), recursive = TRUE, showWarnings = FALSE)
+
+  partial_file <- paste0(dest_file, ".partial")
+  if (file.exists(partial_file)) unlink(partial_file)
+  on.exit(if (file.exists(partial_file)) unlink(partial_file), add = TRUE)
+
+  request <- httr2::request(url) |>
+    httr2::req_user_agent("north-sea-phyc-validation/Stage0") |>
+    httr2::req_retry(max_tries = max_tries, max_seconds = 60)
+  response <- httr2::req_perform(request, path = partial_file)
+  status <- httr2::resp_status(response)
+  size_bytes <- file.info(partial_file)$size
+  content_type <- httr2::resp_header(response, "content-type")
+
+  if (status < 200L || status >= 300L) {
+    stop(sprintf("Download returned HTTP status %d for %s", status, url), call. = FALSE)
+  }
+  if (is.na(size_bytes) || size_bytes < minimum_bytes) {
+    stop(sprintf("Downloaded response is smaller than %d bytes: %s", minimum_bytes, url), call. = FALSE)
+  }
+  if (!isTRUE(file.rename(partial_file, dest_file))) {
+    stop(sprintf("Atomic rename failed for %s", dest_file), call. = FALSE)
+  }
+
   list(
-    checksum = chk,
-    status = httr2::resp_status(resp),
-    size = file.info(dest_file)$size
+    checksum = calculate_checksum(dest_file),
+    status = status,
+    size = unname(size_bytes),
+    content_type = if (is.null(content_type)) NA_character_ else content_type,
+    url = url
   )
+}
+
+# Build a stable query URL with explicit, percent-encoded parameter values.
+build_query_url <- function(base_url, parameters) {
+  if (is.null(names(parameters)) || any(!nzchar(names(parameters)))) {
+    stop("Every query parameter must be named.", call. = FALSE)
+  }
+  encoded <- vapply(parameters, function(value) utils::URLencode(as.character(value), reserved = TRUE), character(1))
+  paste0(base_url, "?", paste0(names(encoded), "=", encoded, collapse = "&"))
 }

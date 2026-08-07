@@ -1,0 +1,3 @@
+source_id,provider,dataset,layer_url,selection_field,selection_value,license,license_url
+ices_ecoregions,ICES,ICES Ecoregions,https://gis.ices.dk/gis/rest/services/ICES_reference_layers/ICES_Ecoregions/MapServer/0,Ecoregion,Greater North Sea,CC BY 4.0,https://www.ices.dk/data/guidelines-and-policy/Pages/ICES-data-policy.aspx
+ices_areas,ICES,ICES Statistical Areas,https://gis.ices.dk/gis/rest/services/ICES_reference_layers/ICES_Areas/MapServer/0,Area_Full,^27\.3\.a,CC BY 4.0,https://www.ices.dk/data/guidelines-and-policy/Pages/ICES-data-policy.aspx

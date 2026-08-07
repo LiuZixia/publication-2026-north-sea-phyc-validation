@@ -1,59 +1,51 @@
 #!/usr/bin/env Rscript
-#' Stage 0 Setup and Validation
-#'
-#' This script initializes the R environment, ensures dependencies and storage
-#' targets are correctly configured, and sets up session logging.
+# Execute the complete Stage 0 derivation and governance gate from registered inputs.
 
-# Ensure core packages are loaded so renv detects them
-library(httr2)
-library(jsonlite)
-library(digest)
-library(sf)
-library(testthat)
-
-if (!requireNamespace("renv", quietly = TRUE)) {
-  install.packages("renv", repos = "https://cloud.r-project.org")
-}
-
-# Create logs directory
-if (!dir.exists("outputs/logs")) {
-  dir.create("outputs/logs", recursive = TRUE)
-}
-
-# Initialize run log
-log_file <- sprintf("outputs/logs/run_%s.log", format(Sys.time(), "%Y%m%dT%H%M%SZ", tz = "UTC"))
-sink(log_file, split = TRUE)
-cat("Pipeline Execution Started at:", format(Sys.time(), "%Y-%m-%dT%H:%M:%SZ", tz = "UTC"), "\n\n")
-
-# Load helpers and core scripts
-source("R/00_core_setup.R")
-source("R/00_identifiers.R")
-source("R/00_spatial_assignment.R")
-
-# Validate environment and symlink target
-message("Validating environment...")
-tryCatch({
-  verify_raw_data_target()
-  message("Environment validation passed.")
-}, error = function(e) {
-  stop("Environment validation failed: ", e$message)
+suppressPackageStartupMessages({
+  library(digest)
+  library(jsonlite)
+  library(sf)
+  library(testthat)
 })
+if (!requireNamespace("renv", quietly = TRUE)) {
+  stop("renv is unavailable; restore the repository environment before running Stage 0.", call. = FALSE)
+}
 
-# Force renv snapshot to record used packages
-message("Snapshotting dependencies...")
-renv::snapshot(prompt = FALSE)
+dir.create("outputs/logs", recursive = TRUE, showWarnings = FALSE)
+run_time <- format(Sys.time(), "%Y%m%dT%H%M%SZ", tz = "UTC")
+log_file <- file.path("outputs", "logs", paste0("stage0_", run_time, ".log"))
+log_connection <- file(log_file, open = "wt")
+sink(log_connection, type = "output", split = TRUE)
+sink(log_connection, type = "message")
+on.exit({
+  sink(type = "message")
+  sink(type = "output")
+  close(log_connection)
+}, add = TRUE)
 
-# Regenerate spatial outputs
-message("Regenerating spatial outputs...")
-source("scripts/00_downloads/00_download_spatial.R")
+cat(sprintf("Stage 0 execution started: %s\n", format(Sys.time(), "%Y-%m-%dT%H:%M:%SZ", tz = "UTC")))
+cat(sprintf("Git commit: %s\n", system2("git", c("rev-parse", "HEAD"), stdout = TRUE)))
+source("R/00_core_setup.R")
+verify_raw_data_target(required_gb = 0)
 
-# Run tests
-message("Running Stage 0 tests...")
-res <- testthat::test_dir("tests", stop_on_failure = TRUE)
+cat("\n--- renv status ---\n")
+renv::status()
 
-cat("--- Session Info ---\n")
+cat("\n--- deterministic spatial derivation ---\n")
+derive_output <- system2(
+  file.path(R.home("bin"), "Rscript"),
+  "scripts/00_derive_spatial.R",
+  stdout = TRUE,
+  stderr = TRUE
+)
+derive_status <- attr(derive_output, "status")
+cat(paste(derive_output, collapse = "\n"), "\n")
+if (!is.null(derive_status) && derive_status != 0L) stop("Stage 0 spatial derivation failed.", call. = FALSE)
+
+cat("\n--- Stage 0 tests ---\n")
+testthat::test_dir("tests", stop_on_failure = TRUE, stop_on_warning = TRUE)
+
+cat("\n--- session information ---\n")
 print(sessionInfo())
-cat("--------------------\n\n")
-
-cat("Stage 0 Setup completed successfully.\n")
-sink()
+cat(sprintf("\nStage 0 gate completed successfully: %s\n", format(Sys.time(), "%Y-%m-%dT%H:%M:%SZ", tz = "UTC")))
+cat(sprintf("Log: %s\n", log_file))

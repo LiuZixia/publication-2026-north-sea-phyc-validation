@@ -2,60 +2,82 @@
 
 ## Current State
 
-- **Updated (UTC):** 2026-08-07T16:44:49Z
-- **Current stage:** Stage 0 (Governance and protocol freeze) remains in progress; the gate has not passed.
-- **Session objective:** Audit committed revision `86933df` and the live artifacts against the complete Stage 0 requirements.
-- **Starting branch:** `main`
-- **Starting commit:** `86933df4690f7a50fe5c092b5e13e182359718b1`
-- **Relevant starting dirty state:** modified `PENDING.md`; untracked `20260807T163613Z` tracking snapshots; local branch one commit ahead of `origin/main`.
-- **First concrete action:** Validate the committed spatial CRS, geometry, station assignment, raw manifests, identifiers, environment, tests, and pipeline regeneration behavior.
-- **Last completed milestone:** Revision `86933df` committed the Stage 0 implementation and resolved several earlier identifier/provenance gaps, but it did not pass the Stage 0 gate. The unchanged pre-audit live state is archived as `20260807T164128Z_PROGRESS.md` and `20260807T164128Z_PENDING.md`.
+- **Updated (UTC):** 2026-08-07T19:21:52Z
+- **Current stage:** Stage 0 (Governance and protocol freeze) passed in full. Stage 1 has not begun.
+- **Session objective:** Record Zixia Liu's explicit approval, require the complete 83-assertion pipeline to pass, snapshot the finished gate, and commit Stage 0.
+- **Starting branch/commit:** `main` at `50f51db88164d9309142a58bdcc515e0c89117ec`, two commits ahead of `origin/main`.
+- **Relevant starting dirty state:** the complete technical Stage 0 change set remained uncommitted, including modified live tracking and untracked archive snapshots through `20260807T180401Z`.
+- **First concrete action:** Archive the pre-approval state, then record the exact named approval statement without changing any frozen scientific decision.
+- **Last completed milestone:** The full Stage 0 gate passed on 2026-08-07 with 83/83 assertions, zero warnings, and zero skips after Zixia Liu's approval was registered. The gate-transition state is archived as `20260807T192152Z_PROGRESS.md` and `20260807T192152Z_PENDING.md`.
 
-## Completed Work and Audit Findings
+## Completed Work and Evidence
 
-- Commit `86933df` provides a concrete version containing the R environment, ICES download/derivation script, machine-readable configuration, protocol-change register, data dictionary, spatial files, identifier functions, station-assignment function, setup runner, and tests.
-- Identifier coverage improved: all twelve required generator functions exist, configured prefixes now match, sample identity uses a UTC timestamp, and source records accept a collision index.
-- Raw spatial acquisitions now use the required external symlink, atomic-download helper, SHA-256 checksums, timestamped run directories, manifests, and human-readable logs. Two reproducible runs returned identical checksums.
-- The project-activated `renv` environment is consistent and the lockfile records 44 packages.
-- Stage 0 still does **not** pass because the committed spatial outputs have a fundamental CRS error. Both ICES REST responses declare Web Mercator (`wkid 102100`, latest `3857`). The domain correctly remains EPSG:3857, but the subregion geometry is relabelled—not transformed—as EPSG:4326 while retaining metre coordinates. Its bounding box is approximately `[-556597, 6106855, 1454850, 8859143]`, which is impossible longitude/latitude data and contradicts `config/protocol_config.json`.
-- The committed subregion file contains three features rather than one row per two declared subregions: `skagerrak_kattegat` occurs twice. GEOS reports the three geometries valid only when treated planarly, while default s2 validation reports all three invalid.
-- `assign_station()` disables s2 and requires geodetic distance support from `lwgeom`, which is neither installed nor locked. Direct station assignment terminates with `there is no package called 'lwgeom'`.
-- The test suite reports 24 passes and one skip, not a complete pass. The spatial assignment portion is skipped when `lwgeom` is unavailable, so the assertions that would expose the unusable committed geometry do not run. The current tests also do not assert output CRS, plausible coordinate ranges, unique `subregion_id`, partition equality, default 5.5 km buffer behavior, or manifest completeness.
-- The spatial script comment “Validate s2 topologies” is unsupported: its check uses `st_is_valid()` after processing but does not prove s2 validity, and the generated output fails an explicit s2 audit.
-- The raw manifest records endpoint, nominal layer, access time, filename, and checksum, but it still omits license, HTTP status, response size/content validation, pagination/transfer-limit state, and software/session version. Files containing ESRI JSON are also named `.geojson`, obscuring their actual format.
-- The committed setup runner does not execute `scripts/00_downloads/00_download_spatial.R`, so it cannot rebuild the Stage 0 spatial outputs from registered raw inputs. It validates whatever files already exist rather than serving as a complete Stage 0 pipeline entry point.
-- The change register still attributes scientific approval to `Core Team / Protocol Review` without an identifiable reviewer or approval artifact. The live `PENDING.md` itself continues to list this approval as missing.
-- The live tracking pair was internally inconsistent: `PROGRESS.md` described pre-commit defects, while `PENDING.md` both retained Stage 0 blockers and inserted a Stage 1 transition. This audit restores one conservative status.
+- Replaced the ambiguous `0.05deg` rule with a machine-readable 5,500 m geodesic tolerance, zero-distance shared-boundary handling, a 0.000001 m numerical tie tolerance, centroid tie-breaking, and final lexicographic-ID tie-breaking.
+- Hardened station assignment for core, external-transfer, outside, missing, invalid, boundary, overlap, and duplicated-coordinate cases.
+- Split raw acquisition from deterministic derivation. `scripts/00_setup.R` never accesses the network; it rebuilds from the immutable run pinned in `config/spatial_raw_run.txt`.
+- Created registered raw run `SPATIAL-ICES-20260807T174114Z`. It archives the official ICES data-policy page, MapServer and layer metadata, independent count responses, and complete feature responses.
+- Reconciled provider counts: 17/17 ecoregions and 66/66 statistical-area features. Each layer reports a 2,000-record maximum, each completed in one page, and no transfer-limit flag was reported.
+- Verified all nine raw response artifacts against registered sizes and SHA-256 checksums. Raw manifest SHA-256: `6aafa68e92c980aa306a9c9abe0d0ea9d0aba4f36bd994f6f4c6df9545b7e5bb`.
+- Verified acquisition idempotency: a normal rerun reused the checksum-validated frozen run and the raw-run directory count remained unchanged.
+- Generated one valid EPSG:4326 domain and two unique valid EPSG:4326 subregions with zero overlap and a relative partition error below `1e-7`.
+- Generated `metadata/stage0_spatial_provenance.csv`, linking output checksums to the frozen raw manifest, feature checksums, derivation script, source configuration, and protocol configuration.
+- Added a reviewer-facing Stage 0 governance/reproduction record and linked it from the README.
+- Expanded the gate from 33 narrow assertions to 83 assertions covering governance, identifiers, dictionary coverage, environment, exact spatial behavior, complete partitioning, raw counts, pagination, checksums, licence evidence, and derived provenance.
+- Corrected the unsupported `Dr. Principal Investigator` attribution to an explicit pending state. The gate now fails loudly rather than representing invented approval as evidence.
+- Registered Zixia Liu's explicit approval of all five Stage 0 decisions, received in the Codex conversation on 2026-08-07 at 19:17 UTC; no scientific choice changed during approval registration.
+- Completed the full post-approval entry point: 29 governance, 21 identifier, and 33 spatial assertions passed, for 83 total with zero failures, warnings, or skips.
+- A failed acquisition staging directory was moved intact to `/tmp/failed-spatial-acquisition-20260807T174054Z`; it is recoverable and is no longer inside the immutable raw store.
 
 ## File-Change Ledger
 
 | Path | Change | Purpose | Execution status |
 |---|---|---|---|
-| `PROGRESS.md` | modified | Reconcile the tracker with commit `86933df` and current audit evidence | refreshed; Stage 0 remains open |
-| `PENDING.md` | modified | Remove contradictory Stage 1 transition and order remaining Stage 0 work | refreshed |
-| `docs/agent_tracking/archive/20260807T163613Z_PROGRESS.md` | untracked, pre-existing | Preserve a prior state | present; not modified in this audit |
-| `docs/agent_tracking/archive/20260807T163613Z_PENDING.md` | untracked, pre-existing | Preserve a prior state | present; not modified in this audit |
-| `docs/agent_tracking/archive/20260807T164128Z_PROGRESS.md` | added | Preserve unchanged pre-audit live progress | snapshot created before refresh |
-| `docs/agent_tracking/archive/20260807T164128Z_PENDING.md` | added | Preserve unchanged pre-audit live pending state | snapshot created before refresh |
+| `README.md` | modified | Link the Stage 0 governance and reproduction record | validated |
+| `PROGRESS.md` | modified | Record implementation, evidence, artifacts, checks, and remaining approval gate | reconciled |
+| `PENDING.md` | modified | Reduce remaining work to genuine approval and final gate closure | reconciled |
+| `R/00_core_setup.R` | modified | Enforce locked dependencies, exact symlink/mount/free-space checks, immutable atomic downloads, response metadata, and query construction | executed |
+| `R/00_spatial_assignment.R` | modified | Implement the exact frozen assignment and tie-break rules with coordinate validation | 33 spatial assertions pass |
+| `R/00_spatial_provenance.R` | added | Validate immutable manifests, sizes, checksums, pagination, counts, licence evidence, and frozen-run lookup | executed |
+| `config/protocol_config.json` | modified | Freeze exact CRS, mask, UTC, depth, distance, boundary, and tie semantics | governance assertions pass |
+| `config/protocol_change_register.csv` | modified | Replace invented attribution with Zixia Liu's supplied approval and traceable conversation reference | approved; 29 governance assertions pass |
+| `config/spatial_sources.csv` | added | Freeze ICES endpoints, selectors, licence, and official policy URL | executed |
+| `config/spatial_raw_run.txt` | added | Pin derivation to `SPATIAL-ICES-20260807T174114Z` | executed |
+| `config/spatial/greater_north_sea.geojson` | regenerated | Frozen Greater North Sea domain | checksum `100d3aed06392f9b6956d91bc8484c868d2febf803306c9a9187f6f003890602` |
+| `config/spatial/hydrographic_subregions.geojson` | regenerated | Frozen core/external-transfer partition | checksum `d8864a7bc92233a9889fc702119f6db703d4843ceffd2364b92d92a688f3ea25` |
+| `metadata/stage0_spatial_provenance.csv` | added/generated | Link derived outputs to immutable inputs and code/config checksums | checksum `fb82422813409860cb9e7dc01633aa4af898c3bc421e8e24e3853fae5029c877` |
+| `scripts/00_downloads/00_download_spatial.R` | modified | Validated, paginated, checksummed, licence-evidenced, append-only acquisition with idempotent reuse | executed successfully |
+| `scripts/00_derive_spatial.R` | added | Deterministically regenerate spatial outputs and provenance from the pinned raw run | executed successfully |
+| `scripts/00_setup.R` | modified | Run environment status, derivation, fail-on-warning tests, logging, and session capture without network acquisition | executed successfully |
+| `tests/test_stage0_identifiers.R` | modified | Expand identifier determinism, collision, prefix, and dictionary coverage | 21 assertions pass |
+| `tests/test_stage0_governance.R` | added | Test configuration, accountable approval, source freeze, and environment | 29 assertions pass |
+| `tests/test_stage0_spatial.R` | added | Test partition, exact buffer, boundaries, tie-breaks, invalid states, raw provenance, and derived provenance | 33 assertions pass |
+| `docs/STAGE0_GOVERNANCE.md` | added | Reviewer-facing frozen scope, rule, provenance, reproduction, and approval record | complete |
+| `docs/agent_tracking/archive/20260807T165726Z_{PROGRESS,PENDING}.md` | untracked, pre-existing | Preserve prior claimed-pass state | unchanged |
+| `docs/agent_tracking/archive/20260807T170858Z_{PROGRESS,PENDING}.md` | added earlier | Preserve pre-audit claimed-pass state | unchanged |
+| `docs/agent_tracking/archive/20260807T173148Z_{PROGRESS,PENDING}.md` | added | Preserve implementation-session start | complete |
+| `docs/agent_tracking/archive/20260807T180401Z_{PROGRESS,PENDING}.md` | added | Preserve pre-full-pipeline milestone state | complete |
+| `docs/agent_tracking/archive/20260807T191733Z_{PROGRESS,PENDING}.md` | added | Preserve the complete technical state immediately before named approval was registered | complete |
+| `docs/agent_tracking/archive/20260807T192152Z_{PROGRESS,PENDING}.md` | added | Preserve the post-approval gate-transition state immediately after the successful run | complete |
+| `data/raw/search_runs/SPATIAL-ICES-20260807T174114Z/` | added externally | Immutable registered ICES spatial acquisition | validated; raw store, Git-ignored |
+| `outputs/logs/stage0_20260807T180017Z.log` | generated | Full Stage 0 execution record | 81 pass, 2 approval failures; Git-ignored |
+| `outputs/logs/stage0_20260807T191825Z.log` | generated | Successful full Stage 0 execution and session record | 83 pass, 0 fail/warn/skip; Git-ignored |
 
 ## Validation Record
 
-- `Rscript -e 'testthat::test_dir("tests", stop_on_failure=TRUE)'` reported 24 passes and one skip because `lwgeom` is not installed.
-- Direct `assign_station(c(54,57.5,65), c(2,11,0))` failed with `there is no package called 'lwgeom'`.
-- `Rscript -e 'renv::status()'` reported no dependency issues in the activated project environment.
-- `sf` reported the domain CRS as EPSG:3857 and the subregions as WGS84 despite both sharing the same metre-valued bounding box.
-- Default s2 validity was `FALSE` for all three subregion features; the file contains two rows with the same `skagerrak_kattegat` identifier.
-- Raw ICES response headers independently confirmed `wkid 102100`/`latestWkid 3857`.
-- Spatial runs `SPATIAL-ICES-20260807T162508Z` and `SPATIAL-ICES-20260807T162911Z` produced identical raw checksums, but their manifests omit required provenance fields noted above.
-- All required identifier generator functions were found; station IDs use `STN-`, and differing collision indices produce differing record IDs.
-- `git diff --check` passed for current unstaged changes. No download, API request, scientific transformation, or analysis result was produced during this audit.
+- R parse checks for every changed/new R file — passed.
+- `Rscript scripts/00_downloads/00_download_spatial.R` — passed; validated and reused the existing run without creating another directory.
+- `Rscript scripts/00_derive_spatial.R` — passed without warnings from the final implementation.
+- Pre-approval `Rscript -e 'testthat::test_dir("tests", stop_on_failure=FALSE, stop_on_warning=FALSE)'` — 81 pass, 2 expected approval failures, 0 warnings, 0 skips.
+- Post-approval `Rscript scripts/00_setup.R` — PASS: 83; FAIL/WARN/SKIP: 0. The locked environment was consistent, deterministic derivation passed, and full `sessionInfo()` was captured in `outputs/logs/stage0_20260807T191825Z.log`.
+- `git diff --check` — passed.
 
-## Archive History
+## Data, Search, and Model State
 
-- `20260807T124500Z_PROGRESS.md` and `20260807T124500Z_PENDING.md` — initial tracking milestone.
-- `20260807T143428Z_PROGRESS.md` and `20260807T143428Z_PENDING.md` — terminal session start.
-- `20260807T144242Z_PROGRESS.md` and `20260807T144242Z_PENDING.md` — pre-implementation state.
-- `20260807T144825Z_PROGRESS.md` and `20260807T144825Z_PENDING.md` — pre-first-audit state.
-- `20260807T151725Z_PROGRESS.md` and `20260807T151725Z_PENDING.md` — earlier claimed-pass state.
-- `20260807T161836Z_PROGRESS.md` and `20260807T161836Z_PENDING.md` — pre-commit audit state.
-- `20260807T164128Z_PROGRESS.md` and `20260807T164128Z_PENDING.md` — unchanged post-commit state before this audit.
+- Stage 0 raw spatial inputs and derived definitions are frozen and reproducible.
+- Stage 1 systematic-search execution is not complete and did not advance during this work.
+- No eligible-dataset manifest, observation-only outcomes, recurrence strata, validation splits, CMEMS product, PhyC matchup, or model result is frozen.
+- No biological or validation conclusion is supported yet.
+
+## Stage 0 Gate Result
+
+Stage 0 is complete. The spatial definitions, roles, coordinate/time/depth/mask conventions, station rule, outcome hierarchy, change control, identifiers, data dictionary, R environment, raw provenance, deterministic derivation, tests, approval, and execution log satisfy the Stage 0 actions, outputs, and gate. This does not imply that the systematic search, observational dataset qualification, CMEMS product selection, PhyC validation, or paper results are complete.
