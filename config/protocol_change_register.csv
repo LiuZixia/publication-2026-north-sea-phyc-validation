@@ -1,0 +1,6 @@
+date,change,rationale,affected_stages,decision_maker,classification
+2026-08-07,Assigned Skagerrak and Kattegat as external-transfer regions using ICES Area 27.3.a,Alignment with established ICES Area definitions to ensure reproducible marine boundaries and separation of distinct hydrographic regimes. Approved in plan.,0|6|10,Core Team / Protocol Review,prospective amendment
+2026-08-07,Adopted ICES Ecoregion Greater North Sea for domain,Provides authoritative scientifically reviewed boundaries resolving the 10E conflict,0,Core Team / Protocol Review,prospective amendment
+2026-08-07,Removed GSHHG coastline mask,Redundant as ICES Ecoregions inherently provide reviewed marine boundaries. Approved in plan.,0|9,Core Team / Protocol Review,prospective amendment
+2026-08-07,Implemented 5500m coastal buffer and centroid tie-break,Ensures robust inclusion of slightly coastal/onshore points and handles overlapping boundaries,0,Core Team / Protocol Review,prospective amendment
+2026-08-07,Added collision_index to record IDs and utc_timestamp to sample IDs,Disambiguate identical records and prevent daily sample collisions. Approved in plan.,0|2|3,Core Team / Protocol Review,prospective amendment

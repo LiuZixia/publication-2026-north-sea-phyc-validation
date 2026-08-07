@@ -1,0 +1,23 @@
+entity,field,type,description,allowed_values,hash_recipe_inputs
+dataset,dataset_id,string,Unique stable ID for dataset (DS-*),,"provider, source_dataset_name, version"
+dataset,provider,string,Data provider name,,
+dataset,access_status,string,Status of data access,"public,restricted,pending",
+source_record,record_id,string,Unique stable ID for source record (REC-*),,"dataset_id, provider_record_id, collision_index"
+source_record,collision_index,integer,Index to disambiguate identical records lacking unique IDs,,
+sample,sample_id,string,Unique stable ID for sample (SMP-*),,"station_id, utc_timestamp, depth_m (rounded 1 dec)"
+sample,station_id,string,ID of station where sample taken,,
+sample,utc_timestamp,datetime,UTC time of sample (ISO8601),,
+sample,depth_m,numeric,Depth of sample in meters,,
+station,station_id,string,Unique ID for station (STN-*),,"dataset_id, provider_station_name, lat (4 dec), lon (4 dec)"
+taxon_record,taxon_record_id,string,Unique ID for taxon record (TAX-*),,"sample_id, taxon_name (lower), life_stage (lower)"
+taxon_record,sample_id,string,ID of sample containing taxon,,
+taxon_record,reported_name,string,Taxon name reported by provider,,
+taxon_record,aphia_id,integer,WoRMS AphiaID,,
+observation_window,window_id,string,Unique ID for observation window (WIN-*),,"station_id, start_date, end_date"
+observation_window,subregion_id,string,Hydrographic subregion ID,,
+event,event_id,string,Unique event ID (EVT-*),,"subregion_id, year, event_number"
+year,year_id,string,Unique year ID (YR-*),,"subregion_id, year"
+network,network_id,string,Unique network ID (NET-*),,"provider"
+subregion,subregion_id,string,Unique hydrographic subregion ID (REG-*),,"name"
+search_run,search_run_id,string,Unique search run ID (SEARCH-*),,"provider, timestamp"
+model_file,model_file_id,string,Unique model file ID (MOD-*),,"filename, checksum"
