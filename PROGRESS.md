@@ -2,9 +2,9 @@
 
 ## Current State
 
-- **Updated (UTC):** 2026-08-07T14:34:28Z
+- **Updated (UTC):** 2026-08-07T14:35:56Z
 - **Current stage:** Planning and reproducibility scaffolding before Stage 0 execution
-- **Session objective:** Validate, commit, and push the documentation and reproducibility scaffolding with terminal Git
+- **Session objective:** Documentation and reproducibility scaffolding validated, committed, and pushed with terminal Git
 - **Starting branch:** `main`
 - **Starting commit:** `b9ffc94`
 - **Last milestone:** Agent tracking and external raw-data controls established and archived at `20260807T124500Z`
@@ -17,6 +17,7 @@
 - Verified that `data/raw` resolves to `/mnt/hdd/publication-2026-north-sea-phyc-validation`.
 - Reserved `scripts/00_downloads/` for every systematic-search request and raw-file acquisition script.
 - Updated the raw-data ignore rule so Git ignores the local `data/raw` symlink itself.
+- Committed the documented workflow as `772f60f` (`Add reproducible publication workflow`) and pushed it to `origin/main`.
 
 No systematic API search, raw-data download, in-situ calculation, CMEMS extraction, or scientific validation result has yet been executed by repository scripts.
 
@@ -43,6 +44,7 @@ No systematic API search, raw-data download, in-situ calculation, CMEMS extracti
 - The target filesystem was mounted and reported approximately 955 GB available at the time checked.
 - `git check-ignore -v data/raw` confirmed that the symlink is ignored by the repository rule.
 - `git diff --check`, trailing-whitespace checks, and local Markdown-link validation passed.
+- Local `main` and `origin/main` both resolved to `772f60f` immediately after the content push.
 - No research pipeline test applies yet because no acquisition or analysis scripts have been implemented.
 
 ## Archive History
