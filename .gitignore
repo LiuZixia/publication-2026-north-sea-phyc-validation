@@ -1,0 +1,34 @@
+# Operating systems and editors
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/
+
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+.pytest_cache/
+.ruff_cache/
+.ipynb_checkpoints/
+
+# R
+.RData
+.Rhistory
+.Rproj.user/
+
+# Local configuration and credentials
+.env
+.env.*
+*.secret
+
+# Large or regenerable research artifacts
+data/raw/*
+data/interim/*
+data/processed/*
+outputs/*
+
+# Permit documented directory placeholders
+!data/**/.gitkeep
+!outputs/.gitkeep
