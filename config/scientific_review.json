@@ -1,0 +1,31 @@
+{
+  "schema_version": "1.0.0",
+  "versioned_at_utc": "2026-08-08T16:10:00Z",
+  "purpose": "Record who has scientifically reviewed each frozen decision, and at what level of independence. Held separately from config/stage1_search_config.json because that file's checksum is embedded in all ten archived run summaries: editing it to correct a reviewer name would invalidate every pinned search and force a re-run of the entire Stage 1 acquisition.",
+
+  "supersedes": {
+    "file": "config/stage1_search_config.json",
+    "field": "review.second_scientific_reviewer",
+    "frozen_value": "Dr. Researcher",
+    "note": "That value was a placeholder present when the searches executed. It is superseded by this record and must not be read as a reviewer identity. The frozen file itself is deliberately left unchanged so the pinned run checksums remain valid."
+  },
+
+  "stage1_search_strategy": {
+    "query_designer": "automated implementation under principal-investigator direction",
+    "reviewer": "Dr. Zixia Liu",
+    "reviewer_role": "principal investigator",
+    "review_type": "self_review_by_principal_investigator",
+    "independent": false,
+    "status": "reviewed",
+    "reviewed_utc": "2026-08-08",
+    "scope_reviewed": "Frozen geographic domain, biological and measurement terms, per-source strategies, screening rules, catalogue-identity rules, the sixteen-dataset known-item benchmark set, and the access and licence policy.",
+    "independence_statement": "The designer and the reviewer are not independent parties, so STAGED_WORK_PLAN.md Stage 1 action 2 — 'have a second scientific reviewer check exclusions and ambiguous query choices' — is NOT satisfied by this record. It is recorded as reviewed, not as independently reviewed, and every reported result must carry that distinction.",
+    "independent_review": {
+      "status": "deferred",
+      "plan": "An independent second scientific reviewer is to be identified once preliminary results exist and the scope of what needs reviewing is concrete.",
+      "must_complete_before": "Stage 7 confirmatory manifest freeze",
+      "rationale_for_deferral": "Principal-investigator decision, 2026-08-08: a reviewer is easier to recruit and brief against concrete results than against a search strategy alone.",
+      "risk_if_not_completed": "Exclusion and query decisions taken by a single party would enter the confirmatory analysis unchecked. The exclusions most in need of a second reader are the dataset-metadata screen, which excludes 18,503 catalogue rows on one reason code, and the access-driven scope reductions in config/access_and_licence_policy.json."
+    }
+  }
+}

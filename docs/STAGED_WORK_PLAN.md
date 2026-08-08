@@ -66,17 +66,26 @@ Execute the search described in `DATASET_SYSTEMATIC_SEARCH.md` using APIs or rep
 
 ### Actions
 
-1. Implement one R acquisition module per source family, initially covering PLET, ICES DOME, EMODnet Biology/EurOBIS/OBIS, SMHI SHARK, and provider catalogues with supported programmatic access.
+1. Implement one R acquisition module per source family, covering PLET, ICES DOME, EMODnet Biology/EurOBIS/OBIS, and SMHI SHARK, together with the families added by search update `MANUAL-20260807T195118Z` in `DATASET_SYSTEMATIC_SEARCH.md` §12.6: PANGAEA, GBIF, the `data.marine.gov.scot` CKAN API, Cefas Data Hub/DASSH, and ICES figshare. Add further provider catalogues with supported programmatic access as they are identified.
 2. Freeze a source-specific search strategy before execution, including controlled terms, synonyms, filters, and expected response fields. Have a second scientific reviewer check exclusions and ambiguous query choices where possible.
 3. Query the complete frozen geographic area and all specified biological and measurement terms. Do not restrict a query based on expected ecological results.
 4. Record the exact endpoint, API version, query text, parameters or request body, geographic bounds, filters, UTC timestamp, page number or cursor, HTTP status, retry, and response filename.
 5. Retrieve all pages and validate that reported totals reconcile with downloaded records. Detect pagination loops, server-side caps, partial content, and duplicate pages.
 6. Archive raw JSON, XML, CSV, or provider export files unchanged and calculate checksums.
 7. Normalize only dataset-level discovery metadata into a candidate registry. Preserve source-specific identifiers and the raw-response link.
-8. Test known-item recall against established North Sea monitoring datasets in the candidate register. A missing benchmark triggers query/API diagnosis; it does not justify manually adding an untraceable search hit.
-9. Log manual searches, emails, and contact-only routes separately. Do not describe them as API searches.
-10. Generate search-flow totals from the candidate registry: records identified, duplicate catalogue records, unique dataset families, screened, excluded, pending, and advanced to acquisition.
-11. Append later searches as new dated `search_run_id` values. Never overwrite the original run.
+8. Test known-item recall against established North Sea monitoring datasets in the candidate register, using the benchmark set proposed in `DATASET_SYSTEMATIC_SEARCH.md` §12.6: DS02, DS04, DS05, DS06, DS07, DS08, DS10, and DS16, cross-checked against the externally curated OSPAR COMP4 input list (DS24). A missing benchmark triggers query/API diagnosis; it does not justify manually adding an untraceable search hit.
+9. Log manual searches, emails, and contact-only routes separately in `metadata/manual_discovery_log.csv`. Do not describe them as API searches. This includes the DS08 Helgoland Roads licence and moratorium enquiry.
+10. Register the taxon-to-carbon conversion authority (DS22, `PEG_BVOL`) as a versioned, checksummed acquisition alongside the observation sources. It is republished annually, so an unpinned copy makes every Tier C carbon estimate irreproducible.
+11. Generate search-flow totals from the candidate registry: records identified, duplicate catalogue records, unique dataset families, screened, excluded, pending, and advanced to acquisition.
+12. Append later searches as new dated `search_run_id` values. Never overwrite the original run. Record per-endpoint retrieval timestamps: provider holdings are actively changing, so the pre-submission re-run is expected to return genuine additions that must be labelled external replication.
+13. Resolve every entry of the narrative candidate register (`DATASET_SYSTEMATIC_SEARCH.md` §6 and §12) against the executed search and generate a ranked acquisition shortlist. A count of datasets advanced to acquisition is not a handoff: Stage 2 needs named candidates in a defensible order. Rank by declared reference tier, domain position, access feasibility, and CMEMS-era overlap, with the weights recorded in configuration. An unresolved register entry is a discovery failure to diagnose, never a manual registry insertion.
+14. Open every contact-only and restricted access request now, in parallel, and register each one in `metadata/provider_access_requests.csv` with what is requested, what it blocks, a follow-up date, a decision deadline, and the fallback that applies if it is refused. Access latency, not computation, is this study's binding constraint: DS08 alone gates the lifeform stratification named in the paper title. Requests are non-blocking for Stage 1 and must not wait for the Stage 2 gate.
+
+### Screening and identity rules
+
+Dataset-metadata screening and catalogue-identity rules live in `config/screening_rules.json`, separate from the frozen `config/stage1_search_config.json`. The search configuration's checksum is embedded in every archived run summary, so correcting a screen must never invalidate a pinned response and force a re-run. Screening changes are versioned in the change register and require a regenerated registry.
+
+Screening at this stage excludes only what is clearly irrelevant. Over-inclusion is corrected by Stage 2 record-level screening; over-exclusion silently removes a candidate from the study and is the more serious error. Where a catalogue's dataset names are provider codes rather than descriptions, a keyword screen on the name has no discriminative validity and must not be applied.
 
 ### Essential search fields
 
@@ -92,13 +101,14 @@ Execute the search described in `DATASET_SYSTEMATIC_SEARCH.md` using APIs or rep
 
 - Repeating the same query against the archived response produces the same registry rows.
 - API record counts reconcile page by page.
-- Every registry row points to raw evidence.
+- Every registry row points to raw evidence, **and every archived catalogue record produces a registry row**. A parser that skips records it cannot fully populate biases discovery in a direction no count will reveal: requiring a DOI silently discarded the restricted holdings that exist precisely to fill coverage gaps.
 - Inclusion and exclusion categories are mutually exclusive and complete.
 - Search-flow counts are calculated, never typed manually.
+- Known-item recall is tested against benchmarks that the search modules were **not** built around, and each benchmark is checked for retention as well as presence. A benchmark that is recalled and then screened out is a screening defect, and it must fail the build rather than be reported as a successful recall.
 
 ### Gate
 
-Advance only after the systematic search is reproducibly executed. Existing narrative candidate counts remain provisional until supported by archived query responses and generated screening records.
+Advance only after the systematic search is reproducibly executed, every register entry is resolved or its absence diagnosed, and the ranked acquisition shortlist exists. Existing narrative candidate counts remain provisional until supported by archived query responses and generated screening records.
 
 ## 5. Stage 2 — Data Acquisition, Licensing, and Record-Level Screening
 
@@ -108,13 +118,14 @@ Obtain the actual observations, confirm that they meet the declared criteria, an
 
 ### Actions
 
-1. Acquire the highest-resolution provider version of each public candidate. For restricted datasets, record the request, response, terms, and current status without assuming eventual access.
-2. Store each delivered file unchanged under a versioned raw-data location and record filename, size, checksum, acquisition date, provider version, license, and citation.
-3. Inspect file schemas in R and create machine-readable inventories of tables, columns, units, missing-value codes, quality flags, coordinate fields, and date fields.
-4. Perform record-level eligibility screening for domain intersection, repeated sampling, CMEMS-era overlap potential, biomass or conversion variables, sampling cadence, method metadata, and licensing.
-5. Link duplicate records exposed by PLET, DOME, EMODnet, EurOBIS, OBIS, or provider portals. Use the highest-resolution provider record as canonical and retain aggregator identifiers for provenance and gap checking.
-6. Assign a provisional evidence tier and role: primary reference, lifeform-only validation, comparator, discovery/sensitivity only, pending, or excluded.
-7. Record exclusions with controlled reason codes and free-text detail. Never delete excluded rows from the registry.
+1. Acquire in the order set by the Stage 1 ranked shortlist (`metadata/stage1_acquisition_shortlist.csv`), highest-resolution provider version first. The shortlist is a work order, not an eligibility decision. Acquiring in rank order front-loads the datasets that can change the Stage 4 feasibility verdict; acquiring in registry order spends the project's effort on catalogue bulk. For restricted datasets, record the request, response, terms, and current status without assuming eventual access, and keep the provider-response register current.
+2. Re-check the shortlist against the register crosswalk before closing this stage. A candidate that proves unusable at record level is recorded with its reason and does not silently vanish from the coverage narrative.
+3. Store each delivered file unchanged under a versioned raw-data location and record filename, size, checksum, acquisition date, provider version, license, and citation.
+4. Inspect file schemas in R and create machine-readable inventories of tables, columns, units, missing-value codes, quality flags, coordinate fields, and date fields.
+5. Perform record-level eligibility screening for domain intersection, repeated sampling, CMEMS-era overlap potential, biomass or conversion variables, sampling cadence, method metadata, and licensing.
+6. Link duplicate records exposed by PLET, DOME, EMODnet, EurOBIS, OBIS, GBIF, DASSH, or provider portals. Use the highest-resolution provider record as canonical and retain aggregator identifiers for provenance and gap checking. GBIF and DASSH were added by search update `MANUAL-20260807T195118Z`; several holdings publish to one aggregator and not the other, so omitting either creates both false duplicates and false independence.
+7. Assign a provisional evidence tier and role: primary reference, lifeform-only validation, comparator, discovery/sensitivity only, pending, or excluded.
+8. Record exclusions with controlled reason codes and free-text detail. Never delete excluded rows from the registry.
 
 ### Outputs
 
@@ -198,12 +209,15 @@ Decide, without PhyC values, which paper questions are estimable and where the s
 ### Actions
 
 1. Determine whether at least two genuinely independent monitoring networks support total carbon, total biovolume, or defensible carbon conversion over the CMEMS period.
-2. Determine which subregions have both adequately sampled bloom seasons and adequately observed non-bloom windows.
+2. Determine which subregions have both adequately sampled bloom seasons and adequately observed non-bloom windows. Search update `MANUAL-20260807T195118Z` (§12.5) predicts that the offshore central and northern North Sea may have no Tier A–C reference at all, because every identified high-tier source lies at a coastal margin or in the transition region. A subregion with no eligible reference data must be declared here as an observation-adequacy limit, before PhyC is inspected, so that it can never appear as a post-hoc exclusion.
 3. Assess whether event/year counts can support held-out evaluation rather than only descriptive matchups.
 4. Screen whether the available years, networks, cadence, and variables could possibly satisfy the prespecified recurrence rules. Final recurrence classification follows harmonization in Stage 6.
 5. Identify method and size-domain gaps that could reverse a total-biomass label.
 6. Declare which questions are confirmatory, secondary, exploratory, or currently infeasible.
 7. Record a stop or redesign decision if direct biomass coverage cannot support the primary question. Do not substitute chlorophyll, CPR PCI, or derived occurrence maps silently.
+8. Treat every contact-required dataset as unavailable and confirm that its consequence, recorded in `metadata/provider_access_requests.csv`, has already been applied. Under `config/access_and_licence_policy.json` there are no response deadlines: a dataset obtainable only by request is unavailable from the moment the search establishes that, and the study proceeds without it. Requests are still sent, and a reply re-admits the dataset through the normal Stage 2 route as a dated addition to the change register — never as a silent improvement to a result. The datasets the study proceeds without are listed in `metadata/stage1_unavailable_candidates.csv` so that an access-driven scope limit can never be mistaken later for an ecological or performance-driven exclusion.
+9. Declare the Tier A base explicitly. The executed search found only DS06 with a usable direct carbon route, in the external-transfer region by the Stage 0 assignment; DS08's carbon and biovolume children are contact-required and therefore unavailable, leaving its CC-BY abundance children only. The confirmatory analysis therefore rests on Tier C abundance-to-carbon conversion. State this here, before any PhyC value is seen, and carry the consequence into Stage 5 action 10 and Stage 10.
+10. Do not narrow the analysable domain pre-emptively. The paper's basin-wide framing is retained, so every subregion must be pursued through every open route before any is set aside — offshore coverage rests on the DS12 CPR records reachable through OBIS/EurOBIS at Tier D/E. A subregion is declared an observation-adequacy limit only after that has been done, and always before PhyC is inspected.
 
 ### Outputs
 
@@ -234,6 +248,7 @@ Create auditable reference variables without erasing provider data or manufactur
 7. Propagate plausible conversion uncertainty and retain lower, central, and upper estimates rather than treating converted carbon as error-free.
 8. Calculate sample completeness, converted taxon fraction, unresolved biomass risk, and observed size domain.
 9. Preserve *Phaeocystis* colonies, colonial cells, solitary cells, and total cells as separate fields unless a validated conversion is available.
+10. Carry the lower, central, and upper conversion estimates from action 7 forward as three parallel reference series, not as an annotation on a single series. They must remain separable through outcome construction in Stage 6 and reach the Stage 10 metrics intact. Because the Tier A base is too narrow to carry the primary analysis, the confirmatory result is expected to rest on Tier C conversion, and `DATASET_SYSTEMATIC_SEARCH.md` §9.7 warns that conversion uncertainty may then dominate apparent model error. Whether the incremental value of PhyC survives that uncertainty is a prespecified result of this study, not a caveat to be discovered late.
 
 ### Outputs
 
@@ -287,6 +302,13 @@ Bloom thresholds and seasonal baselines are estimated from training years only. 
 6. retain fold-specific threshold provenance so each held-out label identifies the training data that defined it.
 
 A separate full-observation event catalogue may be generated for descriptive recurrence figures, but it must be clearly labelled descriptive and cannot provide leaked labels or thresholds to held-out performance estimation.
+
+A fixed 90th-percentile rule defines bloom prevalence at roughly one window in ten **by construction**, so the rarity that motivates emphasising PR-AUC is a property of the threshold rather than an observation. Two checks are therefore required and registered here, before any threshold is applied:
+
+1. repeat outcome construction across a prespecified percentile range and report how event counts, prevalence, and downstream metrics respond, using training folds only;
+2. verify that the resulting events correspond to recognised North Sea bloom phenology by season and subregion. A threshold that produces events uniformly through the year is measuring variance, not blooms, whatever its percentile.
+
+Also construct the outcome separately from the lower, central, and upper conversion series of Stage 5 action 10, so that a window whose bloom state depends on the conversion assumption is identifiable rather than silently resolved.
 
 ### Outputs
 
@@ -393,6 +415,11 @@ Create comparable observation–model pairs while quantifying point-to-grid, tim
 7. Calculate scale-mismatch diagnostics: within-neighbourhood variance, station-to-subregion difference, temporal variability within the observation window, and sampling support.
 8. Build a matchup uncertainty budget that separates observation error, carbon-conversion uncertainty, temporal mismatch, spatial representativeness, vertical mismatch, and model-grid/mask limitations where estimable.
 9. Select one primary PhyC representation using training folds only; apply it unchanged to held-out events. Retain the other registered representations as sensitivity analyses.
+10. Build the two registered pipeline controls alongside the real matchups, using the identical matchup machinery:
+    - a **positive control** matching CMEMS chlorophyll to in-situ chlorophyll, which should agree well precisely because of the ocean-colour assimilation coupling;
+    - a **negative control** in which PhyC dates are permuted within subregion, destroying the real temporal correspondence while preserving every distributional property.
+
+    Every safeguard elsewhere in this plan suppresses false optimism, and none of them establishes that the pipeline can detect a signal at all. Without these controls a null result cannot be distinguished from a broken matchup, and a null is a publishable outcome of this study only if that distinction can be made. The controls are declared here and scored at Stage 10; their expected directions are registered before they are run.
 
 ### Outputs
 
@@ -448,6 +475,10 @@ Calculate:
 For reference tiers with commensurate units, also report supporting continuous-agreement diagnostics such as signed bias, median absolute error, RMSE on a justified scale, and rank association. Use clustered uncertainty and show observed-versus-modelled distributions. Correlation alone is not validation, and continuous metrics do not replace the registered bloom-classification outcome.
 
 Estimate uncertainty by clustered bootstrap or an appropriate hierarchical approach at event/year/network level. Do not use daily rows as independent replicates. Report event counts and effective independent units beside each metric.
+
+Report every headline metric three times, once against each of the lower, central, and upper conversion series carried from Stage 5 action 10. The incremental value of PhyC over the primary baseline is accepted only where it holds across all three. Where it does not, report the conversion-dependence explicitly: for a study whose reference is expected to rest on Tier C conversion, an increment that exists only under the central coefficients is a finding about the coefficients, not about the product.
+
+Score the two Stage 9 controls in the same table as the real comparisons. The positive control (CMEMS chlorophyll against in-situ chlorophyll) should show clear agreement; the negative control (date-permuted PhyC) should show none. Read the primary result only after both behave as registered. If the positive control fails, the pipeline is under suspicion and no conclusion about PhyC may be drawn; if the negative control succeeds, leakage is present and the splits must be re-audited.
 
 Report both window-level and event-balanced summaries where long events would otherwise dominate. Handle missing covariates through a prespecified, fold-safe method and report the effect of complete-case exclusions. Keep model complexity proportional to the number of independent events and account for the limited, prespecified set of comparisons.
 

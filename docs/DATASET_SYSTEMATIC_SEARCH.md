@@ -14,6 +14,15 @@ This is a living registry. New searches append dated entries; they do not overwr
 
 **Discovery yield:** 21 candidate dataset or service families were retained. Sixteen have a public or defined acquisition route, four require targeted provider contact or restricted access, and one is known from metadata but is not released. Aggregator and provider copies are not independent datasets, so a sample-level count will be reported only after deduplication.
 
+**Update history:** this original run is preserved unchanged. Later runs append dated sections and do not modify §2–§11.
+
+| Run | Date | Method | Result |
+|---|---|---|---|
+| initial | 2026-08-07 | narrative discovery across §3 sources | DS01–DS21, recorded in §6 |
+| `MANUAL-20260807T195118Z` | 2026-08-07 | manual web discovery and provider-page inspection | DS22–DS34 and dated refinements, recorded in [§12](#12-search-update-2026-08-07--manual-discovery-run-manual-20260807t195118z) |
+
+Neither run is a reproducibly executed search. All candidate counts remain provisional until Stage 1 archives query responses and generates the registry.
+
 ## 2. Search Question
 
 > Which accessible or requestable North Sea datasets provide repeated, georeferenced observations of phytoplankton carbon, biovolume, abundance, composition, pigments, or bloom state at sufficient temporal and taxonomic resolution to validate concurrent CMEMS PhyC and quantify performance across recurrent dominant bloom lifeforms?
@@ -212,3 +221,148 @@ For every acquired dataset, create one registry row with:
 ## 11. Search Update Rule
 
 Rerun the structured search immediately before protocol registration and again before manuscript submission. Record new datasets, changed access status, updated versions, and broken endpoints. Dataset additions after model evaluation require a separately labelled external replication analysis; they cannot be silently added to improve the primary result.
+
+## 12. Search Update 2026-08-07 — Manual Discovery Run `MANUAL-20260807T195118Z`
+
+### 12.1 Status and evidentiary standing
+
+This run was performed by interactive web search and direct inspection of provider, repository, and publication pages before Stage 1 execution. It is **not** an executed API search and does not advance the Stage 1 gate.
+
+- **Run identifier:** `MANUAL-20260807T195118Z`
+- **Date (UTC):** 2026-08-07
+- **Method:** interactive search-engine discovery followed by retrieval of provider, repository, and journal pages
+- **Purpose:** broaden the candidate pool and stress-test the assumptions in §6 before query strategies are frozen
+- **Machine-readable log:** [`metadata/manual_discovery_log.csv`](../metadata/manual_discovery_log.csv)
+
+Section 6 is not modified by this run. Refinements to existing rows appear in §12.3 as dated addenda so the original register remains auditable.
+
+Every entry carries a `verification_status`:
+
+| Value | Meaning |
+|---|---|
+| `page_inspected` | the cited provider, repository, or publication page was retrieved and read during this run |
+| `search_summary_only` | the entry rests on search-engine result text; the primary page was not retrieved |
+| `not_verified` | retrieval was attempted and returned no usable content |
+
+Coverage, cadence, variable, and licence statements below are **as reported by the cited source on the access date**. They remain provisional evidence under §12 of `AGENTS.md` until an archived query response and checksum support them. No count, cadence, or record total in this section may be carried into the manuscript without regeneration from an executed search.
+
+### 12.2 New candidate entries
+
+| ID | Dataset, service, or reference | Coverage and access | Relevant content | Principal value | Principal limitation | Planned role | Verification |
+|---|---|---|---|---|---|---|---|
+| DS22 | HELCOM EG Phyto biovolume file (`PEG_BVOL`), ICES-hosted, mirrored by [Nordic Microalgae](https://nordicmicroalgae.org/biovolume-lists/) | republished annually as a new version; [ICES library record](https://ices-library.figshare.com/articles/report/HELCOM_Expert_Group_on_Phytoplankton_Biovolume_File/27900237) | taxon geometric shapes, size classes, biovolume and carbon-content coefficients | the conversion authority on which every Tier C carbon estimate depends; used by SMHI and Nordic monitoring | Baltic-centred origin; coverage of North Sea taxa must be audited; annual versioning means an unpinned copy is a moving target | **conversion reference, not observations**; must be version-frozen and checksummed before any Tier C conversion | `search_summary_only` |
+| DS23 | [NIOZ Wadden Sea phytoplankton](https://www.gbif.org/dataset/1d276c75-d90c-40c8-973d-2eac7c8089e5), GBIF `10.15468/okwkou` | NIOZ-Texel jetty at the Marsdiep tidal inlet; reported as running since 1974 at roughly 40 samples per year | phytoplankton species densities with associated Secchi, SPM, nutrients, chlorophyll, primary production | long independent Dutch coastal record absent from the original register; method contrast to RWS ship-based sampling | tidal-inlet jetty station; strongly local hydrography; not representative of a shelf subregion | external coastal sentinel; duplicate check against DS02/DS03 | `search_summary_only` |
+| DS24 | [OSPAR COMP4 COMPEAT input data files](https://ices-library.figshare.com/articles/dataset/Input_data_files_for_the_OSPAR_COMP_4_eutrophication_assessment_using_COMPEAT/22189111) and [COMPEAT code](https://github.com/ices-tools-prod/COMPEAT) | Greater North Sea, Celtic Seas, Bay of Biscay; assessment period 2015–2020; extracted from the ICES Data Portal | harmonized in-situ chlorophyll and nutrients aggregated to OSPAR COMP4 assessment areas | frozen, versioned, externally curated dataset with published assessment-area geometry and open R code | chlorophyll is Tier E and COMP4 also ingests remote sensing; assessment areas are not the frozen subregions | Tier E comparator, non-PhyC baseline candidate, and **known-item recall benchmark for Stage 1** | `search_summary_only` |
+| DS25 | [EMODnet Chemistry](https://emodnet.ec.europa.eu/en/chemistry) aggregated eutrophication product | Greater North Sea; SeaDataNet ODV and NetCDF; OGC WMS/WFS/CSW | validated and harmonized in-situ chlorophyll-a and nutrients | machine-readable route to a climatological chlorophyll baseline over the whole domain | chlorophyll only; feeds Copernicus, so independence from the assimilation chain must be established per source before use | Tier E comparator and non-PhyC baseline candidate | `search_summary_only` |
+| DS26 | [SMHI IFCB imaging](https://figshare.scilifelab.se/articles/dataset/Manually_annotated_IFCB_plankton_images_from_the_Skagerrak_Kattegat_and_Baltic_Proper_by_SMHI/25883455) with the `iRfcb` R client | Skagerrak, Kattegat, Baltic Proper; manually annotated image reference library; data flow into SHARK | imaged plankton with classifications supporting biovolume | highest temporal resolution available in the external-transfer region | transition waters; imaged size range and classifier performance must be audited; not the core domain | Tier B external-transfer and temporal-resolution benchmark | `search_summary_only` |
+| DS27 | [COSYNA/Hereon FerryBox](https://www.hereon.de/institutes/carbon_cycles/cosyna/observations/ferrybox/index.php.en); [2002–2005 ESSD release](https://essd.copernicus.org/articles/10/1729/2018/) `10.1594/PANGAEA.883824`; [pCO2 series since 2013](https://doi.pangaea.de/10.1594/PANGAEA.930383) | ships of opportunity on Cuxhaven–Immingham, Büsum–Helgoland, and Halden–Zeebrugge–Immingham–Moss; open data policy; ASCII and NetCDF export | chlorophyll-a fluorescence, phytoplankton group fluorescence, turbidity, oxygen, salinity, temperature, partly nutrients | the only sub-daily spatially resolved surface record in the southern North Sea | fluorescence is not carbon and is subject to photoacclimation and non-photochemical quenching; surface-only; route-constrained | Tier E; quantify the timing blur introduced by monthly networks | `search_summary_only` |
+| DS28 | LifeWatch Belgium HPLC pigment series | Belgian Part of the North Sea; reported as monthly since 2002 under the LifeWatch programme | HPLC pigments supporting CHEMTAX group decomposition | the only identified route to a haptophyte and *Phaeocystis* pigment share in Belgian waters | CHEMTAX ratios are regionally tuned and non-unique; Tier E under §5; no direct total-biomass conversion | Tier E lifeform comparator and triangulation for DS10 | `search_summary_only` |
+| DS29 | [Inner Oslofjord phytoplankton 1896–2020](https://www.nature.com/articles/s41597-022-01869-3), GBIF `10.15468/gugesq`, CC-BY 4.0 | inner Oslofjord, principally station Dk1/S1 in Vestfjorden; approximately monthly 2006–2020; 605 sampling events and 22,636 records reported | cell abundance, biomass in µg C/L for 1994–2020 with gaps, 412 accepted taxa, associated hydrography and nutrients | rare published carbon-unit record with an open licence | **inner fjord, outside the frozen domain and outside the Skagerrak/Kattegat external-transfer definition**; pre-1920 records not comparable | not eligible under §4.4; retain only as a documented out-of-domain assessment | `page_inspected` |
+| DS30 | [GBIF](https://www.gbif.org/) as an aggregator family | global biodiversity aggregator publishing marine monitoring datasets | occurrence and sampling-event records including DS23 and Norwegian holdings | closes a genuine gap: DS23 and the NIVA holdings are published to GBIF and not to EurOBIS | presence-heavy records and heterogeneous effort; aggregator copies are not independent sources | discovery and **deduplication family, to be added to the §7 rule** | `search_summary_only` |
+
+### 12.3 Dated refinements to existing register rows
+
+These addenda refine §6 without replacing it. Each states what changed and why it matters.
+
+**DS06 SMHI — tier raised from B to A/B candidate.** SHARK is reported to store phytoplankton carbon (µg C/L) derived from biovolume through the HELCOM PEG/NOMP lists, not biovolume alone. Programmatic access is supported by the `SHARK4R` and `iRfcb` R clients in addition to the documented API. Consequence: DS06 is the most tractable high-tier acquisition target and should be the reference implementation for the Stage 1 module pattern. It remains an external-transfer region under the frozen Stage 0 assignment. `search_summary_only`
+
+**DS08 Helgoland Roads — structure confirmed, access status downgraded.** The PANGAEA publication series [`10.1594/PANGAEA.960407`](https://doi.pangaea.de/10.1594/PANGAEA.960407) reports 145 child datasets covering 1962–2023 and carries total abundance, total biovolume, **and** biomass as carbon, with carbon resolved by group (diatoms split into centrales and pennales, dinoflagellates, silicoflagellates, coccolithophorids, flagellates, green algae, ciliates). `page_inspected`
+
+This is the only source identified in either run that can express **lifeform dominance as a carbon share**, which `docs/CONTEXT.md` requires and which cell counts cannot supply. DS08 is therefore load-bearing for the lifeform stratification, not merely a temporal-resolution sentinel.
+
+Access is not clean. The series states CC-BY-4.0 that "comes into effect after moratorium ends" and requires login to download; an inspected annual carbon dataset ([`10.1594/PANGAEA.862910`](https://doi.pangaea.de/10.1594/PANGAEA.862910), 2015) renders as "Licensing unknown: Please contact principal investigator/authors to gain access and request licensing terms". `page_inspected` The years under moratorium may be exactly the CMEMS-overlap years. DS08 is reclassified from public acquisition to **request-and-verify**, and the licence enquiry must be logged through the manual/contact channel of Stage 1 action 9, never as an API result.
+
+**DS09 Sylt Roads — two distinct series; the continuing one is lower tier.** The quantitative microplankton series is reported for [1992–2013](https://doi.pangaea.de/10.1594/PANGAEA.150033). What continues to the present is a *semi-quantitative* net-based microplankton analysis published in annual datasets ([2018](https://doi.pangaea.de/10.1594/PANGAEA.937744), [2019](https://doi.pangaea.de/10.1594/PANGAEA.937747)). Net selectivity plus semi-quantitative enumeration places the modern years at Tier D/E, not the Tier B a coastal-sentinel role implies, and the quantitative window may end before much of the reanalysis period. `search_summary_only`
+
+**DS10 LifeWatch FlowCam — coverage extended and characterised.** Reported as May 2017 to August 2024; 9 nearshore stations monthly and 8 offshore stations seasonally; 138 biological groups including 76 diatom and 17 dinoflagellate groups; 55–300 µm ESD; EurOBIS `10.14284/760`, Marine Data Archive `10.14284/710`, annotated image library `10.14284/680`; CC-BY 4.0. The 55 µm lower bound is confirmed and remains the binding constraint on total-biomass interpretation. `page_inspected`
+
+**DS16 Scottish Coastal Observatory Stonehaven — upgraded and identified.** [DOI `10.7489/610-1`](https://data.marine.gov.scot/dataset/scottish-coastal-observatory-stonehaven-site), UK Open Government Licence, 1997–2017, weekly. Ten CSV resources including phytoplankton counts (first 400 cells), counts by fields of view, presence/absence, target-species analysis, and **flow cytometry**, plus environmental, Secchi, temperature, and zooplankton data. `page_inspected`
+
+The flow-cytometry resource addresses the pico/nano gap that §8 currently makes conditional on DS21, which is unreleased. Caution: a first-400-cells protocol yields relative composition rather than absolute density; the fields-of-view resource is required for abundance.
+
+**DS07 Cefas SmartBuoy — method confirmed, duplicate family extended.** Approximately weekly automated 150 mL samples preserved in acidified Lugol's iodine and enumerated by the Utermöhl technique to the lowest practical taxon in cells L⁻¹. The same holding is also published through [DASSH](https://doi.dassh.ac.uk/data/1634), which must be linked as an aggregator copy under §7 rather than counted separately. `search_summary_only`
+
+### 12.4 Assessed and not retained
+
+| ID | Source | Decision | Reason |
+|---|---|---|---|
+| DS31 | Copernicus Marine In Situ TAC product `INSITU_NWS_PHYBGCWAV_DISCRETE_MYNRT_013_036` | excluded from primary truth; retained as a documented decision | North-West Shelf scoped and superficially ideal, but it is a Copernicus in-situ product drawing on the same chlorophyll streams that inform the ocean-colour chain. Using it as independent reference would breach the assimilation boundary in `docs/CONTEXT.md`. Recorded explicitly so a reviewer sees it was considered and rejected. |
+| DS32 | [HAEDAT](https://haedat.iode.org/) harmful algal event database | excluded as event truth | *Phaeocystis* is systematically under-reported because events rarely carry demonstrable economic impact; the published northern-Europe review identifies only two North Sea *Phaeocystis* entries (Wilhelmshaven 2010; Dutch mussel mortality 2001). Absence of an entry does not evidence absence of a bloom, so HAEDAT cannot define negative windows. |
+| DS33 | [PhytoBase](https://essd.copernicus.org/articles/12/907/2020/) and MAREDAT | excluded from acquisition | Global syntheses assembled from OBIS, GBIF, CPR, and monitoring programmes already in the register. Inclusion would inflate the dataset count with duplicates of held sources. Retained only as a taxonomy crosswalk and recall aid. |
+| DS34 | BODC / NERC Shelf Sea Biogeochemistry cruise and glider holdings | excluded from primary | Campaign-based rather than recurrent; fails the three-year repeated-observation criterion in §4.1. Retain only as a potential method-comparison dataset. |
+
+### 12.5 Consequences for the tier hierarchy and study feasibility
+
+Two structural findings follow from this run and are recorded as risks, not as design changes.
+
+1. **The Tier A base is narrow and sits at the domain margins.** Only DS08 (German Bight coastal fixed station) and DS06 (Skagerrak/Kattegat external-transfer region) were found to report phytoplankton carbon directly, and DS08 has an unresolved moratorium. DS29 was the only other carbon-unit record found and is out of domain.
+2. **The offshore central and northern North Sea has no identified Tier A–C candidate.** Every high-tier source found is at a coastal margin (DS02–DS05, DS07–DS10, DS16, DS23) or in the transition region (DS06, DS26). Offshore coverage rests on DS12 (CPR, Tier D/E) and DS19–DS20, which are contact-only and reported to lack an analyzable phytoplankton database.
+
+Because the primary row unit is `subregion_id × analysis_window`, some frozen subregions may have no eligible reference data at all. This is a Stage 4 feasibility determination. It must be declared from observation coverage before PhyC is inspected, so that an empty subregion is recorded as an adequacy limit and never appears as a post-hoc exclusion.
+
+### 12.6 Consequences for Stage 1 execution
+
+1. **Additional source families need acquisition modules** beyond PLET, ICES DOME, EMODnet/EurOBIS/OBIS, and SMHI SHARK: PANGAEA (to enumerate the 145 DS08 children), GBIF (DS23 and Norwegian holdings), the `data.marine.gov.scot` CKAN API (DS16), Cefas Data Hub and DASSH (DS07), and ICES figshare (DS22, DS24).
+2. **The §7 deduplication rule gains GBIF** as an aggregator family. DASSH is likewise an aggregator copy for DS07.
+3. **A known-item recall benchmark set is proposed** for Stage 1 action 8: DS02, DS04, DS05, DS06, DS07, DS08, DS10, and DS16, with the DS24 input-file list as an externally curated cross-check. A benchmark that fails to appear triggers query or API diagnosis, never a manual registry insertion.
+4. **DS22 must be version-frozen before any Tier C conversion.** `PEG_BVOL` is republished annually; without a pinned, checksummed version the conversion is irreproducible and the §9.7 risk that conversion uncertainty dominates apparent model error cannot be quantified.
+5. **Provider holdings are actively changing.** The DTO-BioFlow open calls ran to 2026-04-30 with the explicit aim of mobilising previously unavailable plankton datasets into EMODnet and EDITO. Record per-endpoint retrieval timestamps, and expect the §11 pre-submission re-run to return genuine additions that must be labelled external replication rather than folded into the primary result.
+
+### 12.7 Proposed additions to the exclusion rules
+
+To be applied when §4 is next revised, with the rationale recorded in `config/protocol_change_register.csv`:
+
+- **§4.3, exclude from primary truth:** Copernicus in-situ products whose chlorophyll streams inform the ocean-colour chain; global syntheses assembled from aggregators already held.
+- **§4.4, exclude entirely:** harmful-algal event registries as bloom-state truth where reporting is impact-triggered rather than observation-triggered; single-campaign cruise and glider programmes without recurrence.
+
+### 12.8 Sources consulted in this run
+
+Pages retrieved and read (`page_inspected`): [PANGAEA Helgoland series 960407](https://doi.pangaea.de/10.1594/PANGAEA.960407); [PANGAEA 862910](https://doi.pangaea.de/10.1594/PANGAEA.862910); [Stonehaven dataset record](https://data.marine.gov.scot/dataset/scottish-coastal-observatory-stonehaven-site); [Inner Oslofjord data descriptor](https://pmc.ncbi.nlm.nih.gov/articles/PMC9751269/); [BPNS FlowCam data descriptor](https://pmc.ncbi.nlm.nih.gov/articles/PMC12727804/).
+
+Retrieval attempted without usable content (`not_verified`): the SMHI SHARK Swagger endpoint returned only a page shell; the API surface remains unverified and must be established during Stage 1.
+
+All remaining URLs cited in §12.2–§12.4 are `search_summary_only` and are listed with their status in [`metadata/manual_discovery_log.csv`](../metadata/manual_discovery_log.csv).
+
+## 13. Executed Stage 1 Search — 2026-08-08
+
+Stage 1 has now been reproducibly executed against the frozen configuration in [`config/stage1_search_config.json`](../config/stage1_search_config.json). The executable modules cover PLET, ICES DOME, EMODnet ERDDAP, OBIS, SMHI SHARK, PANGAEA, GBIF, Marine Scotland DKAN, Cefas Data Hub/DASSH, and ICES Figshare. The successful immutable runs are pinned in [`metadata/stage1_active_runs.csv`](../metadata/stage1_active_runs.csv); abandoned preflight and diagnosed provider-behaviour runs remain immutable but are not used by the compiler.
+
+The following generated artifacts, rather than the narrative discovery totals in §§1 and 12, are the current Stage 1 evidence:
+
+- [`metadata/stage1_query_log.csv`](../metadata/stage1_query_log.csv): exact requests, pages or cursors, timestamps, response paths, HTTP states, record counts, and SHA-256 checksums;
+- [`metadata/candidate_registry.csv`](../metadata/candidate_registry.csv): dataset-level discovery metadata linked to raw evidence, conservative screening states, and duplicate/canonical links;
+- [`metadata/stage1_known_item_recall.csv`](../metadata/stage1_known_item_recall.csv): evidence-backed recall of every prespecified benchmark;
+- [`metadata/stage1_search_flow.csv`](../metadata/stage1_search_flow.csv): calculated identification, duplicate, screening, exclusion, pending, and acquisition totals; and
+- `outputs/logs/stage1_validation_20260808T083225Z.log`: deterministic-regeneration checksum, complete test result, R version, package versions, and session information.
+
+The DS22 Figshare page was not treated as the conversion table itself. The official ICES-hosted `PEG_BVOL` ZIP was downloaded by the Figshare/ICES module, archive-validated, checksummed, and registered as the one Stage 1 item advanced to acquisition. Dataset-level `pending` does not mean eligible for analysis: access, licences, recurrence, methods, record schemas, geographic intersection, and duplicate observations remain Stage 2 decisions. The unavailable second scientific review is explicitly recorded as pending in the frozen configuration and is not represented as approval.
+
+### 13.1 Requirement audit and remediation — 2026-08-08
+
+An independent audit against `STAGED_WORK_PLAN.md` §4 found that the executed search reproduced deterministically while several of its scientific requirements were unmet. The automated suite passed throughout, so "the tests pass" was not evidence that the requirements were satisfied. All defects below are repaired; the artefacts listed in §13 were regenerated.
+
+| Defect | Consequence | Repair |
+|---|---|---|
+| The biological screen matched only `phytoplank` | DS02 (RWS) and DS04 (BSH) were excluded as outside biological scope while recall still reported them found | Screening terms moved to `config/screening_rules.json` and broadened; recall now reports and asserts retention, not only presence |
+| The PLET parser required a DOI cell | Seven archived catalogue datasets marked "No DOI" produced no registry row, including DS17 `OSPAR_LLUR-SH_2010-2020`; discovery was biased against restricted holdings, which are the least likely to carry a DOI and the most important for gap filling | DOI requirement removed; a test asserts every archived PLET data row reaches the registry |
+| PLET dataset names are provider codes | DS17 was recalled but then screened out on its name, while DS18 survived only because that provider appended `_phyto` | PLET declared a scope-guaranteed catalogue; a keyword screen on a provider code has no discriminative validity |
+| Title identity applied `[^a-z0-9]` before folding case | Every capital letter was deleted, so title identity depended on a provider's capitalisation and the previous SmartBuoy alias rule could never match | Case is folded first; the rule is unit tested |
+| Identity grouped on any shared DOI | PLET publishes eight Marine Scotland series under `10.17031/1637`, so Loch Ewe, Scalloway, Scapa, and Stonehaven became one dataset family and DS16 appeared as a duplicate of DS16's neighbour | A DOI attached by one source to more than one distinct title is a collection DOI and is excluded from identity |
+| The GBIF geographic screen was an inclusion term in a disjunction | Any phytoplankton dataset satisfied it through the biological pattern, so no GBIF row was ever screened on geography while the handoff reported out-of-domain results as filtered | Replaced by an explicit `geographic_screen_state` on every row; geography is recorded, never enforced, at dataset level |
+| Provider strings carrying non-ASCII characters were unknown-encoding under the C locale | `perl = TRUE` matching declined to match them with only a warning, so a benchmark could have gone unrecalled with nothing failing | Provider text is marked UTF-8 at parse time |
+| The benchmark set contained only datasets the modules were built around | A systematic discovery failure could not be detected | Extended from nine to sixteen: DS03, DS09, DS12, DS17, DS18, DS23, and DS26 added. The extension immediately exposed two of the defects above |
+
+### 13.2 Register crosswalk, acquisition shortlist, and access register
+
+Stage 1 previously reported one dataset advanced to acquisition — the DS22 conversion authority — against 8,060 undifferentiated pending rows. That is a compliant count and an unusable handoff. Three generated artefacts now bridge the narrative register and the executed search:
+
+- [`metadata/stage1_ds_crosswalk.csv`](../metadata/stage1_ds_crosswalk.csv): every DS01–DS34 entry resolved against archived evidence, with the resolution pattern, retained rows, canonical families, and geographic-screen states;
+- [`metadata/stage1_acquisition_shortlist.csv`](../metadata/stage1_acquisition_shortlist.csv): 22 named datasets ranked by declared reference tier, domain position, access feasibility, and CMEMS-era overlap, with the weights recorded in `config/ds_register_crosswalk.json`;
+- [`metadata/provider_access_requests.csv`](../metadata/provider_access_requests.csv): the seven contact-only requests, each with what it blocks, a follow-up date, a decision deadline, and the scope reduction that applies if it is refused.
+
+Thirty-one of thirty-four register entries resolved. The three that did not are DS21 (reported unreleased by its publisher, consistent with §6.3), DS31 and DS33 (excluded-by-decision entries that were never searched for). None is a discovery failure.
+
+**Two findings bear on feasibility and are recorded here before any PhyC value is inspected.**
+
+1. **The offshore gap in §12.5.2 is now empirically supported, not merely predicted.** DS19, the Norwegian IMR North Sea Ecosystem Survey, resolves to a single registry row that does not survive screening. Together with DS12 (CPR, contact-only) and DS20 (contact-only), the offshore central and northern North Sea has no retained candidate of any tier in the executed search. Whether those subregions are analysable at all now depends entirely on the DS12 and DS19 access requests.
+2. **The Tier A base is two datasets, and neither is straightforwardly usable.** DS08 is a single German Bight coastal station whose carbon-resolved years are under moratorium; DS06 lies in the external-transfer region by the Stage 0 assignment. The confirmatory analysis is therefore expected to rest on Tier C abundance-to-carbon conversion through the pinned DS22 `PEG_BVOL` file, and §9.7's warning that conversion uncertainty may dominate apparent model error becomes a prespecified result rather than a caveat. `STAGED_WORK_PLAN.md` Stage 5 action 10 and Stage 10 now carry the lower, central, and upper conversion series through to the reported metrics.

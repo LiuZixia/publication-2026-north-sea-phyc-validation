@@ -79,6 +79,16 @@ The intended acquisition order is:
 
 No dataset is pooled until its sampling gear, preservation, size selectivity, taxonomic resolution, units, cadence, quality flags, and licensing are recorded.
 
+## Observation-Adequacy Limits Known Before PhyC Inspection
+
+The executed Stage 1 search (`DATASET_SYSTEMATIC_SEARCH.md` §13) establishes three limits on what this paper can claim. They are recorded here, before any PhyC value is inspected, so that none of them can later appear as a post-hoc exclusion.
+
+1. **Reference tier.** Only DS06, in the external-transfer region, has a usable direct-carbon route. DS08's carbon and biovolume datasets state an unknown licence requiring author contact and are therefore unavailable under the frozen access policy; only its CC-BY abundance series can be used. The confirmatory analysis consequently rests on Tier C abundance-to-carbon conversion through the pinned DS22 `PEG_BVOL` file, and whether the incremental value of PhyC survives that conversion uncertainty is a prespecified result of this study rather than a caveat.
+2. **Lifeform stratification.** No available source measures lifeform dominance as a carbon share directly; DS08 was the only one, through the datasets now unavailable. Dominance must therefore be derived from abundance via `PEG_BVOL` at every source, with the conversion uncertainty carried into the `phaeocystis_handoff_pass` decision that authorizes PhyC use in 02B, 02C, and 02E.
+3. **Spatial.** Every high-tier candidate lies at a coastal margin or in the Skagerrak/Kattegat transition. Offshore central and northern North Sea coverage rests entirely on the CPR records (DS12) reachable through OBIS/EurOBIS, at Tier D/E; DS19 and DS20 yielded no usable route.
+
+**The basin-wide framing above is retained.** The paper is not narrowed to coastal and transition waters. Instead, every subregion is pursued through every open route — including the Tier D/E offshore CPR arm, which is a required component rather than an optional one — and a subregion is declared an observation-adequacy limit only after that has been done, always before PhyC is inspected. Datasets the study proceeds without are listed in `metadata/stage1_unavailable_candidates.csv`; access is a documented reason for a limit, never a reason a result was excluded.
+
 ## Fixed Inputs
 
 - frozen North Sea domain and hydrographic subregions;

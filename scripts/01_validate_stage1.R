@@ -3,16 +3,32 @@
 source("R/00_core_setup.R")
 required_namespace("testthat")
 
-registry_path <- "metadata/candidate_registry.csv"
-if (!file.exists(registry_path)) stop("Compile the Stage 1 registry before validation.", call. = FALSE)
-before <- calculate_checksum(registry_path)
+run_step <- function(script) {
+  output <- system2("Rscript", script, stdout = TRUE, stderr = TRUE)
+  status <- attr(output, "status")
+  if (is.null(status)) status <- 0L
+  if (status != 0L) stop(paste(c(script, output), collapse = "\n"), call. = FALSE)
+  output
+}
 
-compile_output <- system2("Rscript", "scripts/01_compile_candidate_registry.R", stdout = TRUE, stderr = TRUE)
-compile_status <- attr(compile_output, "status")
-if (is.null(compile_status)) compile_status <- 0L
-if (compile_status != 0L) stop(paste(compile_output, collapse = "\n"), call. = FALSE)
-after <- calculate_checksum(registry_path)
-if (!identical(before, after)) stop("Candidate registry changed when rebuilt from the same pinned responses.", call. = FALSE)
+# Every generated Stage 1 artefact must reproduce byte-for-byte from the same pinned responses.
+tracked <- c("metadata/candidate_registry.csv", "metadata/stage1_known_item_recall.csv",
+             "metadata/stage1_ds_crosswalk.csv", "metadata/stage1_acquisition_shortlist.csv",
+             "metadata/stage1_unavailable_candidates.csv")
+missing <- tracked[!file.exists(tracked)]
+if (length(missing)) stop(sprintf("Generate Stage 1 artefacts before validation: %s", paste(missing, collapse = ", ")), call. = FALSE)
+before <- vapply(tracked, calculate_checksum, character(1))
+
+compile_output <- run_step("scripts/01_compile_candidate_registry.R")
+crosswalk_output <- run_step("scripts/01_build_ds_crosswalk.R")
+
+after <- vapply(tracked, calculate_checksum, character(1))
+changed <- tracked[before != after]
+if (length(changed)) {
+  stop(sprintf("Stage 1 artefacts changed when rebuilt from the same pinned responses: %s",
+    paste(changed, collapse = ", ")), call. = FALSE)
+}
+compile_output <- c(compile_output, crosswalk_output)
 
 test_output <- capture.output(
   testthat::test_dir("tests", reporter = "summary", stop_on_failure = TRUE),
@@ -24,8 +40,8 @@ stamp <- format(Sys.time(), "%Y%m%dT%H%M%SZ", tz = "UTC")
 log_path <- file.path("outputs", "logs", paste0("stage1_validation_", stamp, ".log"))
 log_lines <- c(
   paste("completed_utc:", format(Sys.time(), "%Y-%m-%dT%H:%M:%SZ", tz = "UTC")),
-  paste("candidate_registry_sha256_before:", before),
-  paste("candidate_registry_sha256_after:", after),
+  "artifact_sha256_before:", paste(names(before), before, sep = ": "),
+  "artifact_sha256_after:", paste(names(after), after, sep = ": "),
   "compile_output:", compile_output,
   "test_output:", test_output,
   "session_info:", capture.output(sessionInfo())

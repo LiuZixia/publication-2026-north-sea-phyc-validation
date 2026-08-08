@@ -1,0 +1,6 @@
+"ds_id","name","availability","priority_score","declared_tier","declared_domain","retained_rows","rows_contact_required","planned_role","register_section"
+"DS19","Norwegian IMR Ecosystem Survey","no_route",19,"C","core",0,0,"northern offshore coverage; reported to lack an analyzable database","6.3"
+"DS17","LLUR Schleswig-Holstein","contact_required",18,"C","core_margin",1,1,"fills German coastal Phaeocystis gap","6.3"
+"DS18","NLWKN Lower Saxony","contact_required",18,"C","core_margin",2,2,"long Lower Saxony coastal record","6.3"
+"DS20","Norwegian coastal and Torungen-Hirtshals","no_route",13,"D","transition",0,0,"Skagerrak and Norwegian inflow gap","6.3"
+"DS21","Cefas Ferrybox flow cytometry","no_route",13,"D","core",0,0,"small functional groups; excluded until released","6.3"

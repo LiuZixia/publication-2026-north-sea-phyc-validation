@@ -1,0 +1,51 @@
+{
+  "schema_version": "1.0.0",
+  "versioned_at_utc": "2026-08-08T14:00:00Z",
+  "applies_to_stage": 1,
+  "purpose": "Dataset-metadata screening and catalogue-identity rules applied AFTER the frozen searches have executed. Kept separate from config/stage1_search_config.json because that file's checksum is embedded in every archived run summary: correcting a screening rule must never invalidate a pinned search response.",
+  "change_control": "Versioned here and recorded in config/protocol_change_register.csv. Changing these terms changes reported search-flow counts, so a change requires a regenerated registry and a stated rationale.",
+  "biological_scope": {
+    "rule": "A catalogue row is excluded only when nothing in its title, measurement types, or taxonomic content indicates phytoplankton or a phytoplankton-derived measurement. Deliberately permissive: over-inclusion is corrected by Stage 2 record-level screening, whereas over-exclusion silently removes a candidate from the study.",
+    "note": "Provider titles abbreviate. Matching only the full word 'phytoplankton' discarded the Dutch RWS ('_phyto') and German BSH ('Phyto_Zoo') national series while known-item recall still reported them found.",
+    "match_against": ["title", "measurement_types", "taxonomic_content"],
+    "terms": [
+      "phyto", "phaeocyst", "diatom", "dinoflag", "bacillariophy", "haptophy", "prymnesio",
+      "coccolith", "cyanobact", "chlorophyt", "picoplank", "microalga", "harmful alga",
+      "algal bloom", "plankton bloom", "chlorophyll", "pigment", "biovolume", "bvol",
+      "flow cytometr", "cell count", "primary produc", "compeat", "eutroph"
+    ],
+    "scope_guaranteed_sources": [
+      { "source": "OBIS", "reason": "queried server-side with the prespecified phytoplankton clades, so every returned row is in biological scope by construction" },
+      { "source": "SMHI SHARK", "reason": "queried through the provider's own Phytoplankton datatype" },
+      { "source": "PANGAEA", "reason": "queried with the frozen biological and measurement terms" },
+      { "source": "PLET", "reason": "the Plankton Lifeform Extraction Tool catalogue is entirely plankton monitoring, and its dataset names are provider codes ('OSPAR_LLUR-SH_2010-2020') rather than descriptions. A keyword screen on such a name has no discriminative validity: it excluded DS17, a named register candidate for the German coastal Phaeocystis gap, while retaining DS18 only because that provider happened to append '_phyto'. Zooplankton-only PLET rows are therefore carried to Stage 2 record-level screening rather than dropped on a name." }
+    ]
+  },
+  "geographic_screen": {
+    "rule": "Record, never enforce, at dataset level. Only OBIS applied the frozen polygon server-side. Every other family returns catalogue metadata whose stated coverage cannot prove where the underlying records lie, so Stage 2 action 4 performs the record-level domain intersection.",
+    "match_against": ["title", "geographic_metadata"],
+    "states": [
+      "in_domain_by_server_side_query_geometry",
+      "dataset_metadata_matches_frozen_domain_terms",
+      "dataset_metadata_indicates_out_of_domain",
+      "dataset_metadata_lacks_domain_evidence"
+    ],
+    "in_domain_terms_source": "config/stage1_search_config.json geographic_scope.terms",
+    "out_of_domain_terms": [
+      "adriatic", "mediterran", "black sea", "caspian", "baltic proper", "gulf of bothnia",
+      "pacific", "antarctic", "southern ocean", "arctic ocean", "indian ocean", "caribbean",
+      "red sea", "south china", "gulf of mexico", "great lakes", "tasman", "yellow sea"
+    ]
+  },
+  "identity": {
+    "collection_doi_rule": "A DOI that one source attaches to more than one distinct normalized title is a collection DOI and is excluded from identity grouping. PLET publishes eight separate Marine Scotland series under 10.17031/1637; treating it as a dataset identity merged four distinct observatories into one family.",
+    "title_rule": "Case is folded before non-alphanumeric characters are stripped.",
+    "declared_unlinked": [
+      {
+        "relation": "PLET Cefas SmartBuoy 2001-2019 to Cefas Data Hub holdings 19624 (2001-2017) and 21250 (2018-2019)",
+        "reason": "One-to-many across time; the Cefas holdings API exposes no DOI. No dataset-level rule can express this without asserting a duplication that does not exist.",
+        "resolved_at": "Stage 2 record-level linkage"
+      }
+    ]
+  }
+}

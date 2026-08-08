@@ -31,8 +31,17 @@ test_that("protocol changes have accountable approval rather than role placehold
   expect_identical(names(register), required)
   expect_true(nrow(register) >= 5L)
   expect_false(anyNA(register[required]))
-  expect_true(all(register$approval_status == "approved"))
+  expect_true(all(register$approval_status %in% c("approved", "pending")))
+  # The register carries proposals for later stages once Stage 0 is frozen. Anything that
+  # touches a frozen Stage 0 decision must still be approved; a pending row may only
+  # affect stages that have not yet passed their gate.
+  stage_lists <- strsplit(register$affected_stages, "|", fixed = TRUE)
+  touches_stage_zero <- vapply(stage_lists, function(x) "0" %in% trimws(x), logical(1))
+  expect_true(all(register$approval_status[touches_stage_zero] == "approved"))
+  # A pending row must still name its decision maker and its proposal source, so an
+  # unapproved change can never be mistaken for a silently adopted one.
   expect_true(all(nzchar(trimws(register$approval_reference))))
+  expect_true(all(nzchar(trimws(register$decision_maker))))
   placeholder_pattern <- "principal investigator|core team|protocol review|pending|unknown|tbd|placeholder"
   expect_false(any(grepl(placeholder_pattern, register$decision_maker, ignore.case = TRUE)))
   expect_true(all(register$classification %in% c("prospective amendment", "sensitivity analysis", "protocol deviation")))

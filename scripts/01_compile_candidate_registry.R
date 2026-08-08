@@ -1,6 +1,7 @@
 # Compile evidence-linked Stage 1 dataset metadata from the pinned immutable search runs.
 
 source("R/01_search_helpers.R")
+source("R/01_registry_identity.R")
 required_namespace("jsonlite")
 verify_raw_data_target(0.01)
 
@@ -22,6 +23,16 @@ manifest_list <- lapply(active$search_run_id, function(id) {
 query_log <- do.call(rbind, manifest_list)
 utils::write.csv(query_log, "metadata/stage1_query_log.csv", row.names = FALSE, na = "")
 
+# Provider payloads are UTF-8, but this pipeline runs under the C locale, where R leaves such
+# strings marked "unknown". perl=TRUE matching then cannot translate any row carrying a non-ASCII
+# character (for example the NLWKN German provider names) and silently declines to match it, which
+# would let a known-item benchmark go unrecalled without any failure being raised.
+as_utf8 <- function(x) {
+  x <- as.character(x)
+  Encoding(x) <- "UTF-8"
+  x
+}
+
 scalar <- function(x, default = "") {
   if (is.null(x) || !length(x) || all(is.na(x))) return(default)
   value <- x[[1]]
@@ -29,7 +40,8 @@ scalar <- function(x, default = "") {
   as.character(value)
 }
 plain_text <- function(x) {
-  x <- gsub("<[^>]+>", " ", scalar(x), perl = TRUE)
+  x <- as_utf8(scalar(x))
+  x <- gsub("<[^>]+>", " ", x, perl = TRUE)
   x <- gsub("&amp;", "&", x, fixed = TRUE)
   x <- gsub("&quot;|&#34;", "\"", x, perl = TRUE)
   x <- gsub("&#39;|&apos;", "'", x, perl = TRUE)
@@ -44,10 +56,6 @@ extract_xml <- function(xml, tag) {
 join_values <- function(x) {
   if (is.null(x) || !length(x)) return("")
   trimws(paste(unique(as.character(unlist(x))), collapse = "; "))
-}
-norm_doi <- function(x) {
-  x <- tolower(trimws(x)); x <- sub("^https?://(dx\\.)?doi\\.org/", "", x); x <- sub("^doi:", "", x)
-  ifelse(grepl("^10\\.", x), x, "")
 }
 manifest_for <- function(run_id, filename_pattern = NULL, raw_path = NULL, prefer_label = NULL) {
   m <- query_log[query_log$search_run_id == run_id, , drop = FALSE]
@@ -97,13 +105,19 @@ run_id <- function(key) active$search_run_id[match(key, active$source_key)]
 
 # PLET publishes a complete HTML catalogue table with provider, dataset, access, and DOI.
 rid <- run_id("PLET"); ev <- manifest_for(rid, "catalogue\\.html$")
-html <- paste(readLines(file.path("data", "raw", ev$raw_response_path), warn = FALSE), collapse = "\n")
+html <- as_utf8(paste(readLines(file.path("data", "raw", ev$raw_response_path), warn = FALSE), collapse = "\n"))
 trs <- regmatches(html, gregexpr("(?s)<tr[^>]*>.*?</tr>", html, perl = TRUE))[[1]]
 for (tr in trs) {
   cells <- regmatches(tr, gregexpr("(?s)<td[^>]*>.*?</td>", tr, perl = TRUE))[[1]]
-  if (length(cells) != 5L || !grepl("doi.org", cells[[5]], fixed = TRUE)) next
+  # Accept every catalogue data row. Requiring a DOI cell here silently discarded seven real
+  # PLET datasets whose DOI column reads "No DOI", including the restricted German coastal
+  # series OSPAR_LLUR-SH_2010-2020 (DS17) and the public Environment Agency chlorophyll series.
+  # Restricted holdings are the least likely to carry a DOI and the most important to record,
+  # so a DOI filter biases discovery against exactly the gap-filling datasets the study needs.
+  if (length(cells) != 5L) next
   cells <- vapply(cells, plain_text, character(1))
   doi <- regmatches(cells[[5]], regexpr("10\\.[^[:space:]]+", cells[[5]], perl = TRUE))
+  if (!length(doi)) doi <- ""
   add(new_candidate(ev, cells[[3]], paste(cells[[1]], cells[[2]], cells[[3]], sep = ":"), cells[[3]],
     if (nzchar(doi)) paste0("https://doi.org/", doi) else "", geographic_metadata = cells[[1]],
     measurement_types = cells[[3]], taxonomic_content = cells[[3]], access_status = cells[[4]], license = "per underlying PLET dataset"))
@@ -236,45 +250,48 @@ rownames(registry) <- NULL
 
 # Conservative dataset-level screening: only clearly irrelevant catalogue rows are excluded here.
 cfg <- jsonlite::fromJSON("config/stage1_search_config.json", simplifyVector = FALSE)
-geo_terms <- tolower(unlist(cfg$geographic_scope$terms))
-geo_pattern <- paste(geo_terms, collapse = "|")
+rules <- stage1_screening_rules()
+geo_pattern <- stage1_pattern(cfg$geographic_scope$terms)
 
-bio_pattern <- "phytoplank|phaeocyst|diatom|dinoflag|coccolith|picoplank|nanophyt|microalga|chlorophyll|pigment|biovolume|flow cytometr|compeat|eutroph"
 scope_text <- tolower(paste(registry$title, registry$measurement_types, registry$taxonomic_content))
 geo_text <- tolower(paste(registry$title, registry$geographic_metadata))
 
-query_guaranteed <- registry$source %in% c("OBIS", "SMHI SHARK", "PANGAEA")
-gbif_relevant <- registry$source == "GBIF" & grepl(geo_pattern, geo_text, perl = TRUE)
-relevant <- query_guaranteed | gbif_relevant | grepl(bio_pattern, scope_text, perl = TRUE)
+scope_guaranteed <- vapply(rules$biological_scope$scope_guaranteed_sources, `[[`, character(1), "source")
+relevant <- registry$source %in% scope_guaranteed |
+  grepl(stage1_pattern(rules$biological_scope$terms), scope_text, perl = TRUE)
 
 conversion <- registry$provider_dataset_id == "PEG_BVOL_2025"
 registry$screening_status <- ifelse(conversion, "advanced_to_acquisition", ifelse(relevant, "pending", "excluded"))
 registry$exclusion_reason <- ifelse(registry$screening_status == "excluded", "outside_biological_scope_at_dataset_metadata_screen", "")
-registry$reviewer <- "automated_prespecified_metadata_screen; independent_scientific_review_pending"
+
+# Geography is recorded, not enforced, at dataset level. Only OBIS applies the frozen polygon
+# server-side; every other family returns catalogue metadata whose stated coverage cannot prove
+# where the underlying records lie. Stage 2 performs the record-level domain intersection, so
+# this column hands that step an explicit state per row instead of an undifferentiated backlog.
+registry$geographic_screen_state <- ifelse(
+  registry$source == "OBIS", "in_domain_by_server_side_query_geometry",
+  ifelse(grepl(geo_pattern, geo_text, perl = TRUE), "dataset_metadata_matches_frozen_domain_terms",
+    ifelse(grepl(stage1_pattern(rules$geographic_screen$out_of_domain_terms), geo_text, perl = TRUE),
+      "dataset_metadata_indicates_out_of_domain",
+      "dataset_metadata_lacks_domain_evidence")))
+
+review <- jsonlite::fromJSON("config/scientific_review.json", simplifyVector = FALSE)$stage1_search_strategy
+registry$reviewer <- sprintf("automated_prespecified_metadata_screen; %s by %s; independent_second_review_%s",
+  review$review_type, review$reviewer, review$independent_review$status)
 registry$decision_date <- "2026-08-08"
 
 # Link cross-catalogue duplicates and choose a deterministic provider-priority canonical record.
-dois <- norm_doi(registry$doi_or_stable_url)
-norm_titles <- tolower(gsub("[^a-z0-9]", "", registry$title))
-sb_pattern <- "smartbuoymarineobservationalnetworkukwatersphytoplanktondata"
-norm_titles[grepl(sb_pattern, norm_titles)] <- sb_pattern
+dois <- stage1_norm_doi(registry$doi_or_stable_url)
+norm_titles <- stage1_norm_title(registry$title)
+collection_dois <- stage1_collection_dois(registry$source, dois, norm_titles)
+identity_dois <- ifelse(dois %in% collection_dois, "", dois)
 
 registry_id <- paste(registry$source, registry$provider_dataset_id, sep = ":")
 priority_order <- c("SMHI SHARK", "PANGAEA", "Marine Scotland", "Cefas Data Hub/DASSH", "PLET", "OBIS", "GBIF", "EMODnet ERDDAP", "ICES Figshare", "ICES DOME")
 registry$canonical_provider_dataset_id <- registry_id
 registry$duplicate_catalogue_ids <- ""
 
-group_id <- seq_len(nrow(registry))
-for (doi in unique(dois[nzchar(dois)])) {
-  idx <- which(dois == doi)
-  min_g <- min(group_id[idx])
-  group_id[group_id %in% group_id[idx]] <- min_g
-}
-for (nt in unique(norm_titles[nzchar(norm_titles)])) {
-  idx <- which(norm_titles == nt)
-  min_g <- min(group_id[idx])
-  group_id[group_id %in% group_id[idx]] <- min_g
-}
+group_id <- stage1_identity_groups(identity_dois, norm_titles)
 
 for (g in unique(group_id)) {
   idx <- which(group_id == g)
@@ -289,8 +306,8 @@ for (g in unique(group_id)) {
 essential <- c("search_run_id", "source", "endpoint", "api_version", "query_hash_sha256", "execution_time_utc",
   "raw_response_path", "raw_response_checksum_sha256", "provider_dataset_id", "catalogue_id", "title",
   "doi_or_stable_url", "version", "geographic_metadata", "temporal_metadata", "measurement_types", "taxonomic_content",
-  "method_metadata", "access_status", "license", "screening_status", "exclusion_reason", "reviewer", "decision_date",
-  "duplicate_catalogue_ids", "canonical_provider_dataset_id", "related_identifier")
+  "method_metadata", "access_status", "license", "screening_status", "exclusion_reason", "geographic_screen_state",
+  "reviewer", "decision_date", "duplicate_catalogue_ids", "canonical_provider_dataset_id", "related_identifier")
 registry <- registry[, essential]
 if (any(!nzchar(registry$provider_dataset_id)) || any(!nzchar(registry$title)) || any(!nzchar(registry$raw_response_path)) ||
     any(!nzchar(registry$raw_response_checksum_sha256))) stop("Essential candidate evidence fields are incomplete.", call. = FALSE)
@@ -310,26 +327,57 @@ flow <- data.frame(
 utils::write.csv(flow, "metadata/stage1_search_flow.csv", row.names = FALSE)
 
 # Every benchmark is located by an explicit, auditable provider identifier or title/DOI pattern.
+#
+# The original set (DS02, DS04, DS05, DS06, DS07, DS08, DS10, DS16, DS24) tested only datasets the
+# search modules were built around, so it could not detect a systematic discovery failure. It is
+# extended here with the register's remaining load-bearing candidates: the offshore evidence base
+# (DS12 CPR), the restricted German coastal series (DS17, DS18), the second Wadden Sea sentinel
+# (DS09), the Dutch historical extension (DS03), the GBIF-only Dutch record (DS23), and the
+# external-transfer imaging series (DS26). DS17 was added because it exposed a real parser defect:
+# it was present in the archived PLET catalogue and silently dropped for having no DOI.
 benchmarks <- data.frame(
-  benchmark_id = c("DS02", "DS04", "DS05", "DS06", "DS07", "DS08", "DS10", "DS16", "DS24"),
-  description = c("RWS phytoplankton", "BSH phytoplankton", "NOVANA phytoplankton", "SMHI Kattegat/Skagerrak",
-                  "Cefas SmartBuoy", "Helgoland Roads", "VLIZ LifeWatch FlowCam", "Stonehaven Observatory", "OSPAR COMPEAT inputs"),
-  pattern = c("66f557fe4103f", "66f41f3f2a72e", "66f42801afddd", "10.17031/1633", "CefasDataHub.58",
-              "PANGAEA.960407", "956d618f-91dc-4930-a253-cdf80ddb9371|10.14284/760", "Stonehaven", "22189111"),
+  benchmark_id = c("DS02", "DS03", "DS04", "DS05", "DS06", "DS07", "DS08", "DS09", "DS10",
+                   "DS12", "DS16", "DS17", "DS18", "DS23", "DS24", "DS26"),
+  description = c("RWS phytoplankton", "Dutch long-term monitoring", "BSH phytoplankton",
+                  "NOVANA phytoplankton", "SMHI Kattegat/Skagerrak", "Cefas SmartBuoy",
+                  "Helgoland Roads", "Sylt Roads", "VLIZ LifeWatch FlowCam",
+                  "Continuous Plankton Recorder", "Stonehaven Observatory",
+                  "LLUR Schleswig-Holstein (restricted)", "NLWKN Lower Saxony (restricted)",
+                  "NIOZ Wadden Sea phytoplankton", "OSPAR COMPEAT inputs", "SMHI IFCB imaging"),
+  pattern = c("66f557fe4103f", "Dutch long term monitoring of phytoplankton", "66f41f3f2a72e",
+              "66f42801afddd", "10.17031/1633", "CefasDataHub.58",
+              "PANGAEA.960407", "Sylt Roads", "956d618f-91dc-4930-a253-cdf80ddb9371|10.14284/760",
+              "Continuous Plankton Recorder", "Stonehaven", "OSPAR_LLUR-SH", "OSPAR_NLWKN",
+              "okwkou|1d276c75-d90c-40c8-973d-2eac7c8089e5", "22189111",
+              "Imaging Flow Cytobot|IFCB"),
   stringsAsFactors = FALSE
 )
 recall_fields <- c("provider_dataset_id", "catalogue_id", "title", "doi_or_stable_url", "related_identifier")
 haystack <- apply(registry[, recall_fields, drop = FALSE], 1L, paste, collapse = " | ")
 recall_rows <- lapply(seq_len(nrow(benchmarks)), function(i) {
   idx <- which(grepl(benchmarks$pattern[[i]], haystack, ignore.case = TRUE, perl = TRUE))
-  if (!length(idx)) return(data.frame(benchmarks[i, ], found = FALSE, matched_source = "", matched_provider_dataset_id = "", raw_response_path = "", raw_response_checksum_sha256 = ""))
-  j <- idx[[1]]
+  if (!length(idx)) return(data.frame(benchmarks[i, ], found = FALSE, matched_source = "", matched_provider_dataset_id = "",
+    screening_status = "", canonical_provider_dataset_id = "", raw_response_path = "", raw_response_checksum_sha256 = ""))
+  # Prefer a match that survived screening, so the recall row reports the state the benchmark
+  # actually carries into Stage 2 rather than a same-pattern sibling such as a zooplankton series.
+  retained <- idx[registry$screening_status[idx] != "excluded"]
+  j <- if (length(retained)) retained[[1]] else idx[[1]]
   data.frame(benchmarks[i, ], found = TRUE, matched_source = registry$source[[j]], matched_provider_dataset_id = registry$provider_dataset_id[[j]],
+    screening_status = registry$screening_status[[j]], canonical_provider_dataset_id = registry$canonical_provider_dataset_id[[j]],
     raw_response_path = registry$raw_response_path[[j]], raw_response_checksum_sha256 = registry$raw_response_checksum_sha256[[j]])
 })
 recall <- do.call(rbind, recall_rows)
 utils::write.csv(recall, "metadata/stage1_known_item_recall.csv", row.names = FALSE)
 if (!all(recall$found)) stop(sprintf("Known-item recall failed: %s", paste(recall$benchmark_id[!recall$found], collapse = ", ")), call. = FALSE)
+
+# Recall alone does not prove a benchmark survived screening. A prespecified known item that is
+# present but excluded is a screening defect, and it must stop the build rather than be reported
+# as a successful recall.
+dropped <- recall$benchmark_id[recall$screening_status == "excluded"]
+if (length(dropped)) {
+  stop(sprintf("Prespecified benchmarks were recalled but excluded by the metadata screen: %s",
+    paste(dropped, collapse = ", ")), call. = FALSE)
+}
 
 message(sprintf("Compiled %d unique catalogue records from %d identified query hits; all %d benchmarks recalled.",
   nrow(registry), nrow(identified), nrow(recall)))
