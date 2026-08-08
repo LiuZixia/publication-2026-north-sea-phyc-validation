@@ -14,7 +14,9 @@ run_step <- function(script) {
 # Every generated Stage 1 artefact must reproduce byte-for-byte from the same pinned responses.
 tracked <- c("metadata/candidate_registry.csv", "metadata/stage1_known_item_recall.csv",
              "metadata/stage1_ds_crosswalk.csv", "metadata/stage1_acquisition_shortlist.csv",
-             "metadata/stage1_unavailable_candidates.csv")
+             "metadata/stage1_unavailable_candidates.csv", "metadata/stage1_query_log.csv",
+             "metadata/stage1_emodnet_wfs_overlap.csv",
+             "metadata/stage1_emodnet_wfs_overlap_summary.csv")
 missing <- tracked[!file.exists(tracked)]
 if (length(missing)) stop(sprintf("Generate Stage 1 artefacts before validation: %s", paste(missing, collapse = ", ")), call. = FALSE)
 before <- vapply(tracked, calculate_checksum, character(1))

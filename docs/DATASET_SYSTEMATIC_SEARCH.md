@@ -325,7 +325,7 @@ All remaining URLs cited in §12.2–§12.4 are `search_summary_only` and are li
 
 ## 13. Executed Stage 1 Search — 2026-08-08
 
-Stage 1 has now been reproducibly executed against the frozen configuration in [`config/stage1_search_config.json`](../config/stage1_search_config.json). The executable modules cover PLET, ICES DOME, EMODnet ERDDAP, OBIS, SMHI SHARK, PANGAEA, GBIF, Marine Scotland DKAN, Cefas Data Hub/DASSH, and ICES Figshare. The successful immutable runs are pinned in [`metadata/stage1_active_runs.csv`](../metadata/stage1_active_runs.csv); abandoned preflight and diagnosed provider-behaviour runs remain immutable but are not used by the compiler.
+Stage 1 has now been reproducibly executed against the frozen configuration in [`config/stage1_search_config.json`](../config/stage1_search_config.json). The initial executable modules cover PLET, ICES DOME, EMODnet ERDDAP, OBIS, SMHI SHARK, PANGAEA, GBIF, Marine Scotland DKAN, Cefas Data Hub/DASSH, and ICES Figshare. Their successful immutable runs are pinned in [`metadata/stage1_active_runs.csv`](../metadata/stage1_active_runs.csv). The later direct EMODnet Biology WFS audit is a separately configured, append-only update pinned in [`metadata/stage1_append_runs.csv`](../metadata/stage1_append_runs.csv), so the checksum provenance of the initial ten runs remains unchanged. Abandoned preflight and diagnosed provider-behaviour runs remain immutable but are not used by the compiler.
 
 The following generated artifacts, rather than the narrative discovery totals in §§1 and 12, are the current Stage 1 evidence:
 
@@ -333,7 +333,7 @@ The following generated artifacts, rather than the narrative discovery totals in
 - [`metadata/candidate_registry.csv`](../metadata/candidate_registry.csv): dataset-level discovery metadata linked to raw evidence, conservative screening states, and duplicate/canonical links;
 - [`metadata/stage1_known_item_recall.csv`](../metadata/stage1_known_item_recall.csv): evidence-backed recall of every prespecified benchmark;
 - [`metadata/stage1_search_flow.csv`](../metadata/stage1_search_flow.csv): calculated identification, duplicate, screening, exclusion, pending, and acquisition totals; and
-- `outputs/logs/stage1_validation_20260808T083225Z.log`: deterministic-regeneration checksum, complete test result, R version, package versions, and session information.
+- the latest `outputs/logs/stage1_validation_*.log`: deterministic-regeneration checksums, complete test results, R version, package versions, and session information.
 
 The DS22 Figshare page was not treated as the conversion table itself. The official ICES-hosted `PEG_BVOL` ZIP was downloaded by the Figshare/ICES module, archive-validated, checksummed, and registered as the one Stage 1 item advanced to acquisition. Dataset-level `pending` does not mean eligible for analysis: access, licences, recurrence, methods, record schemas, geographic intersection, and duplicate observations remain Stage 2 decisions. The unavailable second scientific review is explicitly recorded as pending in the frozen configuration and is not represented as approval.
 
@@ -357,12 +357,26 @@ An independent audit against `STAGED_WORK_PLAN.md` §4 found that the executed s
 Stage 1 previously reported one dataset advanced to acquisition — the DS22 conversion authority — against 8,060 undifferentiated pending rows. That is a compliant count and an unusable handoff. Three generated artefacts now bridge the narrative register and the executed search:
 
 - [`metadata/stage1_ds_crosswalk.csv`](../metadata/stage1_ds_crosswalk.csv): every DS01–DS34 entry resolved against archived evidence, with the resolution pattern, retained rows, canonical families, and geographic-screen states;
-- [`metadata/stage1_acquisition_shortlist.csv`](../metadata/stage1_acquisition_shortlist.csv): 22 named datasets ranked by declared reference tier, domain position, access feasibility, and CMEMS-era overlap, with the weights recorded in `config/ds_register_crosswalk.json`;
-- [`metadata/provider_access_requests.csv`](../metadata/provider_access_requests.csv): the seven contact-only requests, each with what it blocks, a follow-up date, a decision deadline, and the scope reduction that applies if it is refused.
+- [`metadata/stage1_acquisition_shortlist.csv`](../metadata/stage1_acquisition_shortlist.csv): 19 named datasets ranked by declared reference tier, domain position, access feasibility, and CMEMS-era overlap, with the weights recorded in `config/ds_register_crosswalk.json`;
+- [`metadata/provider_access_requests.csv`](../metadata/provider_access_requests.csv): seven provider requests, each with its present availability treatment, the consequence already applied, and the trigger that would re-admit the dataset. Requests carry no decision deadline.
 
-Thirty-one of thirty-four register entries resolved. The three that did not are DS21 (reported unreleased by its publisher, consistent with §6.3), DS31 and DS33 (excluded-by-decision entries that were never searched for). None is a discovery failure.
+Thirty of thirty-four register entries resolved. The four without retained registry evidence are DS20 and DS21 (diagnosed as unavailable) and DS31 and DS33 (excluded-by-decision entries that were never searched for). None is an undiagnosed discovery failure.
 
 **Two findings bear on feasibility and are recorded here before any PhyC value is inspected.**
 
-1. **The offshore gap in §12.5.2 is now empirically supported, not merely predicted.** DS19, the Norwegian IMR North Sea Ecosystem Survey, resolves to a single registry row that does not survive screening. Together with DS12 (CPR, contact-only) and DS20 (contact-only), the offshore central and northern North Sea has no retained candidate of any tier in the executed search. Whether those subregions are analysable at all now depends entirely on the DS12 and DS19 access requests.
-2. **The Tier A base is two datasets, and neither is straightforwardly usable.** DS08 is a single German Bight coastal station whose carbon-resolved years are under moratorium; DS06 lies in the external-transfer region by the Stage 0 assignment. The confirmatory analysis is therefore expected to rest on Tier C abundance-to-carbon conversion through the pinned DS22 `PEG_BVOL` file, and §9.7's warning that conversion uncertainty may dominate apparent model error becomes a prespecified result rather than a caveat. `STAGED_WORK_PLAN.md` Stage 5 action 10 and Stage 10 now carry the lower, central, and upper conversion series through to the reported metrics.
+1. **Offshore evidence remains low tier.** DS12 CPR is openly reachable through OBIS/EurOBIS and keeps the offshore arm alive at Tier D/E; DS19 and DS20 provide no usable route. Whether each offshore subregion is analysable remains a Stage 4 observation-adequacy decision.
+2. **The usable direct-carbon base is DS06 alone, in the external-transfer region.** DS08's carbon and biovolume children require author contact and are unavailable under the frozen access policy; its open abundance children remain a Tier C sentinel. The confirmatory analysis is therefore expected to rest on abundance-to-carbon conversion through the pinned DS22 `PEG_BVOL` file. `STAGED_WORK_PLAN.md` Stage 5 action 10 and Stage 10 carry lower, central, and upper conversion series through to the reported metrics.
+
+### 13.3 Append-only EMODnet Biology WFS audit — 2026-08-08
+
+The initial execution searched EMODnet ERDDAP and OBIS but did not directly query the official EMODnet Biology Dataportal WFS named in §3.1. That omission is now closed by `scripts/00_downloads/02_search_emodnet_biology_wfs.R` against `https://geo.vliz.be/geoserver/Dataportal/wfs`. The update is frozen separately in `config/stage1_emodnet_biology_wfs_append.json`. It archives `GetCapabilities`, the `Dataportal:eurobis` occurrence schema, the `Dataportal:eurobis_datasets` inventory schema, and every page of the complete dataset inventory. The pinned run reports 1,517 unique provider dataset IDs across two terminally reconciled catalogue pages.
+
+The comparison is generated rather than narrated by hand:
+
+- [`metadata/stage1_emodnet_wfs_overlap.csv`](../metadata/stage1_emodnet_wfs_overlap.csv) records every WFS dataset ID, its normalized title, exact-title matches to earlier catalogues and to OBIS specifically, biological-title screening, and disposition;
+- [`metadata/stage1_emodnet_wfs_overlap_summary.csv`](../metadata/stage1_emodnet_wfs_overlap_summary.csv) calculates the audit totals; and
+- the WFS rows enter [`metadata/candidate_registry.csv`](../metadata/candidate_registry.csv), so unmatched candidates cannot disappear from the Stage 2 handoff.
+
+The complete inventory contains 247 exact normalized-title matches to any previously archived catalogue, including 137 to OBIS. Of 161 titles passing the permissive biological screen, 40 have no exact-title match to an earlier catalogue. This rejects the strong claim that OBIS/EurOBIS demonstrably contains every WFS holding under identical dataset titles. It does **not** establish 40 new North Sea datasets: 18 of those titles explicitly indicate out-of-domain waters and 22 contain no dataset-level geographic evidence; none names a frozen North Sea geography. Exact-title matching is deliberately conservative, so near-title duplicates remain unresolved rather than being asserted identical.
+
+All 40 are retained as `pending` candidates for Stage 2 record-level geometry and provenance screening. They add no demonstrated in-domain holding, no new narrative-register entry, and no new acquisition-shortlist row. Rebuilding the DS01–DS34 crosswalk preserves 30/34 resolution, the same 19-item shortlist, and the same rank order; WFS catalogue copies add provenance to several existing entries. Access is classified once per canonical dataset family, preventing an unlicensed aggregator metadata copy from downgrading an openly licensed provider archive.

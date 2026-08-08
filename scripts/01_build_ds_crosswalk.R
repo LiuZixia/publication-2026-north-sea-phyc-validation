@@ -25,6 +25,7 @@ rank_of <- function(table, key, label) {
 
 search_fields <- c("provider_dataset_id", "catalogue_id", "title", "doi_or_stable_url", "related_identifier")
 haystack <- apply(registry[, search_fields, drop = FALSE], 1L, paste, collapse = " | ")
+registry_id <- paste(registry$source, registry$provider_dataset_id, sep = ":")
 
 rows <- lapply(spec$entries, function(e) {
   target <- if (identical(e$match_field, "source")) registry$source else haystack
@@ -37,7 +38,18 @@ rows <- lapply(spec$entries, function(e) {
   # register's claim. The register calls DS08 a public-then-request dataset; the archive shows
   # that all 28 of its carbon and all 24 of its biovolume children state an unknown licence
   # requiring author contact, while only its abundance children are CC-BY.
-  access_class <- stage1_access_class(registry$license[retained], registry$access_status[retained])
+  # Catalogue duplicates are discovery evidence, not additional acquisition routes. Classify
+  # access once per canonical dataset family using the provider-priority representative; an
+  # unlicensed WFS metadata copy must not downgrade an openly licensed provider or OBIS archive.
+  canonical <- unique(registry$canonical_provider_dataset_id[retained])
+  access_idx <- match(canonical, registry_id)
+  missing_canonical <- is.na(access_idx)
+  if (any(missing_canonical)) {
+    access_idx[missing_canonical] <- vapply(canonical[missing_canonical], function(id) {
+      retained[match(id, registry$canonical_provider_dataset_id[retained])]
+    }, integer(1))
+  }
+  access_class <- stage1_access_class(registry$license[access_idx], registry$access_status[access_idx])
   availability <- stage1_availability(access_class)
 
   tier_rank <- rank_of(spec$ranking$tier_rank, e$tier, "tier")

@@ -14,6 +14,8 @@ stage,action,requirement,test_file,test_name,coverage
 1,10,Register the taxon-to-carbon conversion authority as a versioned checksummed acquisition,tests/test_stage1_search.R,DS22 is the actual validated and pinned PEG_BVOL file,automated
 1,11,Generate search-flow totals from the candidate registry,tests/test_stage1_search.R,search-flow counts are generated and exactly reproducible,automated
 1,12,Append later searches as new dated search_run_id values,tests/test_stage1_search.R,one complete active run is pinned for every required source family,automated
+1,12,Directly audit the EMODnet Biology WFS route as a separately configured append-only run,tests/test_stage1_search.R,the direct EMODnet Biology WFS update is append-only and complete,automated
+1,12,Diagnose overlap between the direct EMODnet Biology inventory and prior archived catalogues,tests/test_stage1_search.R,the direct EMODnet WFS inventory has an explicit overlap diagnosis,automated
 1,13,Resolve every register entry against the executed search and rank the acquisition shortlist,tests/test_stage1_search.R,every register entry resolves to archived evidence or is diagnosed,automated
 1,14,Treat contact-required datasets as unavailable and record the consequence applied now,tests/test_stage1_search.R,contact-required datasets are excluded from acquisition and their consequence is recorded,automated
 1,quality,Repeating the query against the archived response produces the same registry rows,scripts/01_validate_stage1.R,deterministic rebuild checksum comparison,automated

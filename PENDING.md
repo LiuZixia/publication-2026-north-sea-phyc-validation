@@ -1,33 +1,30 @@
 # Pending
 
-- **Updated (UTC):** 2026-08-08T16:12:29Z
-- **Current stage:** Stage 1 complete and accepted. Stage 2 ready to begin. Do not begin CMEMS acquisition or PhyC inspection.
+- **Updated (UTC):** 2026-08-08T17:02:45Z
+- **Current stage:** Stage 1 complete and committed with a direct EMODnet Biology WFS append audit. Stage 2 is ready to begin. Do not begin CMEMS acquisition or PhyC inspection.
 
 ## Current Audit
 
-All five principal-investigator decisions of 2026-08-08 are implemented and frozen. The protocol-change register carries no pending rows. Everything automatable passes and reproduces byte-for-byte.
+All five principal-investigator decisions of 2026-08-08 are implemented and frozen. The protocol-change register carries no pending rows. Everything automatable passes and reproduces byte-for-byte. The initial checkpoint and the separate EMODnet closure are committed.
 
 ## Needs You — but nothing is blocked on it
 
 1. **Send the seven request drafts** in [`docs/access_requests/DRAFT_EMAILS.md`](docs/access_requests/DRAFT_EMAILS.md). Fill in name, affiliation, and email, confirm each provider's current address, and record the date in `sent_utc` in `metadata/provider_access_requests.csv`. Nothing waits on a reply: under the frozen access policy each dataset is already treated as unavailable and its consequence is already applied. A reply re-admits the dataset as a dated addition to the change register.
-2. **Review the pre-existing uncommitted changes** to `docs/DATASET_SYSTEMATIC_SEARCH.md`, `docs/STAGED_WORK_PLAN.md`, and the rewrite of `scripts/00_downloads/01_search_emodnet_erddap.R`, which predate this session. Then commit.
-3. **Identify an independent second scientific reviewer once preliminary results exist.** Recorded as deferred in `config/scientific_review.json` with a hard requirement to complete before the Stage 7 manifest freeze. The exclusions most needing a second reader are the 18,503 rows excluded on one reason code and the access-driven scope reductions.
+2. **Identify an independent second scientific reviewer once preliminary results exist.** Recorded as deferred in `config/scientific_review.json` with a hard requirement to complete before the Stage 7 manifest freeze. The broad biological exclusions and access-driven scope reductions most need a second reader.
 
 ## First Priority
 
-**Create a clean, validated Stage 1 checkpoint commit before any further network acquisition.**
+**Freeze the Stage 2 record-level screening contract before downloading shortlist observations.**
 
-Completion evidence: all required Stage 1 files and tracking archives are committed and `scratch.R` is excluded. The complete Stage 1 validation has passed immediately before staging, with log `outputs/logs/stage1_validation_20260808T161209Z.log`.
+Completion evidence: a versioned schema and executable assertions define record keys, required provider fields, units, licence state, immutable raw provenance, geographic intersection, duplicate linkage, and explicit disposition of the 40 unmatched WFS candidates.
 
 ## Ordered Next Actions
 
-1. Commit the validated Stage 1 checkpoint: include all required timestamped tracking archives and exclude the removed `scratch.R` diagnostic.
-2. Before Stage 2, append a direct EMODnet Biology occurrence-WFS search run using the official `Dataportal:eurobis` route; compare its dataset identifiers/holdings with archived OBIS/EurOBIS evidence and rerun the crosswalk and ranking.
-3. Commit the EMODnet closure result separately, whether it demonstrates no new holdings or changes the shortlist.
-4. Freeze the Stage 2 record-level screening contract, then acquire in shortlist rank order beginning DS06, DS26, DS02, DS04, DS05, and DS07.
-5. For DS08, acquire the 128 open-licence abundance children only; the 289 contact-required carbon and biovolume children are out of scope.
-6. Record a `licence_state` per acquired file, so shortlist entries flagged `resolve_licence_before_stage7_manifest_freeze` cannot reach the confirmatory manifest unresolved.
-7. Link the PLET-to-Cefas SmartBuoy relationship at record level; it is one-to-many across time and intentionally unlinked at Stage 1.
+1. Freeze the Stage 2 record-level screening contract. It must explicitly resolve the 40 unmatched biological-title WFS candidates: 18 title-diagnosed out of domain and 22 with unknown dataset-level geography.
+2. Acquire in shortlist rank order beginning DS06, DS26, DS02, DS04, DS05, and DS07.
+3. For DS08, acquire the 128 open-licence abundance children only; the 289 contact-required carbon and biovolume children are out of scope.
+4. Record a `licence_state` per acquired file, so shortlist entries flagged `resolve_licence_before_stage7_manifest_freeze` cannot reach the confirmatory manifest unresolved.
+5. Link the PLET-to-Cefas SmartBuoy relationship at record level; it is one-to-many across time and intentionally unlinked at Stage 1.
 
 ## Blockers, Warnings, and Scientific Risks
 
@@ -36,10 +33,11 @@ Completion evidence: all required Stage 1 files and tracking archives are commit
 - **Offshore coverage rests on one Tier D/E source.** DS12 CPR through its open OBIS route is the only offshore evidence; DS19 and DS20 yielded no usable route. CPR silk retention makes it semi-quantitative for most phytoplankton, so offshore conclusions will be weaker than coastal ones by construction, not by chance.
 - **The transition region depends on a single provider.** DS06 and DS26 are both SMHI holdings, so "two independent networks" cannot be claimed there.
 - **The German coastal sector lost two of three sources.** DS17 and DS18 are contact-required, leaving DS04. This is the sector where *Phaeocystis* blooms recur.
-- The 8,060 `pending` catalogue rows are neither eligible nor independent datasets. The shortlist, not that number, is the Stage 2 handoff.
+- The registry's `pending` catalogue rows are neither eligible nor independent datasets. The shortlist, not that count, is the Stage 2 acquisition work order.
 - GBIF lacks a spatial dataset filter; 341 rows positively indicate out-of-domain water and 5,492 carry no domain evidence. Record-level geographic screening is mandatory at Stage 2.
 - DS20's crosswalk pattern previously matched an ICES report rather than data; it now resolves to nothing. Stage 2 must treat any resolution as provisional until a record schema is inspected.
-- Nine EMODnet ERDDAP queries returned HTTP 404, that server's zero-results response, undocumented in the frozen strategy. EMODnet Biology's databox route was never queried directly; OBIS/EurOBIS very likely covers the same holdings, but that is assumed rather than demonstrated.
+- Nine EMODnet ERDDAP queries returned HTTP 404, that server's zero-results response, undocumented in the frozen initial strategy.
+- The direct WFS audit rejects a blanket identical-title assumption: 40 biologically named datasets have no exact prior-catalogue title match. None provides affirmative North Sea evidence at dataset-title level. They are not acquisition-ready and require record-level geometry and duplicate screening in Stage 2.
 - Abandoned preflight raw runs are immutable, excluded by the active-run registry, and must not be reused silently.
 
 ## Deferred or Out of Scope

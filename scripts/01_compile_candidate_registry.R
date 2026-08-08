@@ -12,12 +12,39 @@ if (!setequal(active$source_key, expected_keys) || anyDuplicated(active$source_k
   stop("Active-run registry must pin exactly one successful run for every required source key.", call. = FALSE)
 }
 
-manifest_list <- lapply(active$search_run_id, function(id) {
+# Later searches are append-only updates with their own frozen configuration. They are pinned in a
+# separate registry so the ten-run initial execution and the checksum embedded in those summaries
+# remain unchanged and auditable.
+append_path <- "metadata/stage1_append_runs.csv"
+append <- if (file.exists(append_path)) {
+  utils::read.csv(append_path, stringsAsFactors = FALSE, check.names = FALSE)
+} else {
+  data.frame(source_key = character(), search_run_id = character(), configuration_path = character(),
+             stringsAsFactors = FALSE)
+}
+if (nrow(append)) {
+  if (!identical(names(append), c("source_key", "search_run_id", "configuration_path")) ||
+      any(!append$source_key %in% "EMODNET_BIOLOGY_WFS") || anyDuplicated(append$search_run_id) ||
+      any(!file.exists(append$configuration_path))) {
+    stop("Stage 1 append-run registry is malformed or references an unsupported update.", call. = FALSE)
+  }
+}
+runs <- rbind(
+  data.frame(active, configuration_path = "config/stage1_search_config.json", stringsAsFactors = FALSE),
+  append
+)
+
+manifest_list <- lapply(seq_len(nrow(runs)), function(i) {
+  id <- runs$search_run_id[[i]]
   path <- file.path("data", "raw", "search_runs", id, "manifest.csv")
   summary_path <- file.path("data", "raw", "search_runs", id, "run_summary.json")
   if (!file.exists(path) || !file.exists(summary_path)) stop(sprintf("Missing completed manifest for %s.", id), call. = FALSE)
   summary <- jsonlite::fromJSON(summary_path, simplifyVector = FALSE)
   if (!identical(summary$status, "complete") || !isTRUE(summary$pagination_complete)) stop(sprintf("Run is not complete: %s", id), call. = FALSE)
+  if (!identical(summary$configuration_path, runs$configuration_path[[i]]) ||
+      !identical(summary$configuration_checksum_sha256, calculate_checksum(runs$configuration_path[[i]]))) {
+    stop(sprintf("Search configuration provenance mismatch for %s.", id), call. = FALSE)
+  }
   utils::read.csv(path, stringsAsFactors = FALSE, check.names = FALSE)
 })
 query_log <- do.call(rbind, manifest_list)
@@ -145,6 +172,33 @@ for (ev_i in which(query_log$search_run_id == rid & query_log$http_status == 200
   }
 }
 
+# The direct Dataportal WFS append retrieves the complete EurOBIS dataset inventory. It is not
+# assumed to be biologically or geographically in scope: names are screened locally below, and
+# every unmatched relevant title remains visible as a new candidate.
+if (nrow(append)) {
+  for (rid in append$search_run_id[append$source_key == "EMODNET_BIOLOGY_WFS"]) {
+    for (ev_i in which(query_log$search_run_id == rid & grepl("dataset_catalogue_page_", query_log$raw_response_path))) {
+      ev <- query_log[ev_i, , drop = FALSE]
+      x <- jsonlite::fromJSON(file.path("data", "raw", ev$raw_response_path), simplifyVector = FALSE)
+      for (feature in x$features) {
+        z <- feature$properties
+        id <- scalar(z$id)
+        stable_url <- build_query_url(ev$endpoint, c(
+          service = "WFS", version = "2.0.0", request = "GetFeature",
+          typeNames = "Dataportal:eurobis_datasets", outputFormat = "application/json",
+          CQL_FILTER = paste0("id=", id)
+        ))
+        add(new_candidate(ev, id, paste0("EurOBIS-WFS:", id), z$name, stable_url,
+          geographic_metadata = "Complete EurOBIS dataset inventory; record-level coverage not asserted",
+          measurement_types = z$name, taxonomic_content = z$name,
+          method_metadata = "Dataportal:eurobis_datasets WFS inventory; occurrence schema archived in the same run",
+          access_status = "public EMODnet Biology WFS metadata", license = ev$license,
+          related_identifier = paste0("EurOBIS dataset id ", id)))
+      }
+    }
+  }
+}
+
 # OBIS applies the frozen polygon server-side and returns dataset metadata in one response per clade.
 rid <- run_id("OBIS")
 for (ev_i in which(query_log$search_run_id == rid)) {
@@ -260,6 +314,48 @@ scope_guaranteed <- vapply(rules$biological_scope$scope_guaranteed_sources, `[[`
 relevant <- registry$source %in% scope_guaranteed |
   grepl(stage1_pattern(rules$biological_scope$terms), scope_text, perl = TRUE)
 
+# Demonstrate rather than assume the relationship between the direct WFS inventory and the
+# previously searched catalogues. Exact normalized-title equality is conservative: it records
+# positive overlap without claiming that similarly named holdings are identical.
+wfs_idx <- which(registry$source == "EMODnet Biology WFS")
+other_idx <- which(registry$source != "EMODnet Biology WFS")
+if (length(wfs_idx)) {
+  normalized <- stage1_norm_title(registry$title)
+  existing_by_title <- split(other_idx[nzchar(normalized[other_idx])], normalized[other_idx][nzchar(normalized[other_idx])])
+  overlap_rows <- lapply(wfs_idx, function(i) {
+    matches <- existing_by_title[[normalized[[i]]]]
+    if (is.null(matches)) matches <- integer()
+    obis_matches <- matches[registry$source[matches] == "OBIS"]
+    data.frame(
+      search_run_id = registry$search_run_id[[i]],
+      wfs_dataset_id = registry$provider_dataset_id[[i]],
+      wfs_dataset_name = registry$title[[i]],
+      normalized_title = normalized[[i]],
+      exact_title_match_existing = length(matches) > 0L,
+      exact_title_match_obis = length(obis_matches) > 0L,
+      matched_existing_sources = paste(sort(unique(registry$source[matches])), collapse = ";"),
+      matched_existing_provider_ids = paste(sort(unique(registry$provider_dataset_id[matches])), collapse = ";"),
+      biological_title_match = relevant[[i]],
+      disposition = if (length(matches)) "catalogue_overlap_demonstrated" else if (relevant[[i]])
+        "new_title_candidate_retained" else "unmatched_outside_biological_scope_at_dataset_metadata_screen",
+      stringsAsFactors = FALSE
+    )
+  })
+  overlap <- do.call(rbind, overlap_rows)
+  utils::write.csv(overlap, "metadata/stage1_emodnet_wfs_overlap.csv", row.names = FALSE, na = "")
+  overlap_summary <- data.frame(
+    metric = c("wfs_dataset_inventory_rows", "exact_title_matches_any_archived_catalogue",
+               "exact_title_matches_obis", "biological_title_candidates",
+               "unmatched_biological_title_candidates"),
+    count = c(nrow(overlap), sum(overlap$exact_title_match_existing), sum(overlap$exact_title_match_obis),
+              sum(overlap$biological_title_match),
+              sum(overlap$biological_title_match & !overlap$exact_title_match_existing)),
+    generated_from = "pinned Dataportal:eurobis_datasets WFS responses and normalized titles in the Stage 1 registry",
+    stringsAsFactors = FALSE
+  )
+  utils::write.csv(overlap_summary, "metadata/stage1_emodnet_wfs_overlap_summary.csv", row.names = FALSE)
+}
+
 conversion <- registry$provider_dataset_id == "PEG_BVOL_2025"
 registry$screening_status <- ifelse(conversion, "advanced_to_acquisition", ifelse(relevant, "pending", "excluded"))
 registry$exclusion_reason <- ifelse(registry$screening_status == "excluded", "outside_biological_scope_at_dataset_metadata_screen", "")
@@ -287,7 +383,8 @@ collection_dois <- stage1_collection_dois(registry$source, dois, norm_titles)
 identity_dois <- ifelse(dois %in% collection_dois, "", dois)
 
 registry_id <- paste(registry$source, registry$provider_dataset_id, sep = ":")
-priority_order <- c("SMHI SHARK", "PANGAEA", "Marine Scotland", "Cefas Data Hub/DASSH", "PLET", "OBIS", "GBIF", "EMODnet ERDDAP", "ICES Figshare", "ICES DOME")
+priority_order <- c("SMHI SHARK", "PANGAEA", "Marine Scotland", "Cefas Data Hub/DASSH", "PLET", "OBIS",
+                    "EMODnet Biology WFS", "GBIF", "EMODnet ERDDAP", "ICES Figshare", "ICES DOME")
 registry$canonical_provider_dataset_id <- registry_id
 registry$duplicate_catalogue_ids <- ""
 
@@ -358,10 +455,13 @@ recall_rows <- lapply(seq_len(nrow(benchmarks)), function(i) {
   idx <- which(grepl(benchmarks$pattern[[i]], haystack, ignore.case = TRUE, perl = TRUE))
   if (!length(idx)) return(data.frame(benchmarks[i, ], found = FALSE, matched_source = "", matched_provider_dataset_id = "",
     screening_status = "", canonical_provider_dataset_id = "", raw_response_path = "", raw_response_checksum_sha256 = ""))
-  # Prefer a match that survived screening, so the recall row reports the state the benchmark
-  # actually carries into Stage 2 rather than a same-pattern sibling such as a zooplankton series.
+  # Prefer a match that survived screening and was present in the initial execution. An
+  # append-only aggregator audit must not replace the benchmark evidence already pinned before
+  # the update merely because its rows were parsed earlier in this build.
   retained <- idx[registry$screening_status[idx] != "excluded"]
-  j <- if (length(retained)) retained[[1]] else idx[[1]]
+  candidates <- if (length(retained)) retained else idx
+  initial_candidates <- candidates[registry$source[candidates] != "EMODnet Biology WFS"]
+  j <- if (length(initial_candidates)) initial_candidates[[1]] else candidates[[1]]
   data.frame(benchmarks[i, ], found = TRUE, matched_source = registry$source[[j]], matched_provider_dataset_id = registry$provider_dataset_id[[j]],
     screening_status = registry$screening_status[[j]], canonical_provider_dataset_id = registry$canonical_provider_dataset_id[[j]],
     raw_response_path = registry$raw_response_path[[j]], raw_response_checksum_sha256 = registry$raw_response_checksum_sha256[[j]])

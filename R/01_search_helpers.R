@@ -101,9 +101,13 @@ artifact_row <- function(run, source_family, provider, api_version, license, met
 }
 
 write_search_manifest <- function(run, rows, provider_total, unique_provider_records,
-                                  pagination_complete, notes = "") {
+                                  pagination_complete, notes = "",
+                                  configuration_path = "config/stage1_search_config.json") {
   required_namespace("jsonlite")
   if (!is.data.frame(rows) || !nrow(rows)) stop("Cannot write an empty search manifest.", call. = FALSE)
+  if (!file.exists(configuration_path)) {
+    stop(sprintf("Missing search configuration: %s", configuration_path), call. = FALSE)
+  }
   manifest_path <- file.path(run$path, "manifest.csv")
   utils::write.csv(rows, manifest_path, row.names = FALSE, na = "")
   summary <- list(
@@ -112,8 +116,8 @@ write_search_manifest <- function(run, rows, provider_total, unique_provider_rec
     source_family = unique(rows$source_family),
     started_utc = run$started_utc,
     completed_utc = stage1_now(),
-    configuration_path = "config/stage1_search_config.json",
-    configuration_checksum_sha256 = calculate_checksum("config/stage1_search_config.json"),
+    configuration_path = configuration_path,
+    configuration_checksum_sha256 = calculate_checksum(configuration_path),
     artifact_count = nrow(rows),
     records_identified_within_queries = sum(rows$records_returned),
     provider_total = as.integer(provider_total),

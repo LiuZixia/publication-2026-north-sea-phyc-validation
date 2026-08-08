@@ -1,0 +1,23 @@
+{
+  "schema_version": "1.0.0",
+  "frozen_at_utc": "2026-08-08T16:18:00Z",
+  "classification": "append_only_stage1_search_update",
+  "protocol_source": "docs/DATASET_SYSTEMATIC_SEARCH.md sections 3.1, 7, and 11",
+  "reason": "The initial Stage 1 execution searched EMODnet ERDDAP and OBIS but did not directly query the official EMODnet Biology Dataportal WFS route.",
+  "endpoint": "https://geo.vliz.be/geoserver/Dataportal/wfs",
+  "service": "WFS",
+  "version": "2.0.0",
+  "inventory_layer": "Dataportal:eurobis_datasets",
+  "occurrence_layer": "Dataportal:eurobis",
+  "strategy": "Archive GetCapabilities and both feature schemas, then exhaust the complete eurobis_datasets inventory in deterministic pages of 1000 records. Screen the full inventory locally with the separately versioned Stage 1 rules and compare normalized dataset titles against every previously archived catalogue family.",
+  "filters": [
+    "None: retrieve the complete eurobis_datasets layer",
+    "No occurrence-level biological or geographic filter is applied at Stage 1"
+  ],
+  "expected_inventory_fields": ["_id", "id", "name"],
+  "page_size": 1000,
+  "geographic_scope_wgs84": [-5.0, 48.0, 13.06914, 62.0],
+  "screening_rules_path": "config/screening_rules.json",
+  "comparison_rule": "Exact normalized-title equality is evidence of catalogue overlap; unmatched rows remain explicit and biologically relevant unmatched titles enter the candidate registry.",
+  "license": "EMODnet metadata; terms per underlying EurOBIS dataset"
+}

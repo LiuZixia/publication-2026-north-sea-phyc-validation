@@ -1,0 +1,6 @@
+"metric","count","generated_from"
+"wfs_dataset_inventory_rows",1517,"pinned Dataportal:eurobis_datasets WFS responses and normalized titles in the Stage 1 registry"
+"exact_title_matches_any_archived_catalogue",247,"pinned Dataportal:eurobis_datasets WFS responses and normalized titles in the Stage 1 registry"
+"exact_title_matches_obis",137,"pinned Dataportal:eurobis_datasets WFS responses and normalized titles in the Stage 1 registry"
+"biological_title_candidates",161,"pinned Dataportal:eurobis_datasets WFS responses and normalized titles in the Stage 1 registry"
+"unmatched_biological_title_candidates",40,"pinned Dataportal:eurobis_datasets WFS responses and normalized titles in the Stage 1 registry"

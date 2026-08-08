@@ -2,13 +2,13 @@
 
 ## Current State
 
-- **Updated (UTC):** 2026-08-08T16:12:29Z
-- **Current stage:** Stage 1 complete and accepted. All five principal-investigator decisions of 2026-08-08 are implemented and frozen.
-- **Session objective:** Decide the Stage 1 checkpoint-commit scope and whether to close the remaining EMODnet Biology route assumption before Stage 2.
-- **Branch/commit:** `main` at `753c8d5`, with all remediation uncommitted in the working tree.
-- **First concrete next action:** Stage the validated Stage 1 files and tracking archives and create the checkpoint commit.
-- **Last completed milestone:** Full Stage 1 deterministic rebuild and all Stage 0/1 tests passed at 2026-08-08T16:12:09Z.
-- **Archive snapshot:** `docs/agent_tracking/archive/20260808T161229Z_PROGRESS.md` and `..._PENDING.md`.
+- **Updated (UTC):** 2026-08-08T17:02:45Z
+- **Current stage:** Stage 1 complete and committed, including the direct EMODnet Biology WFS append audit. Stage 2 is ready but has not started.
+- **Session objective:** Commit the validated Stage 1 checkpoint, then close the remaining direct EMODnet Biology route before Stage 2.
+- **Branch/commit:** `main`; the EMODnet closure is committed separately on top of Stage 1 checkpoint `df7f98f`.
+- **First concrete next action:** Freeze the Stage 2 record-level screening contract, including explicit resolution fields for the 40 unmatched WFS biological-title candidates.
+- **Last completed milestone:** Direct EMODnet Biology WFS closure committed after final deterministic validation at 2026-08-08T17:02:35Z.
+- **Archive snapshot:** `docs/agent_tracking/archive/20260808T170245Z_PROGRESS.md` and `..._PENDING.md` preserve the immediately preceding validated state.
 
 Live counts, checksums, and gate states are **generated**, not narrated here: see `outputs/stage_status.md` (`Rscript scripts/99_stage_status.R`). This file records decisions and rationale only.
 
@@ -43,6 +43,10 @@ Eight defects were found and fixed. The automated suite passed before every one 
 - `scripts/99_stage_status.R` now treats blank/`NA` `sent_utc` values as unsent and distinguishes diagnosed no-route/excluded-by-decision entries from undiagnosed search failures. A regression test verifies 0 sent, 7 awaiting send, four diagnosed absences, and zero undiagnosed failures.
 - The official EMODnet documentation exposes a live Biology occurrence WFS at `geo.vliz.be/geoserver/Dataportal/wfs`, distinct from the searched ERDDAP catalogue route. Run an append-only direct-route comparison after the checkpoint commit and before Stage 2 acquisition.
 - The checkpoint validation detected a stale registry encoding that stored non-ASCII text as literal `<U+....>` tokens. Regeneration now writes proper UTF-8 and is byte-stable across repeated rebuilds; the accepted registry SHA-256 is `a765fde77776b6d57d0004f307207c47221d8c22f2607e717e9cdddc1f97f2a9`.
+- Checkpoint commit `df7f98f` freezes the validated initial Stage 1 evidence before any further network acquisition.
+- `SEARCH-EMODNETBIOWFS-20260808T162029Z` directly archived WFS capabilities, the occurrence and dataset schemas, and the complete 1,517-row `Dataportal:eurobis_datasets` inventory in two reconciled pages. Its separate configuration checksum is pinned in the raw run summary.
+- The direct inventory comparison demonstrates 247 exact-title overlaps with prior catalogues (137 with OBIS), while retaining 40 unmatched biological-title candidates. Eighteen are explicitly out of domain and 22 lack dataset-level geography; none contains affirmative frozen-domain evidence. They remain pending for Stage 2 record-level screening.
+- The WFS update adds no demonstrated in-domain dataset and no shortlist row. Rebuilding preserves 30/34 register resolution, 19 shortlisted datasets, and the rank order. The broad statement that every WFS holding is already in OBIS is not made.
 
 ### Principal-investigator decisions of 2026-08-08, now frozen
 
@@ -107,6 +111,13 @@ These are recorded in `README.md` under "Observation-Adequacy Limits Known Befor
 | `config/protocol_change_register.csv` | edited | 28 rows, all approved; six new rows for the 2026-08-08 decisions | complete |
 | `docs/agent_tracking/archive/20260807T195118Z_*` through `20260808T154957Z_*` | added | Preserve required immutable session and milestone handoff snapshots | ready to commit |
 | `scratch.R` | removed from working tree | Discard obsolete diagnostic against an abandoned Figshare run; not a pipeline input | excluded from commit |
+| `config/stage1_emodnet_biology_wfs_append.json` | added | Freeze the direct WFS update without changing the initial ten-run configuration | executed |
+| `scripts/00_downloads/02_search_emodnet_biology_wfs.R` | added | Archive WFS capabilities, schemas, and complete paginated dataset inventory | executed |
+| `metadata/stage1_append_runs.csv` | added | Pin the dated WFS update separately from the initial active runs | complete |
+| `metadata/stage1_emodnet_wfs_overlap*.csv` | added/generated | Record per-dataset overlap and calculated audit totals | focused tests passed |
+| `R/01_search_helpers.R` | edited | Allow each append run to pin its own frozen configuration path and checksum | tested |
+| `scripts/01_compile_candidate_registry.R` | edited | Merge append evidence and generate the WFS overlap audit | executed |
+| `scripts/01_build_ds_crosswalk.R` | edited | Classify access once per canonical family so aggregator copies do not downgrade provider evidence | executed |
 
 ## Validation Record
 
@@ -117,6 +128,12 @@ These are recorded in `README.md` under "Observation-Adequacy Limits Known Befor
 - `Rscript scripts/99_stage_status.R`: regenerated `outputs/stage_status.md`.
 - `Rscript -e 'testthat::test_file("tests/test_stage1_search.R", reporter="summary", stop_on_failure=TRUE)'`: passed after adding generated-status regression coverage.
 - `Rscript scripts/01_validate_stage1.R`: passed after the UTF-8 artifact refresh; full log `outputs/logs/stage1_validation_20260808T161209Z.log`.
+- `Rscript scripts/00_downloads/02_search_emodnet_biology_wfs.R`: passed; append run `SEARCH-EMODNETBIOWFS-20260808T162029Z`, 5 artifacts, 1,517 unique provider records.
+- `Rscript scripts/01_compile_candidate_registry.R`: passed with the append evidence; 28,081 unique catalogue records from 29,771 identified query hits; all 16 benchmarks recalled.
+- `Rscript scripts/01_build_ds_crosswalk.R`: passed; 30/34 resolved and 19 shortlisted, with unchanged rank order.
+- `Rscript -e 'testthat::test_file("tests/test_stage1_search.R", reporter="summary", stop_on_failure=TRUE)'`: passed after the WFS append and overlap assertions were added.
+- `Rscript scripts/01_validate_stage1.R`: final pass after deterministic benchmark-source selection; log `outputs/logs/stage1_validation_20260808T165447Z.log`.
+- `Rscript scripts/01_validate_stage1.R`: passed after preserving the initial benchmark evidence against append-run displacement; final log `outputs/logs/stage1_validation_20260808T170235Z.log`.
 
 ## Data, Search, and Model State
 

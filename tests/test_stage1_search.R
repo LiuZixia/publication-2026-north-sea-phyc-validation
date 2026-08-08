@@ -68,6 +68,37 @@ test_that("one complete active run is pinned for every required source family", 
   }
 })
 
+test_that("the direct EMODnet Biology WFS update is append-only and complete", {
+  append <- read.csv(at_root("metadata", "stage1_append_runs.csv"), stringsAsFactors = FALSE)
+  expect_identical(names(append), c("source_key", "search_run_id", "configuration_path"))
+  expect_true(nrow(append) >= 1L)
+  expect_true(all(append$source_key == "EMODNET_BIOLOGY_WFS"))
+  expect_equal(anyDuplicated(append$search_run_id), 0L)
+
+  for (i in seq_len(nrow(append))) {
+    id <- append$search_run_id[[i]]
+    config_path <- at_root(append$configuration_path[[i]])
+    config <- jsonlite::fromJSON(config_path, simplifyVector = FALSE)
+    expect_identical(config$classification, "append_only_stage1_search_update", info = id)
+    expect_identical(config$inventory_layer, "Dataportal:eurobis_datasets", info = id)
+    expect_identical(config$occurrence_layer, "Dataportal:eurobis", info = id)
+
+    run_dir <- at_root("data", "raw", "search_runs", id)
+    summary <- jsonlite::fromJSON(file.path(run_dir, "run_summary.json"), simplifyVector = FALSE)
+    manifest <- read.csv(file.path(run_dir, "manifest.csv"), stringsAsFactors = FALSE, check.names = FALSE)
+    pages <- manifest[grepl("dataset_catalogue_page_", manifest$raw_response_path), ]
+    expect_identical(summary$status, "complete", info = id)
+    expect_true(summary$pagination_complete, info = id)
+    expect_identical(summary$configuration_path, append$configuration_path[[i]], info = id)
+    expect_identical(summary$configuration_checksum_sha256, calculate_checksum(config_path), info = id)
+    expect_equal(summary$provider_total, 1517L, info = id)
+    expect_equal(summary$unique_provider_records, 1517L, info = id)
+    expect_equal(sum(pages$records_returned), 1517L, info = id)
+    expect_equal(unique(pages$total_reported), 1517L, info = id)
+    expect_true(tail(pages$records_returned, 1L) < config$page_size, info = id)
+  }
+})
+
 test_that("query log has exact scalar requests and checksum-verified raw evidence", {
   log <- read.csv(at_root("metadata", "stage1_query_log.csv"), stringsAsFactors = FALSE, check.names = FALSE)
   required <- c("search_run_id", "source_family", "provider", "endpoint", "api_version", "license", "method",
@@ -118,6 +149,12 @@ test_that("provider totals and terminal pages reconcile", {
   emodnet <- log[log$source_family == "EMODnet ERDDAP", ]
   expect_true(all(emodnet$records_returned < 1000L))
 
+  emodnet_wfs <- log[log$source_family == "EMODnet Biology WFS" &
+    grepl("dataset_catalogue_page_", log$raw_response_path), ]
+  expect_equal(sum(emodnet_wfs$records_returned), unique(emodnet_wfs$total_reported))
+  expect_equal(unique(emodnet_wfs$total_reported), 1517L)
+  expect_true(tail(emodnet_wfs$records_returned, 1L) < 1000L)
+
   figshare <- log[log$source_family == "ICES Figshare" & grepl("ices_library_page_", log$raw_response_path), ]
   expect_true(tail(figshare$records_returned, 1) < 1000L)
   expect_equal(anyDuplicated(figshare$query_hash_sha256), 0L)
@@ -131,7 +168,7 @@ test_that("candidate registry has every essential field and points to raw eviden
     "method_metadata", "access_status", "license", "screening_status", "exclusion_reason", "geographic_screen_state",
     "reviewer", "decision_date", "duplicate_catalogue_ids", "canonical_provider_dataset_id", "related_identifier")
   expect_identical(names(registry), required)
-  expect_equal(nrow(registry), 26564L)
+  expect_equal(nrow(registry), 28081L)
   expect_false(any(!nzchar(registry$search_run_id)))
   expect_false(any(!nzchar(registry$source)))
   expect_false(any(!nzchar(registry$provider_dataset_id)))
@@ -150,7 +187,7 @@ test_that("search-flow counts are generated and exactly reproducible", {
   registry <- read.csv(at_root("metadata", "candidate_registry.csv"), stringsAsFactors = FALSE)
   flow <- read.csv(at_root("metadata", "stage1_search_flow.csv"), stringsAsFactors = FALSE)
   value <- setNames(flow$count, flow$stage)
-  expect_equal(value[["records_identified"]], 28254L)
+  expect_equal(value[["records_identified"]], 29771L)
   expect_equal(value[["duplicate_catalogue_or_query_records"]], value[["records_identified"]] - nrow(registry))
   expect_equal(value[["unique_catalogue_records"]], nrow(registry))
   expect_equal(value[["unique_dataset_families"]], length(unique(registry$canonical_provider_dataset_id)))
@@ -159,6 +196,33 @@ test_that("search-flow counts are generated and exactly reproducible", {
   expect_equal(value[["pending"]], sum(registry$screening_status == "pending"))
   expect_equal(value[["advanced_to_acquisition"]], sum(registry$screening_status == "advanced_to_acquisition"))
   expect_equal(value[["screened"]], value[["excluded"]] + value[["pending"]] + value[["advanced_to_acquisition"]])
+})
+
+test_that("the direct EMODnet WFS inventory has an explicit overlap diagnosis", {
+  overlap <- read.csv(at_root("metadata", "stage1_emodnet_wfs_overlap.csv"), stringsAsFactors = FALSE)
+  summary <- read.csv(at_root("metadata", "stage1_emodnet_wfs_overlap_summary.csv"), stringsAsFactors = FALSE)
+  value <- setNames(summary$count, summary$metric)
+  registry <- read.csv(at_root("metadata", "candidate_registry.csv"), stringsAsFactors = FALSE)
+
+  expect_equal(nrow(overlap), 1517L)
+  expect_equal(anyDuplicated(overlap$wfs_dataset_id), 0L)
+  expect_equal(value[["wfs_dataset_inventory_rows"]], nrow(overlap))
+  expect_equal(value[["exact_title_matches_any_archived_catalogue"]], sum(overlap$exact_title_match_existing))
+  expect_equal(value[["exact_title_matches_obis"]], sum(overlap$exact_title_match_obis))
+  expect_equal(value[["biological_title_candidates"]], sum(overlap$biological_title_match))
+  expect_equal(value[["unmatched_biological_title_candidates"]],
+    sum(overlap$biological_title_match & !overlap$exact_title_match_existing))
+  expect_equal(value[["unmatched_biological_title_candidates"]], 40L)
+
+  # The complete inventory disproves a blanket same-title assumption, but none of the unmatched
+  # biological titles supplies dataset-level North Sea evidence. They remain explicit candidates
+  # for record-level geometry screening instead of being silently promoted or discarded.
+  unmatched_ids <- overlap$wfs_dataset_id[overlap$biological_title_match & !overlap$exact_title_match_existing]
+  unmatched <- registry[registry$source == "EMODnet Biology WFS" &
+    registry$provider_dataset_id %in% unmatched_ids, ]
+  expect_equal(nrow(unmatched), 40L)
+  expect_false(any(unmatched$geographic_screen_state == "dataset_metadata_matches_frozen_domain_terms"))
+  expect_true(all(unmatched$screening_status == "pending"))
 })
 
 test_that("all prespecified known items are recalled from archived evidence", {
@@ -327,6 +391,7 @@ test_that("every register entry resolves to archived evidence or is diagnosed", 
 
   shortlist <- read.csv(at_root("metadata", "stage1_acquisition_shortlist.csv"), stringsAsFactors = FALSE)
   expect_gt(nrow(shortlist), 15L)
+  expect_equal(nrow(shortlist), 19L)
   expect_equal(shortlist$acquisition_rank, seq_len(nrow(shortlist)))
   expect_true(all(diff(shortlist$priority_score) <= 0))
   expect_false(any(shortlist$declared_domain == "out_of_domain"))

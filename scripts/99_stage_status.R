@@ -38,16 +38,35 @@ flow <- utils::read.csv("metadata/stage1_search_flow.csv", stringsAsFactors = FA
 recall <- utils::read.csv("metadata/stage1_known_item_recall.csv", stringsAsFactors = FALSE)
 qlog <- utils::read.csv("metadata/stage1_query_log.csv", stringsAsFactors = FALSE, check.names = FALSE)
 active <- utils::read.csv("metadata/stage1_active_runs.csv", stringsAsFactors = FALSE)
+append <- if (file.exists("metadata/stage1_append_runs.csv")) {
+  utils::read.csv("metadata/stage1_append_runs.csv", stringsAsFactors = FALSE)
+} else data.frame()
 value <- stats::setNames(flow$count, flow$stage)
 
 lines <- c(lines, section("Stage 1 — Reproducible Systematic Search"),
-  kv("Source families with a pinned complete run", nrow(active)),
+  kv("Pinned complete search runs", nrow(active) + nrow(append)),
+  kv("Initial source families", nrow(active)),
+  kv("Append-only update runs", nrow(append)),
   kv("Query-log rows", nrow(qlog)),
   kv("Pagination complete for every query", all(qlog$pagination_complete)),
   kv("Registry SHA-256", calculate_checksum("metadata/candidate_registry.csv")),
-  kv("Search-config SHA-256 (pinned into every run summary)", calculate_checksum("config/stage1_search_config.json")),
+  kv("Initial search-config SHA-256", calculate_checksum("config/stage1_search_config.json")),
   kv("Screening-rules SHA-256 (versioned, not pinned)", calculate_checksum("config/screening_rules.json")),
   "")
+
+if (nrow(append) && file.exists("metadata/stage1_emodnet_wfs_overlap_summary.csv")) {
+  wfs <- utils::read.csv("metadata/stage1_emodnet_wfs_overlap_summary.csv", stringsAsFactors = FALSE)
+  wfs_value <- stats::setNames(wfs$count, wfs$metric)
+  lines <- c(lines, section("Stage 1 — EMODnet Biology WFS Append Audit"),
+    kv("Direct WFS inventory rows", wfs_value[["wfs_dataset_inventory_rows"]]),
+    kv("Exact title matches to any archived catalogue", wfs_value[["exact_title_matches_any_archived_catalogue"]]),
+    kv("Exact title matches to OBIS", wfs_value[["exact_title_matches_obis"]]),
+    kv("Biological-title candidates", wfs_value[["biological_title_candidates"]]),
+    kv("Unmatched biological-title candidates retained", wfs_value[["unmatched_biological_title_candidates"]]),
+    "",
+    "No unmatched biological title contains dataset-level evidence for the frozen North Sea domain;",
+    "those rows remain pending for Stage 2 record-level geometry screening.", "")
+}
 
 lines <- c(lines, "| Search flow | Count |", "|---|---|",
   sprintf("| %s | %s |", flow$stage, fmt(flow$count)), "")
