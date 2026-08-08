@@ -1,49 +1,41 @@
 # Pending
 
-- **Updated (UTC):** 2026-08-08T17:02:45Z
-- **Current stage:** Stage 1 complete and committed with a direct EMODnet Biology WFS append audit. Stage 2 is ready to begin. Do not begin CMEMS acquisition or PhyC inspection.
-
-## Current Audit
-
-All five principal-investigator decisions of 2026-08-08 are implemented and frozen. The protocol-change register carries no pending rows. Everything automatable passes and reproduces byte-for-byte. The initial checkpoint and the separate EMODnet closure are committed.
-
-## Needs You — but nothing is blocked on it
-
-1. **Send the seven request drafts** in [`docs/access_requests/DRAFT_EMAILS.md`](docs/access_requests/DRAFT_EMAILS.md). Fill in name, affiliation, and email, confirm each provider's current address, and record the date in `sent_utc` in `metadata/provider_access_requests.csv`. Nothing waits on a reply: under the frozen access policy each dataset is already treated as unavailable and its consequence is already applied. A reply re-admits the dataset as a dated addition to the change register.
-2. **Identify an independent second scientific reviewer once preliminary results exist.** Recorded as deferred in `config/scientific_review.json` with a hard requirement to complete before the Stage 7 manifest freeze. The broad biological exclusions and access-driven scope reductions most need a second reader.
+- **Updated (UTC):** 2026-08-08T19:08:53Z
+- **Current stage:** Stage 2 contract and EMODnet WFS record-level closure complete. Ranked provider acquisition is next; CMEMS acquisition and PhyC inspection remain prohibited.
 
 ## First Priority
 
-**Freeze the Stage 2 record-level screening contract before downloading shortlist observations.**
+**Commit the validated Stage 2 contract/WFS checkpoint, then acquire rank-1 `REGISTER:DS06` from canonical SMHI/SHARK provider routes.**
 
-Completion evidence: a versioned schema and executable assertions define record keys, required provider fields, units, licence state, immutable raw provenance, geographic intersection, duplicate linkage, and explicit disposition of the 40 unmatched WFS candidates.
+Completion evidence: immutable provider files and acquisition manifests cover the national and regional SHARK phytoplankton packages exposed by WFS 2453/6698 and the ranked Kattegat/Skagerrak products; variables, licences, record keys, coordinates, dates, units, methods, and duplicate links are inventoried under the frozen contract.
 
 ## Ordered Next Actions
 
-1. Freeze the Stage 2 record-level screening contract. It must explicitly resolve the 40 unmatched biological-title WFS candidates: 18 title-diagnosed out of domain and 22 with unknown dataset-level geography.
-2. Acquire in shortlist rank order beginning DS06, DS26, DS02, DS04, DS05, and DS07.
-3. For DS08, acquire the 128 open-licence abundance children only; the 289 contact-required carbon and biovolume children are out of scope.
-4. Record a `licence_state` per acquired file, so shortlist entries flagged `resolve_licence_before_stage7_manifest_freeze` cannot reach the confirmatory manifest unresolved.
-5. Link the PLET-to-Cefas SmartBuoy relationship at record level; it is one-to-many across time and intentionally unlinked at Stage 1.
+1. Commit this checkpoint before any DS06 raw provider acquisition.
+2. Acquire the highest-resolution canonical SMHI/SHARK packages for DS06, including the national and regional packages routed from WFS 2453/6698; treat WFS, GBIF, OBIS, and PLET versions only as aggregator/provenance copies.
+3. Screen DS06 files and records under the frozen contract, including biovolume/carbon availability, method epochs, cadence, spatial support, and exact duplicate linkage.
+4. Continue in rank order with DS26, DS02, DS04, DS05, and DS07.
+5. Acquire only DS08's open abundance children; contact-required carbon and biovolume children remain unavailable.
+6. Resolve every `licence_state` before an item can enter the later eligible manifest; link PLET-to-Cefas SmartBuoy copies at record level.
 
-## Blockers, Warnings, and Scientific Risks
+## Needs User Action, Non-Blocking
 
-- **The confirmatory analysis now rests on Tier C conversion.** DS08's carbon and biovolume children are contact-required and therefore unavailable; only DS06 retains a usable direct-carbon route, and it sits in the external-transfer region. Every carbon estimate flows through the pinned DS22 `PEG_BVOL` file, so its North Sea taxon coverage audit is now load-bearing rather than routine.
-- **No available source measures lifeform dominance as a carbon share.** It must be derived from abundance via `PEG_BVOL` everywhere, with lower/central/upper uncertainty carried through to the Stage 10 metrics. Whether the PhyC increment survives that spread is a prespecified result.
-- **Offshore coverage rests on one Tier D/E source.** DS12 CPR through its open OBIS route is the only offshore evidence; DS19 and DS20 yielded no usable route. CPR silk retention makes it semi-quantitative for most phytoplankton, so offshore conclusions will be weaker than coastal ones by construction, not by chance.
-- **The transition region depends on a single provider.** DS06 and DS26 are both SMHI holdings, so "two independent networks" cannot be claimed there.
-- **The German coastal sector lost two of three sources.** DS17 and DS18 are contact-required, leaving DS04. This is the sector where *Phaeocystis* blooms recur.
-- The registry's `pending` catalogue rows are neither eligible nor independent datasets. The shortlist, not that count, is the Stage 2 acquisition work order.
-- GBIF lacks a spatial dataset filter; 341 rows positively indicate out-of-domain water and 5,492 carry no domain evidence. Record-level geographic screening is mandatory at Stage 2.
-- DS20's crosswalk pattern previously matched an ICES report rather than data; it now resolves to nothing. Stage 2 must treat any resolution as provisional until a record schema is inspected.
-- Nine EMODnet ERDDAP queries returned HTTP 404, that server's zero-results response, undocumented in the frozen initial strategy.
-- The direct WFS audit rejects a blanket identical-title assumption: 40 biologically named datasets have no exact prior-catalogue title match. None provides affirmative North Sea evidence at dataset-title level. They are not acquisition-ready and require record-level geometry and duplicate screening in Stage 2.
-- Abandoned preflight raw runs are immutable, excluded by the active-run registry, and must not be reused silently.
+1. Send the seven drafts in `docs/access_requests/DRAFT_EMAILS.md`, filling sender details and recording `sent_utc`; current availability decisions already apply and no analysis waits for replies.
+2. Appoint an independent scientific reviewer once preliminary results exist; review is mandatory before the Stage 7 manifest freeze.
+
+## Warnings and Scientific Risks
+
+- The confirmatory analysis rests on uncertain abundance-to-carbon conversion; DS22 taxon coverage and lower/central/upper conversion propagation remain load-bearing.
+- WFS 2453 and 6698 are large but are one SMHI provider family, not independent networks. Their open CC0 aggregator copies do not replace canonical SHARK acquisition and deduplication.
+- WFS 5951 is only an exploratory targeted `Diatoma`/*Phaeocystis* series from 1995–1996. It cannot supply total-community truth or meet the ≥10-year recurrence criterion.
+- Offshore evidence still rests on Tier D/E CPR; German coastal high-tier coverage still depends on DS04.
+- The generic WFS layer timed out for an unbounded count and rejects simultaneous `bbox` plus `cql_filter`; the completed, pinned route uses official `eurobis-obisenv_full` `viewParams` links from MarineInfo.
+- Large raw WFS exports are immutable geometry/provenance evidence, not canonical analysis inputs.
+- No dataset is eligible merely because it is ranked, open, or has in-domain records.
 
 ## Deferred or Out of Scope
 
-- Do not inspect CMEMS PhyC until the eligible in-situ manifest, observation-only outcomes, recurrence labels, and validation splits are frozen.
-- Do not interpret search yield, known-item recall, or shortlist rank as biological eligibility, data usability, independence, or feasibility. Rank is a work order.
-- Do not redistribute any acquired provider file.
-- Do not begin event construction, modelling, or performance analysis during Stage 2.
-- Do not treat a passing suite as proof that untested requirements are satisfied. It passed while two benchmarks were excluded, seven catalogue datasets were invisible, four observatories were merged into one family, the geographic screen was inert, and two datasets with zero evidence were reported as openly available. `tests/requirements_map.csv` now makes the covered set explicit.
+- Do not inspect CMEMS PhyC until the eligible observation manifest, observation-only outcomes, recurrence labels, and validation splits are frozen.
+- Do not treat missing or inadequately observed windows as negatives.
+- Do not begin event construction, modelling, performance analysis, or redistribution of provider files during Stage 2.
+- Do not treat total PhyC as a taxon, lifeform, or *Phaeocystis* measurement.

@@ -1,0 +1,62 @@
+{
+  "schema_version": "1.0.0",
+  "frozen_at_utc": "2026-08-08T18:10:24Z",
+  "status": "prospectively_frozen_before_observation_acquisition",
+  "raw_storage_target": "/mnt/hdd/publication-2026-north-sea-phyc-validation/",
+  "shortlist_rows": 19,
+  "wfs_pending_rows": 40,
+  "wfs_title_out_of_domain_signals": 18,
+  "wfs_unknown_title_geography": 22,
+  "artifacts": [
+    {
+      "role": "contract",
+      "path": "config/stage2_record_screening_contract.json",
+      "checksum_sha256": "1734e4360e2b1575741b7ba488160e90411ada61612497370bf3a42cb7264c02"
+    },
+    {
+      "role": "stage1_shortlist",
+      "path": "metadata/stage1_acquisition_shortlist.csv",
+      "checksum_sha256": "aac31f687b1d1476cd7863925da6ba431ef8a7f1e8a3b72809e8c3932b7f3fc7"
+    },
+    {
+      "role": "stage1_wfs_overlap",
+      "path": "metadata/stage1_emodnet_wfs_overlap.csv",
+      "checksum_sha256": "a5fcd4c85be49140c77da177d2c5b814ea8bc561fb44b10183927dcdc2affc26"
+    },
+    {
+      "role": "stage1_candidate_registry",
+      "path": "metadata/candidate_registry.csv",
+      "checksum_sha256": "b845988406ffc6553b909d931f76c88d2bde7da7b25db9aba6780cace7af229f"
+    },
+    {
+      "role": "access_and_licence_policy",
+      "path": "config/access_and_licence_policy.json",
+      "checksum_sha256": "e39b7856206b7122fe4a191796eb71c85c71be2b3082f2bbf7b98c59d5c6376a"
+    },
+    {
+      "role": "protocol_config",
+      "path": "config/protocol_config.json",
+      "checksum_sha256": "1048fb9e44c6ba1805cd04dda7e9737e2d06a2c53dfd9d1da4664d15ae105f7a"
+    },
+    {
+      "role": "greater_north_sea_geometry",
+      "path": "config/spatial/greater_north_sea.geojson",
+      "checksum_sha256": "100d3aed06392f9b6956d91bc8484c868d2febf803306c9a9187f6f003890602"
+    },
+    {
+      "role": "hydrographic_subregions",
+      "path": "config/spatial/hydrographic_subregions.geojson",
+      "checksum_sha256": "d8864a7bc92233a9889fc702119f6db703d4843ceffd2364b92d92a688f3ea25"
+    },
+    {
+      "role": "generated_work_order",
+      "path": "metadata/stage2_acquisition_work_order.csv",
+      "checksum_sha256": "c15fae37d59a9c768b2fefc29f21d9719e10e9da28921d39871ac8bdadbfc74b"
+    },
+    {
+      "role": "generated_wfs_queue",
+      "path": "metadata/stage2_wfs_geometry_queue.csv",
+      "checksum_sha256": "ea50b4594a865634a97458b88657cfcea959be5b3da84f1c10b3ea43b9ddc7ea"
+    }
+  ]
+}

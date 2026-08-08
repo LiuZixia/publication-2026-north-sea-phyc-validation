@@ -1,0 +1,229 @@
+{
+  "schema_version": "1.0.0",
+  "frozen_at_utc": "2026-08-08T18:10:24Z",
+  "stage": 2,
+  "status": "prospectively_frozen_before_observation_acquisition",
+  "scientific_sources": [
+    "README.md",
+    "docs/DATASET_SYSTEMATIC_SEARCH.md sections 4, 5, 7, and 10",
+    "docs/OUTCOME_AND_LIFEFORM_PROTOCOL.md sections 3, 5, 6, 10, and 13",
+    "docs/STAGED_WORK_PLAN.md section 5",
+    "config/access_and_licence_policy.json",
+    "config/protocol_config.json"
+  ],
+  "purpose": "Define record identity, immutable-file provenance, legal-access state, record-level eligibility, and duplicate linkage before any shortlisted observation file is downloaded or inspected.",
+  "phy_c_boundary": {
+    "statement": "No CMEMS PhyC value, file, matchup, or performance measure is an input to Stage 2 acquisition or screening.",
+    "prohibited_fields": ["phyc", "phyc_value", "phyc_performance", "model_agreement", "bloom_prediction"],
+    "next_permitted_stage": 8
+  },
+  "raw_storage": {
+    "repository_link": "data/raw",
+    "required_resolved_target": "/mnt/hdd/publication-2026-north-sea-phyc-validation/",
+    "immutable": true,
+    "creation_rule": "Only version-controlled scripts under scripts/00_downloads may create raw files.",
+    "overwrite_rule": "Never overwrite a verified raw file; changed provider content receives a new versioned path."
+  },
+  "decision_rules": {
+    "shortlist_order_is_mandatory": true,
+    "shortlist_is_not_eligibility": true,
+    "provider_version_precedes_aggregator_copy": true,
+    "title_only_geography_can_set_final_decision": false,
+    "missing_or_inadequate_evidence_state": "pending",
+    "contact_required_treatment": "unavailable",
+    "unknown_is_never_negative": true,
+    "aggregator_copy_counts_as_independent_network": false,
+    "final_inclusion_requires": [
+      "verified_raw_file",
+      "usable_licence_state",
+      "parseable_date_or_datetime",
+      "parseable_coordinates_or_verified_fixed_station",
+      "record_level_core_or_external_transfer_intersection",
+      "repeated_sampling_or_prespecified_method_comparison_role",
+      "method_metadata_sufficient_for_assigned_role"
+    ]
+  },
+  "controlled_vocabularies": {
+    "licence_state": ["open", "unverified", "contact_required", "restricted", "unreleased"],
+    "redistribution_state": ["allowed", "prohibited", "unknown"],
+    "file_validation_state": ["verified", "failed", "pending"],
+    "manifest_status": ["verified", "failed", "unavailable", "pending"],
+    "source_role": ["canonical_provider", "aggregator_copy", "conversion_authority", "comparator"],
+    "domain_state": ["core", "external_transfer", "outside_domain", "unknown", "invalid_coordinate"],
+    "cmems_overlap_state": ["yes", "partial", "no", "unknown"],
+    "audit_state": ["present", "absent", "unknown", "not_applicable"],
+    "screening_decision": ["pending", "included", "secondary", "exploratory", "excluded"],
+    "analysis_role": ["primary_reference", "lifeform_only", "comparator", "discovery_sensitivity", "method_comparison", "pending", "excluded"],
+    "provisional_tier": ["A", "B", "C", "D", "E", "F", "not_applicable", "pending"],
+    "duplicate_relationship": ["same_record", "aggregator_copy", "provider_version_overlap", "temporal_overlap", "probable_duplicate", "not_duplicate", "unresolved"],
+    "resolution_state": ["not_checked", "resolved", "unresolved", "not_applicable"],
+    "title_domain_signal": ["out_of_domain", "unknown", "in_domain"],
+    "work_state": ["not_started", "in_progress", "complete", "failed", "unavailable"],
+    "exclusion_reason_code": [
+      "none",
+      "outside_frozen_domain",
+      "outside_transition_region",
+      "missing_or_invalid_coordinates",
+      "missing_or_invalid_time",
+      "no_cmems_era_overlap",
+      "insufficient_repeated_sampling",
+      "no_biomass_or_conversion_variable",
+      "incompatible_size_domain",
+      "missing_method_metadata",
+      "licence_contact_required",
+      "licence_restricted",
+      "dataset_unreleased",
+      "aggregator_duplicate",
+      "non_phytoplankton_record",
+      "provider_quality_failure",
+      "parse_failure",
+      "other_prespecified"
+    ]
+  },
+  "tables": {
+    "acquisition_work_order": {
+      "row_unit": "one Stage 1 narrative-register shortlist entry",
+      "unique_key": ["work_item_id"],
+      "fields": [
+        {"name": "work_item_id", "type": "character", "required": true, "allow_missing": false, "pattern": "^REGISTER:DS[0-9]{2}$"},
+        {"name": "acquisition_rank", "type": "integer", "required": true, "allow_missing": false},
+        {"name": "ds_id", "type": "character", "required": true, "allow_missing": false, "pattern": "^DS[0-9]{2}$"},
+        {"name": "name", "type": "character", "required": true, "allow_missing": false},
+        {"name": "declared_tier", "type": "character", "required": true, "allow_missing": false},
+        {"name": "declared_domain", "type": "character", "required": true, "allow_missing": false},
+        {"name": "planned_role", "type": "character", "required": true, "allow_missing": false},
+        {"name": "licence_action", "type": "character", "required": true, "allow_missing": false},
+        {"name": "required_next_action", "type": "character", "required": true, "allow_missing": false},
+        {"name": "work_state", "type": "character", "required": true, "allow_missing": false, "vocabulary": "work_state"},
+        {"name": "contract_version", "type": "character", "required": true, "allow_missing": false}
+      ]
+    },
+    "wfs_geometry_queue": {
+      "row_unit": "one unmatched biologically named EMODnet Biology WFS dataset",
+      "unique_key": ["work_item_id"],
+      "fields": [
+        {"name": "work_item_id", "type": "character", "required": true, "allow_missing": false, "pattern": "^EMODNET-WFS:[0-9]+$"},
+        {"name": "wfs_dataset_id", "type": "character", "required": true, "allow_missing": false, "pattern": "^[0-9]+$"},
+        {"name": "wfs_dataset_name", "type": "character", "required": true, "allow_missing": false},
+        {"name": "title_domain_signal", "type": "character", "required": true, "allow_missing": false, "vocabulary": "title_domain_signal"},
+        {"name": "record_geometry_state", "type": "character", "required": true, "allow_missing": false, "vocabulary": "resolution_state"},
+        {"name": "record_access_state", "type": "character", "required": true, "allow_missing": false, "vocabulary": "resolution_state"},
+        {"name": "duplicate_resolution_state", "type": "character", "required": true, "allow_missing": false, "vocabulary": "resolution_state"},
+        {"name": "screening_decision", "type": "character", "required": true, "allow_missing": false, "vocabulary": "screening_decision"},
+        {"name": "required_next_action", "type": "character", "required": true, "allow_missing": false},
+        {"name": "decision_detail", "type": "character", "required": true, "allow_missing": false},
+        {"name": "stage1_raw_response_path", "type": "character", "required": true, "allow_missing": false},
+        {"name": "stage1_raw_response_checksum_sha256", "type": "character", "required": true, "allow_missing": false, "pattern": "^[0-9a-f]{64}$"},
+        {"name": "contract_version", "type": "character", "required": true, "allow_missing": false}
+      ]
+    },
+    "acquisition_manifest": {
+      "row_unit": "one immutable raw provider file",
+      "unique_key": ["raw_relative_path"],
+      "fields": [
+        {"name": "ds_id", "type": "character", "required": true, "allow_missing": false},
+        {"name": "acquisition_rank", "type": "integer", "required": true, "allow_missing": false},
+        {"name": "provider", "type": "character", "required": true, "allow_missing": false},
+        {"name": "provider_dataset_id", "type": "character", "required": true, "allow_missing": false},
+        {"name": "canonical_provider_dataset_id", "type": "character", "required": true, "allow_missing": false},
+        {"name": "provider_version", "type": "character", "required": true, "allow_missing": false},
+        {"name": "source_role", "type": "character", "required": true, "allow_missing": false, "vocabulary": "source_role"},
+        {"name": "request_method", "type": "character", "required": true, "allow_missing": false},
+        {"name": "request_url", "type": "character", "required": true, "allow_missing": false},
+        {"name": "request_parameters_sha256", "type": "character", "required": true, "allow_missing": false, "pattern": "^[0-9a-f]{64}$"},
+        {"name": "retrieved_utc", "type": "character", "required": true, "allow_missing": false},
+        {"name": "raw_relative_path", "type": "character", "required": true, "allow_missing": false},
+        {"name": "filename", "type": "character", "required": true, "allow_missing": false},
+        {"name": "size_bytes", "type": "numeric", "required": true, "allow_missing": false},
+        {"name": "checksum_sha256", "type": "character", "required": true, "allow_missing": false, "pattern": "^[0-9a-f]{64}$"},
+        {"name": "content_type", "type": "character", "required": true, "allow_missing": false},
+        {"name": "file_validation_state", "type": "character", "required": true, "allow_missing": false, "vocabulary": "file_validation_state"},
+        {"name": "license_state", "type": "character", "required": true, "allow_missing": false, "vocabulary": "licence_state"},
+        {"name": "license_evidence", "type": "character", "required": true, "allow_missing": false},
+        {"name": "redistribution_state", "type": "character", "required": true, "allow_missing": false, "vocabulary": "redistribution_state"},
+        {"name": "citation", "type": "character", "required": true, "allow_missing": false},
+        {"name": "doi_or_stable_url", "type": "character", "required": true, "allow_missing": false},
+        {"name": "manifest_status", "type": "character", "required": true, "allow_missing": false, "vocabulary": "manifest_status"},
+        {"name": "status_detail", "type": "character", "required": true, "allow_missing": false}
+      ]
+    },
+    "variable_inventory": {
+      "row_unit": "one source table column in one immutable raw file",
+      "unique_key": ["raw_relative_path", "table_name", "column_name"],
+      "fields": [
+        {"name": "raw_relative_path", "type": "character", "required": true, "allow_missing": false},
+        {"name": "table_name", "type": "character", "required": true, "allow_missing": false},
+        {"name": "column_name", "type": "character", "required": true, "allow_missing": false},
+        {"name": "storage_type", "type": "character", "required": true, "allow_missing": false},
+        {"name": "reported_unit", "type": "character", "required": true, "allow_missing": true},
+        {"name": "semantic_role", "type": "character", "required": true, "allow_missing": false},
+        {"name": "missing_value_codes", "type": "character", "required": true, "allow_missing": true},
+        {"name": "quality_flag_meaning", "type": "character", "required": true, "allow_missing": true},
+        {"name": "example_values", "type": "character", "required": true, "allow_missing": true},
+        {"name": "inventory_state", "type": "character", "required": true, "allow_missing": false, "vocabulary": "audit_state"}
+      ]
+    },
+    "record_screening": {
+      "row_unit": "one immutable provider source record before taxon harmonization",
+      "unique_key": ["record_id"],
+      "fields": [
+        {"name": "record_id", "type": "character", "required": true, "allow_missing": false, "pattern": "^REC-[0-9a-f]{16}$"},
+        {"name": "ds_id", "type": "character", "required": true, "allow_missing": false},
+        {"name": "raw_relative_path", "type": "character", "required": true, "allow_missing": false},
+        {"name": "provider_record_id", "type": "character", "required": true, "allow_missing": false},
+        {"name": "collision_index", "type": "integer", "required": true, "allow_missing": false},
+        {"name": "source_row_number", "type": "integer", "required": true, "allow_missing": false},
+        {"name": "reported_datetime", "type": "character", "required": true, "allow_missing": true},
+        {"name": "datetime_utc", "type": "character", "required": true, "allow_missing": true},
+        {"name": "reported_latitude", "type": "character", "required": true, "allow_missing": true},
+        {"name": "reported_longitude", "type": "character", "required": true, "allow_missing": true},
+        {"name": "latitude", "type": "numeric", "required": true, "allow_missing": true},
+        {"name": "longitude", "type": "numeric", "required": true, "allow_missing": true},
+        {"name": "coordinate_crs", "type": "character", "required": true, "allow_missing": true},
+        {"name": "subregion_id", "type": "character", "required": true, "allow_missing": true},
+        {"name": "domain_state", "type": "character", "required": true, "allow_missing": false, "vocabulary": "domain_state"},
+        {"name": "cmems_overlap_state", "type": "character", "required": true, "allow_missing": false, "vocabulary": "cmems_overlap_state"},
+        {"name": "repeated_sampling_state", "type": "character", "required": true, "allow_missing": false, "vocabulary": "audit_state"},
+        {"name": "biomass_variable_state", "type": "character", "required": true, "allow_missing": false, "vocabulary": "audit_state"},
+        {"name": "method_metadata_state", "type": "character", "required": true, "allow_missing": false, "vocabulary": "audit_state"},
+        {"name": "license_state", "type": "character", "required": true, "allow_missing": false, "vocabulary": "licence_state"},
+        {"name": "canonical_record_id", "type": "character", "required": true, "allow_missing": true},
+        {"name": "duplicate_resolution_state", "type": "character", "required": true, "allow_missing": false, "vocabulary": "resolution_state"},
+        {"name": "provisional_tier", "type": "character", "required": true, "allow_missing": false, "vocabulary": "provisional_tier"},
+        {"name": "analysis_role", "type": "character", "required": true, "allow_missing": false, "vocabulary": "analysis_role"},
+        {"name": "screening_decision", "type": "character", "required": true, "allow_missing": false, "vocabulary": "screening_decision"},
+        {"name": "exclusion_reason_code", "type": "character", "required": true, "allow_missing": false, "vocabulary": "exclusion_reason_code"},
+        {"name": "screening_detail", "type": "character", "required": true, "allow_missing": false}
+      ]
+    },
+    "duplicate_map": {
+      "row_unit": "one assessed relationship from a source record to its canonical record",
+      "unique_key": ["record_id", "canonical_record_id"],
+      "fields": [
+        {"name": "record_id", "type": "character", "required": true, "allow_missing": false, "pattern": "^REC-[0-9a-f]{16}$"},
+        {"name": "canonical_record_id", "type": "character", "required": true, "allow_missing": false, "pattern": "^REC-[0-9a-f]{16}$"},
+        {"name": "relationship", "type": "character", "required": true, "allow_missing": false, "vocabulary": "duplicate_relationship"},
+        {"name": "evidence_fields", "type": "character", "required": true, "allow_missing": false},
+        {"name": "resolution_state", "type": "character", "required": true, "allow_missing": false, "vocabulary": "resolution_state"},
+        {"name": "resolution_detail", "type": "character", "required": true, "allow_missing": false}
+      ]
+    },
+    "dataset_screening_summary": {
+      "row_unit": "one acquired provider dataset or separately routed catalogue candidate",
+      "unique_key": ["work_item_id"],
+      "fields": [
+        {"name": "work_item_id", "type": "character", "required": true, "allow_missing": false},
+        {"name": "record_count", "type": "integer", "required": true, "allow_missing": false},
+        {"name": "core_record_count", "type": "integer", "required": true, "allow_missing": false},
+        {"name": "external_transfer_record_count", "type": "integer", "required": true, "allow_missing": false},
+        {"name": "cmems_overlap_record_count", "type": "integer", "required": true, "allow_missing": false},
+        {"name": "duplicate_record_count", "type": "integer", "required": true, "allow_missing": false},
+        {"name": "provisional_tier", "type": "character", "required": true, "allow_missing": false, "vocabulary": "provisional_tier"},
+        {"name": "analysis_role", "type": "character", "required": true, "allow_missing": false, "vocabulary": "analysis_role"},
+        {"name": "screening_decision", "type": "character", "required": true, "allow_missing": false, "vocabulary": "screening_decision"},
+        {"name": "exclusion_reason_code", "type": "character", "required": true, "allow_missing": false, "vocabulary": "exclusion_reason_code"},
+        {"name": "screening_detail", "type": "character", "required": true, "allow_missing": false}
+      ]
+    }
+  }
+}

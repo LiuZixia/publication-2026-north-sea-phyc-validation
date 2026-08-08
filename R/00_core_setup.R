@@ -63,7 +63,8 @@ calculate_checksum <- function(file_path) {
 }
 
 # Download to a same-directory partial file, validate the response, and rename atomically.
-download_with_retry <- function(url, dest_file, max_tries = 3, minimum_bytes = 1) {
+download_with_retry <- function(url, dest_file, max_tries = 3, minimum_bytes = 1,
+                                timeout_seconds = NULL) {
   required_namespace("httr2")
   if (file.exists(dest_file)) {
     stop(sprintf("Refusing to overwrite immutable raw artifact: %s", dest_file), call. = FALSE)
@@ -77,13 +78,21 @@ download_with_retry <- function(url, dest_file, max_tries = 3, minimum_bytes = 1
   request <- httr2::request(url) |>
     httr2::req_user_agent("north-sea-phyc-validation/Stage0") |>
     httr2::req_retry(max_tries = max_tries, max_seconds = 60)
+  if (!is.null(timeout_seconds)) {
+    request <- httr2::req_timeout(request, seconds = timeout_seconds)
+  }
+  # Preserve provider error bodies long enough to report their diagnostic text. The partial file is
+  # still removed by on.exit and can never be promoted to an immutable raw artifact on failure.
+  request <- httr2::req_error(request, is_error = function(response) FALSE)
   response <- httr2::req_perform(request, path = partial_file)
   status <- httr2::resp_status(response)
   size_bytes <- file.info(partial_file)$size
   content_type <- httr2::resp_header(response, "content-type")
 
   if (status < 200L || status >= 300L) {
-    stop(sprintf("Download returned HTTP status %d for %s", status, url), call. = FALSE)
+    error_text <- tryCatch(readChar(partial_file, min(size_bytes, 1000L), useBytes = TRUE),
+                           error = function(e) "")
+    stop(sprintf("Download returned HTTP status %d for %s: %s", status, url, error_text), call. = FALSE)
   }
   if (is.na(size_bytes) || size_bytes < minimum_bytes) {
     stop(sprintf("Downloaded response is smaller than %d bytes: %s", minimum_bytes, url), call. = FALSE)

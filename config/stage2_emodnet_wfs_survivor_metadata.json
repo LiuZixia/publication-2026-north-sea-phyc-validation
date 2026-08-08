@@ -1,0 +1,16 @@
+{
+  "schema_version": "1.0.0",
+  "frozen_at_utc": "2026-08-08T18:52:00Z",
+  "classification": "stage2_canonical_provider_and_licence_resolution",
+  "geometry_evidence_path": "metadata/stage2_emodnet_wfs_geometry_evidence.csv",
+  "geometry_evidence_checksum_sha256": "2b79aac93e2d199a92efdfc2b884538654448c87615ce5340407e121f2a87f4a",
+  "provider_metadata_url_template": "https://marineinfo.org/id/dataset/%s.html",
+  "provider": "MarineInfo / VLIZ",
+  "dataset_ids": ["2453", "5951", "6698"],
+  "expected_titles": {
+    "2453": "SHARK - National phytoplankton monitoring in Sweden since 1983",
+    "5951": "Dynamics of coastal eutrophicated ecosystems",
+    "6698": "SHARK - Regional monitoring, recipient control and monitoring projects of phytoplankton in Sweden since 1985"
+  },
+  "purpose": "Resolve canonical provider links, access terms, licence evidence, and duplicate-family routing for the three WFS candidates with exact frozen-domain records."
+}

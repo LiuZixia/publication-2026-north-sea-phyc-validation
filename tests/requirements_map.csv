@@ -27,3 +27,12 @@ stage,action,requirement,test_file,test_name,coverage
 1,quality,"Availability and licence are read from archived evidence, including the empty case",tests/test_stage1_search.R,access classes are read from archived evidence and handle the empty case,automated
 1,quality,Scientific review is recorded without overstating independence,tests/test_stage1_search.R,scientific review is recorded honestly and does not overstate independence,automated
 1,quality,Generated status distinguishes diagnosed absence from search failure and unsent from sent requests,tests/test_stage1_search.R,generated status distinguishes diagnosed absence and unsent requests,automated
+2,1,Acquire and screen candidates in the frozen Stage 1 rank order,tests/test_stage2_contract.R,the Stage 1 shortlist is frozen into the exact Stage 2 rank order,automated
+2,2,Archive immutable raw files with complete file-level provenance,tests/test_stage2_contract.R,the Stage 2 freeze pins every contract input and routing artifact,automated
+2,3,Inventory every source variable before harmonization,tests/test_stage2_contract.R,every Stage 2 table schema can be instantiated and rejects drift,automated
+2,4,Preserve original source records and stable record identity,tests/test_stage2_contract.R,source-record identity follows the frozen Stage 0 generator,automated
+2,5,Intersect candidate records with the frozen domain before final inclusion,tests/test_stage2_contract.R,all unmatched WFS candidates remain pending for record-level evidence,automated
+2,6,Link provider and aggregator duplicates without treating copies as independent networks,tests/test_stage2_contract.R,the Stage 2 contract is prospective and preserves the scientific boundary,automated
+2,quality,Keep CMEMS PhyC outside observation acquisition and screening,tests/test_stage2_contract.R,the Stage 2 contract is prospective and preserves the scientific boundary,automated
+2,5,Resolve every unmatched EMODnet WFS candidate using record geometry,tests/test_stage2_contract.R,record geometry resolves every unmatched WFS candidate without title-only exclusion,automated
+2,6,Route WFS survivors to canonical providers and prespecified scientific roles,tests/test_stage2_contract.R,official metadata routes WFS survivors to canonical scientific roles,automated
