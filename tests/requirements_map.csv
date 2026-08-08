@@ -36,3 +36,9 @@ stage,action,requirement,test_file,test_name,coverage
 2,quality,Keep CMEMS PhyC outside observation acquisition and screening,tests/test_stage2_contract.R,the Stage 2 contract is prospective and preserves the scientific boundary,automated
 2,5,Resolve every unmatched EMODnet WFS candidate using record geometry,tests/test_stage2_contract.R,record geometry resolves every unmatched WFS candidate without title-only exclusion,automated
 2,6,Route WFS survivors to canonical providers and prespecified scientific roles,tests/test_stage2_contract.R,official metadata routes WFS survivors to canonical scientific roles,automated
+2,1,Acquire the rank-1 DS06 provider dataset before later work-order entries,tests/test_stage2_contract.R,rank-1 DS06 canonical SHARK acquisition is complete and pinned,automated
+2,2,Archive and pin every immutable canonical SHARK package,tests/test_stage2_contract.R,rank-1 DS06 canonical SHARK acquisition is complete and pinned,automated
+2,3,Inventory all SHARK source variables and reconcile raw row totals,tests/test_stage2_contract.R,DS06 variable inventory and exact spatial screen reconcile every source row,automated
+2,5,Screen every SHARK row against the exact frozen domain and transition regions,tests/test_stage2_contract.R,DS06 variable inventory and exact spatial screen reconcile every source row,automated
+2,6,Audit cross-package SHARK duplicate candidates using provider sample identity and scientific fields,tests/test_stage2_contract.R,DS06 cross-package duplicate evidence preserves distinct scientific rows,automated
+2,7,Keep provisional tier assignment distinct from final eligibility,tests/test_stage2_contract.R,DS06 remains pending despite its provisional direct-carbon tier,automated

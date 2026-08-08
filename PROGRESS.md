@@ -2,72 +2,67 @@
 
 ## Current State
 
-- **Updated (UTC):** 2026-08-08T19:08:53Z
-- **Current stage:** Stage 2 contract and EMODnet WFS record-level closure complete; ranked provider acquisition is next.
-- **Session objective:** Freeze the Stage 2 screening contract and resolve all 40 unmatched WFS candidates before observation acquisition — completed.
-- **Branch/starting commit:** `main` at `648d948` (`stage1: audit EMODnet Biology WFS holdings`).
-- **First concrete next action:** Commit this checkpoint, then acquire the canonical SMHI/SHARK packages routed through rank-1 `REGISTER:DS06`.
-- **Last completed milestone:** Stage 2 contract and EMODnet record-level closure validated at 2026-08-08T19:08:26Z.
-- **Archive snapshot:** `docs/agent_tracking/archive/20260808T190853Z_PROGRESS.md` and `..._PENDING.md` preserve the complete milestone state; `20260808T181024Z_*` preserves the session-start handoff.
+- **Updated (UTC):** 2026-08-08T19:52:37Z
+- **Current stage:** Stage 2 ranked acquisition in progress; rank-1 DS06 canonical acquisition, inventory, exact spatial screen, and cross-package duplicate audit completed.
+- **Session objective:** Commit the validated Stage 1/EMODnet checkpoint, close the direct WFS uncertainty, and begin ranked canonical-provider acquisition — achieved through the DS06 acquisition milestone.
+- **Branch/starting commit:** `main` at `9ea8a4b` (`stage2: freeze screening contract and resolve WFS candidates`).
+- **First concrete next action:** Commit this DS06 milestone, then execute the rank-2 DS26 canonical acquisition route without inspecting CMEMS PhyC.
+- **Last completed milestone:** Rank-1 DS06 canonical acquisition and initial record-level screening validated at 2026-08-08T19:48:09Z.
+- **Archive snapshot:** `docs/agent_tracking/archive/20260808T194809Z_PROGRESS.md` and `..._PENDING.md` preserve the pre-DS06 handoff; `20260808T190853Z_*` preserves the prior contract/WFS milestone.
 
 ## Completed Work
 
-- Stage 1 remains frozen at 30/34 register entries resolved or diagnosed, 19 ranked acquisition candidates, and 16/16 known benchmarks recalled and retained. Commits `df7f98f` and `648d948` preserve the initial checkpoint and direct WFS catalogue audit.
-- `config/stage2_record_screening_contract.json` prospectively freezes acquisition provenance, variable inventory, stable record identity, record-level spatial screening, licence states, scientific roles, and duplicate linkage. `metadata/stage2_contract_freeze.json` pins every contract input and both generated routing artifacts.
-- `metadata/stage2_acquisition_work_order.csv` reproduces the 19 Stage 1 entries in exact rank order. `metadata/stage2_wfs_geometry_queue.csv` retains all 40 WFS candidates as title-neutral pending work at contract freeze: 18 out-of-domain title signals and 22 unknowns.
-- The dataset-keyed WFS acquisition finalized at `data/raw/stage2/emodnet_wfs_geometry/20260808T183226Z`: 40/40 IDs, 81 response artifacts, 384,548 bounding-box records, and approximately 994 MB. All raw checksums passed before the run was pinned.
-- Exact intersection against the unchanged checksum-pinned polygon resolves 37 candidates to zero domain records. WFS 2453 retains 91,148 external-transfer records; 5951 retains 71 core records; 6698 retains 280,399 records (28,659 core and 251,740 external-transfer). Boundary-touch count is zero.
-- Official MarineInfo pages for the three survivors are archived at `data/raw/stage2/emodnet_wfs_survivor_metadata/20260808T190338Z`. WFS 2453 and 6698 are open CC0 SMHI/SHARK aggregator copies routed to `REGISTER:DS06`; they are not new independent networks or work-order rows.
-- WFS 5951 is open CC-BY 4.0 but is a targeted 1995–1996 `Diatoma`/`Phaeocystis globosa` density series, not total-community biomass. Two years cannot meet the registered recurrence criterion; it is retained only as Tier F exploratory *Phaeocystis* discovery sensitivity.
-- No CMEMS file or PhyC value has been acquired or inspected. No event catalogue, recurrence label, validation split, or analysis-ready observation manifest exists.
+- The prior Stage 2 contract and EMODnet WFS closure is committed as `9ea8a4b`. Stage 1 remains frozen at 30/34 register entries resolved or diagnosed, 19 ranked candidates, and 16/16 benchmark recall.
+- `scripts/00_downloads/05_acquire_ds06_smhi_shark.R` acquired all 219 versioned phytoplankton packages from the canonical SMHI SHARK API because package titles cannot reliably establish record geography. The finalized run is `data/raw/stage2/ds06_smhi_shark/DS06_SMHI_SHARK_20260808T191500Z`; it contains 27,700,519 bytes and every ZIP passed CRC validation.
+- The tracked acquisition manifest has 219 immutable file rows with provider version, URL, retrieval time, licence, size, checksum, and validation state. The raw manifest checksum is `e7c8aeec0f286616dd9080ae7d7be7fb5728f36185209bdd298a3787b2506535`.
+- `scripts/02_inventory_screen_ds06_smhi_shark.R` successfully parses both the older 102-column SHARK schema with provider `row_number` and the current 96-column schema using immutable source-line position. It explicitly converts Latin-1 provider text to UTF-8 without altering raw ZIPs.
+- All 909,693 source rows reconcile: 7,948 core-domain, 478,860 external-transfer, and 422,885 outside-domain. The source inventory contains 209,656 carbon, 186,334 biovolume, 513,703 abundance/count, and 494,671 method-metadata rows. These are source-row counts, not sample totals or independent observations.
+- The variable inventory contains 21,390 source-column rows across 219 packages. Large row-level base screening and identity tables are ignored intermediate artifacts but are pinned by tracked SHA-256 registries.
+- The duplicate audit found 8,102 provider sample IDs and only four shared across packages. Re-reading those eight sample-package memberships and comparing SHA-256 fingerprints across 51 sample, taxon, size-class, measurement, method, and reported-value fields found zero exact cross-package record duplicates. Similar measurements were preserved.
+- DS06 is provisionally Tier A because canonical SHARK supplies taxon-level carbon concentration directly. Its Stage 2 decision remains `pending`: the exact CMEMS product temporal contract and Stage 5 compatible sample-level total-community/method-epoch checks are not complete.
+- No CMEMS file or PhyC value was acquired or inspected. No event catalogue, recurrence label, split, or analysis-ready observation manifest exists.
 
 ## File-Change Ledger
 
 | Path | Change and purpose | Validation state |
 |---|---|---|
-| `PROGRESS.md`, `PENDING.md` | Refreshed canonical Stage 2 handoff | reconciled |
-| `docs/agent_tracking/archive/20260808T181024Z_PROGRESS.md`, `..._PENDING.md` | Immutable session-start snapshot | complete |
-| `docs/agent_tracking/archive/20260808T190853Z_PROGRESS.md`, `..._PENDING.md` | Immutable contract/WFS milestone snapshot | complete |
-| `R/00_core_setup.R` | Add optional HTTP timeout and provider error-body diagnostics while preserving partial-file rejection | full suite passed |
-| `R/03_stage2_contract.R` | Read, instantiate, validate, and atomically write frozen Stage 2 tables | tested |
-| `config/stage2_record_screening_contract.json` | Prospective Stage 2 contract | frozen before observation acquisition |
-| `config/stage2_emodnet_wfs_geometry.json` | Pin dataset-keyed WFS geometry route and frozen inputs | executed |
-| `config/stage2_emodnet_wfs_survivor_metadata.json` | Pin official metadata requests for three geometry survivors | executed |
-| `docs/DATASET_SYSTEMATIC_SEARCH.md` | Add §13.4 record-level WFS resolution while preserving the Stage 1 pending handoff historically | complete |
-| `metadata/stage2_acquisition_work_order.csv` | Generated 19-row ranked work order | byte-stable |
-| `metadata/stage2_wfs_geometry_queue.csv` | Generated initial 40-row title-neutral queue | byte-stable |
-| `metadata/stage2_contract_freeze.json` | SHA-256 freeze manifest | byte-stable |
-| `metadata/stage2_emodnet_wfs_active_run.csv` | Pin verified 81-response geometry run | complete |
-| `metadata/stage2_emodnet_wfs_geometry_evidence.csv` | Exact polygon/subregion evidence for all 40 IDs | executed |
-| `metadata/stage2_emodnet_wfs_screening.csv` | Final candidate routing: 37 excluded, two pending via DS06, one exploratory | complete |
-| `metadata/stage2_emodnet_wfs_metadata_active_run.csv` | Pin verified official-metadata run | complete |
-| `metadata/stage2_emodnet_wfs_survivor_resolution.csv` | Licence, provider, duplicate-family, tier, and role resolution | complete |
-| `scripts/00_downloads/03_screen_emodnet_wfs_candidates.R` | Archive paginated record-geometry evidence | executed |
-| `scripts/00_downloads/04_download_emodnet_wfs_survivor_metadata.R` | Archive official method/licence/provider pages | executed |
-| `scripts/02_initialize_stage2_contract.R` | Deterministically generate contract routing artifacts | executed twice byte-identically |
-| `scripts/02_register_stage2_wfs_run.R` | Verify and pin every raw WFS response | executed |
-| `scripts/02_screen_stage2_wfs_geometry.R` | Apply exact unchanged GeoJSON linear-ring and subregion predicates | executed |
-| `scripts/02_register_stage2_wfs_metadata_run.R` | Verify and pin three official metadata pages | executed |
-| `scripts/02_resolve_stage2_wfs_survivors.R` | Apply provider/licence/duplicate/scientific-role decisions | executed |
-| `scripts/02_validate_stage2_contract.R` | Rebuild frozen artifacts and run focused validation | passed |
-| `tests/test_stage2_contract.R` | Contract, geometry, licence, routing, identity, and PhyC-boundary tests | passed |
-| `tests/requirements_map.csv` | Add Stage 2 requirement traceability | full suite passed |
+| `PROGRESS.md`, `PENDING.md` | Refreshed canonical handoff for the DS06 milestone | reconciled |
+| `docs/agent_tracking/archive/20260808T194809Z_PROGRESS.md`, `..._PENDING.md` | Immutable pre-milestone live-file snapshots | complete |
+| `config/stage2_ds06_smhi_shark_acquisition.json` | Freeze rank, catalogue checksum, routes, licence, raw run ID, and selection rule | executed |
+| `scripts/00_downloads/05_acquire_ds06_smhi_shark.R` | Restartable canonical SHARK acquisition with raw-target checks, CRC tests, atomic finalization, and tracked pins | executed and idempotent |
+| `scripts/02_inventory_screen_ds06_smhi_shark.R` | Verify raw checksums, inventory schemas, generate stable record IDs, and exact-screen every record | executed and idempotent |
+| `scripts/02_resolve_ds06_smhi_shark_duplicates.R` | Audit cross-package sample identity and strict scientific fingerprints; emit separate resolved screen | executed and idempotent |
+| `scripts/02_summarize_ds06_smhi_shark_screening.R` | Generate contract-level pending Tier A disposition | executed and idempotent |
+| `scripts/02_validate_stage2_contract.R` | Extend milestone validation to idempotently verify the DS06 acquisition and screen | passed |
+| `metadata/stage2_ds06_smhi_shark_active_run.csv` | Pin one completed canonical raw run | complete |
+| `metadata/stage2_ds06_smhi_shark_acquisition_manifest.csv` | Track all 219 raw package files | complete |
+| `metadata/stage2_ds06_smhi_shark_variable_inventory.csv` | Inventory every source column per package | complete |
+| `metadata/stage2_ds06_smhi_shark_package_summary.csv` | Reconcile dates, spatial states, measurements, methods, and source rows | complete |
+| `metadata/stage2_ds06_smhi_shark_output_registry.csv` | Pin base inventory and large ignored intermediates | complete |
+| `metadata/stage2_ds06_smhi_shark_sample_overlap.csv` | Preserve all eight cross-package sample memberships | complete |
+| `metadata/stage2_ds06_smhi_shark_duplicate_resolution_summary.csv` | Record sample/fingerprint/duplicate totals and rule | complete |
+| `metadata/stage2_ds06_smhi_shark_duplicate_resolution_registry.csv` | Pin duplicate map and resolved screen | complete |
+| `metadata/stage2_ds06_smhi_shark_screening_summary.csv` | Contract-compliant provisional Tier A, pending decision | complete |
+| `data/raw/stage2/ds06_smhi_shark/DS06_SMHI_SHARK_20260808T191500Z/` | Immutable 219-package run plus raw manifest, summary, and log; each file enumerated in tracked manifest | complete, ignored raw store |
+| `data/interim/stage2_ds06_smhi_shark_*.csv` | Base/resolved record screening, duplicate identity, and empty exact-duplicate map | complete, ignored and checksum-pinned |
+| `docs/DATASET_SYSTEMATIC_SEARCH.md` | Add §13.5 evidence-backed DS06 acquisition and conservative disposition | complete |
+| `tests/test_stage2_contract.R` | Add rank, provenance, inventory, spatial, duplicate, and pending-tier regression checks | focused suite passed |
+| `tests/requirements_map.csv` | Map Stage 2 DS06 requirements to executable tests | validated |
 
 ## Validation Record
 
-- `Rscript scripts/02_initialize_stage2_contract.R`: passed; 19 ranked datasets and 40 pending WFS candidates; repeated output SHA-256 values unchanged.
-- `Rscript scripts/00_downloads/03_screen_emodnet_wfs_candidates.R`: passed; finalized `stage2/emodnet_wfs_geometry/20260808T183226Z` with 81 artifacts and 384,548 bounding-box records.
-- `Rscript scripts/02_register_stage2_wfs_run.R data/raw/stage2/emodnet_wfs_geometry/20260808T183226Z`: passed; every raw response checksum verified.
-- `Rscript scripts/02_screen_stage2_wfs_geometry.R`: passed; 37 zero-domain candidates and three survivors, zero boundary touches.
-- `Rscript scripts/00_downloads/04_download_emodnet_wfs_survivor_metadata.R`: passed; three official pages archived and expected titles verified.
-- `Rscript scripts/02_register_stage2_wfs_metadata_run.R data/raw/stage2/emodnet_wfs_survivor_metadata/20260808T190338Z`: passed.
-- `Rscript scripts/02_resolve_stage2_wfs_survivors.R`: passed; two SMHI copies routed to DS06, one series exploratory only.
+- `Rscript scripts/00_downloads/05_acquire_ds06_smhi_shark.R`: complete; 219 packages and 27,700,519 bytes, then idempotent verification without re-download.
+- `Rscript scripts/02_inventory_screen_ds06_smhi_shark.R`: complete; 909,693 rows, 7,948 core, 478,860 external-transfer, 422,885 outside; rerun verified existing outputs.
+- `Rscript scripts/02_resolve_ds06_smhi_shark_duplicates.R`: complete; four shared samples, 51-field fingerprint, zero exact duplicate fingerprints and redundant rows; rerun verified checksums.
+- `Rscript scripts/02_summarize_ds06_smhi_shark_screening.R`: passed; provisional Tier A primary-reference role remains pending.
+- `Rscript -e 'testthat::test_file("tests/test_stage2_contract.R", reporter="summary", stop_on_failure=TRUE)'`: passed after correcting two test expectations exposed by the real provider versions and empty-map CSV typing.
+- `Rscript scripts/02_validate_stage2_contract.R`: passed; idempotent DS06 verification and focused tests recorded in `outputs/logs/stage2_contract_validation_20260808T195120Z.log`.
 - `Rscript -e 'testthat::test_dir("tests", reporter="summary", stop_on_failure=TRUE)'`: all Stage 0–2 tests passed.
-- `Rscript scripts/02_validate_stage2_contract.R`: passed; log `outputs/logs/stage2_contract_validation_20260808T190826Z.log`.
 
 ## Conservative Scientific State
 
-- The confirmatory total-biomass analysis still rests on abundance-to-carbon conversion except for DS06's potential direct-carbon/biovolume route; DS22 conversion coverage remains load-bearing.
-- Offshore reference evidence remains DS12 CPR at Tier D/E. The transition region remains a single-provider setting even though multiple SMHI packages exist.
-- WFS discovery changed provenance and exposed one exploratory short core series, but did not add an independent confirmatory dataset or alter the 19-row rank order.
-- No passing test is treated as eligibility: file-level acquisition, schema inventory, methods, units, recurrence feasibility, and record deduplication remain required per ranked dataset.
+- DS06 materially confirms a usable direct-carbon route, but it is overwhelmingly an external-transfer holding and does not repair the core/offshore Tier A–C gap.
+- The 7,948 core rows come from three packages; source-row presence does not yet establish enough compatible sample totals, recurrence years, positive/negative windows, or independent networks.
+- Carbon and biovolume values remain taxon-level source measurements. They cannot be summed until Stage 5 verifies sampled volume, size domain, technical replicates, methods, quality flags, and autotrophic-community completeness.
+- Shared SHARK sample IDs did not yield scientifically identical rows across packages under the strict 51-field rule. This prevents false deletion but does not license pooling package series before method and sample harmonization.
+- Exact CMEMS-era overlap is deliberately unresolved until the exact product metadata contract is frozen; zero in the pending summary means not assessed, not no overlap.

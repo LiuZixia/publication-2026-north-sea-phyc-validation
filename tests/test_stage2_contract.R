@@ -160,3 +160,107 @@ test_that("official metadata routes WFS survivors to canonical scientific roles"
   expect_equal(sum(work$work_item_id == "REGISTER:DS06"), 1L)
   expect_false(any(grepl("EMODNET-WFS", work$work_item_id)))
 })
+
+test_that("rank-1 DS06 canonical SHARK acquisition is complete and pinned", {
+  contract <- read_stage2_contract(at_root("config", "stage2_record_screening_contract.json"))
+  pin <- read.csv(at_root("metadata", "stage2_ds06_smhi_shark_active_run.csv"),
+                  stringsAsFactors = FALSE, check.names = FALSE)
+  manifest <- read.csv(at_root("metadata", "stage2_ds06_smhi_shark_acquisition_manifest.csv"),
+                       stringsAsFactors = FALSE, check.names = FALSE)
+  expect_equal(nrow(pin), 1L)
+  expect_identical(pin$work_item_id, "REGISTER:DS06")
+  expect_equal(pin$package_count, 219L)
+  expect_equal(pin$total_size_bytes, 27700519)
+  expect_equal(nrow(manifest), 219L)
+  expect_silent(validate_stage2_table(manifest, "acquisition_manifest", contract))
+  expect_true(all(manifest$provider == "SMHI SHARK"))
+  expect_true(all(manifest$source_role == "canonical_provider"))
+  version_counts <- sort(table(manifest$provider_version), decreasing = TRUE)
+  expect_identical(as.integer(version_counts), c(208L, 8L, 1L, 1L, 1L))
+  expect_identical(names(version_counts),
+                   c("2025-03-09", "2025-03-11", "2025-03-07", "2025-03-13", "2025-03-17"))
+  expect_true(all(manifest$file_validation_state == "verified"))
+  expect_true(all(manifest$license_state == "open"))
+  expect_equal(sum(manifest$size_bytes), pin$total_size_bytes)
+
+  run_dir <- at_root("data", "raw", pin$run_relative_path[[1]])
+  expect_identical(calculate_checksum(file.path(run_dir, "manifest.csv")),
+                   pin$manifest_checksum_sha256[[1]])
+  expect_identical(calculate_checksum(file.path(run_dir, "run_summary.json")),
+                   pin$run_summary_checksum_sha256[[1]])
+  expect_true(all(file.exists(at_root("data", "raw", manifest$raw_relative_path))))
+})
+
+test_that("DS06 variable inventory and exact spatial screen reconcile every source row", {
+  contract <- read_stage2_contract(at_root("config", "stage2_record_screening_contract.json"))
+  registry <- read.csv(at_root("metadata", "stage2_ds06_smhi_shark_output_registry.csv"),
+                       stringsAsFactors = FALSE, check.names = FALSE)
+  packages <- read.csv(at_root("metadata", "stage2_ds06_smhi_shark_package_summary.csv"),
+                       stringsAsFactors = FALSE, check.names = FALSE)
+  inventory <- read.csv(at_root("metadata", "stage2_ds06_smhi_shark_variable_inventory.csv"),
+                        stringsAsFactors = FALSE, check.names = FALSE)
+  expect_equal(nrow(registry), 4L)
+  expect_equal(registry$row_count[registry$artifact_role == "record_screening"], 909693L)
+  expect_equal(registry$row_count[registry$artifact_role == "duplicate_identity"], 909693L)
+  expect_equal(nrow(packages), 219L)
+  expect_equal(sum(packages$source_rows), 909693L)
+  expect_equal(sum(packages$core_rows), 7948L)
+  expect_equal(sum(packages$external_transfer_rows), 478860L)
+  expect_equal(sum(packages$outside_domain_rows), 422885L)
+  expect_equal(sum(packages$carbon_rows), 209656L)
+  expect_equal(sum(packages$biovolume_rows), 186334L)
+  expect_equal(sum(packages$abundance_or_count_rows), 513703L)
+  expect_equal(sum(packages$method_metadata_rows), 494671L)
+  expect_true(all(packages$source_rows == packages$core_rows +
+                    packages$external_transfer_rows + packages$outside_domain_rows))
+  expect_equal(nrow(inventory), 21390L)
+  expect_silent(validate_stage2_table(inventory, "variable_inventory", contract))
+})
+
+test_that("DS06 cross-package duplicate evidence preserves distinct scientific rows", {
+  contract <- read_stage2_contract(at_root("config", "stage2_record_screening_contract.json"))
+  summary <- read.csv(
+    at_root("metadata", "stage2_ds06_smhi_shark_duplicate_resolution_summary.csv"),
+    stringsAsFactors = FALSE,
+    check.names = FALSE
+  )
+  overlap <- read.csv(at_root("metadata", "stage2_ds06_smhi_shark_sample_overlap.csv"),
+                      stringsAsFactors = FALSE, check.names = FALSE)
+  duplicate_map <- read.csv(at_root("data", "interim", "stage2_ds06_smhi_shark_duplicate_map.csv"),
+                            stringsAsFactors = FALSE, check.names = FALSE,
+                            colClasses = "character")
+  registry <- read.csv(
+    at_root("metadata", "stage2_ds06_smhi_shark_duplicate_resolution_registry.csv"),
+    stringsAsFactors = FALSE,
+    check.names = FALSE
+  )
+  expect_equal(summary$source_record_count, 909693L)
+  expect_equal(summary$unique_provider_sample_count, 8102L)
+  expect_equal(summary$cross_package_sample_count, 4L)
+  expect_equal(summary$cross_package_sample_membership_count, 8L)
+  expect_equal(summary$scientific_fingerprint_field_count, 51L)
+  expect_equal(summary$exact_duplicate_fingerprint_count, 0L)
+  expect_equal(summary$duplicate_record_count, 0L)
+  expect_equal(nrow(overlap), 8L)
+  expect_equal(length(unique(overlap$shark_sample_id_md5)), 4L)
+  expect_true(all(overlap$exact_cross_package_duplicate_rows == 0L))
+  expect_equal(nrow(duplicate_map), 0L)
+  expect_silent(validate_stage2_table(duplicate_map, "duplicate_map", contract))
+  expect_equal(nrow(registry), 4L)
+  expect_true(all(file.exists(at_root(registry$path))))
+})
+
+test_that("DS06 remains pending despite its provisional direct-carbon tier", {
+  contract <- read_stage2_contract(at_root("config", "stage2_record_screening_contract.json"))
+  summary <- read.csv(at_root("metadata", "stage2_ds06_smhi_shark_screening_summary.csv"),
+                      stringsAsFactors = FALSE, check.names = FALSE)
+  expect_silent(validate_stage2_table(summary, "dataset_screening_summary", contract))
+  expect_identical(summary$work_item_id, "REGISTER:DS06")
+  expect_identical(summary$provisional_tier, "A")
+  expect_identical(summary$analysis_role, "primary_reference")
+  expect_identical(summary$screening_decision, "pending")
+  expect_equal(summary$core_record_count, 7948L)
+  expect_equal(summary$external_transfer_record_count, 478860L)
+  expect_equal(summary$duplicate_record_count, 0L)
+  expect_match(summary$screening_detail, "not-yet-assessed")
+})

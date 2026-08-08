@@ -1,4 +1,4 @@
-# Rebuild the frozen Stage 2 routing artifacts and validate the completed EMODnet WFS closure.
+# Rebuild frozen routing artifacts and validate the EMODnet closure plus rank-1 DS06 screen.
 
 source("R/00_core_setup.R")
 required_namespace("testthat")
@@ -23,6 +23,13 @@ if (!identical(before, after)) {
   stop("Frozen Stage 2 contract artifacts changed during deterministic rebuild.", call. = FALSE)
 }
 
+ds06_output <- unlist(lapply(c(
+  "scripts/00_downloads/05_acquire_ds06_smhi_shark.R",
+  "scripts/02_inventory_screen_ds06_smhi_shark.R",
+  "scripts/02_resolve_ds06_smhi_shark_duplicates.R",
+  "scripts/02_summarize_ds06_smhi_shark_screening.R"
+), run_step), use.names = FALSE)
+
 test_output <- capture.output(
   testthat::test_file("tests/test_stage2_contract.R", reporter = "summary", stop_on_failure = TRUE),
   type = "output"
@@ -34,7 +41,8 @@ writeLines(c(
   paste("completed_utc:", format(Sys.time(), "%Y-%m-%dT%H:%M:%SZ", tz = "UTC")),
   "deterministic_artifact_sha256:", paste(names(after), after, sep = ": "),
   "initializer_output:", initialize_output,
+  "ds06_idempotent_output:", ds06_output,
   "test_output:", test_output,
   "session_info:", capture.output(sessionInfo())
 ), log_path, useBytes = TRUE)
-message(sprintf("Stage 2 contract and EMODnet closure validation passed; log: %s", log_path))
+message(sprintf("Stage 2 contract, EMODnet closure, and DS06 validation passed; log: %s", log_path))

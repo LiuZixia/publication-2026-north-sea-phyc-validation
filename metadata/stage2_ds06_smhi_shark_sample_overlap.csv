@@ -1,0 +1,9 @@
+"shark_sample_id_md5","provider_dataset_id","sample_package_record_count","exact_cross_package_duplicate_rows","scientific_fingerprint_field_count"
+"404ecc436c15b0055e82d44b1aa157e7","SHARK_Phytoplankton_2023_DEEP",224,0,51
+"404ecc436c15b0055e82d44b1aa157e7","SHARK_Phytoplankton_2023_SLCK_SMHI",48,0,51
+"416d3897e7a109722da4492aede9f9bb","SHARK_Phytoplankton_2019_UMSC",224,0,51
+"416d3897e7a109722da4492aede9f9bb","SHARK_Phytoplankton_2019_UMSC_DNA",820,0,51
+"b29bae212489570db3517041d7b9eaed","SHARK_Phytoplankton_2019_UMSC",144,0,51
+"b29bae212489570db3517041d7b9eaed","SHARK_Phytoplankton_2019_UMSC_DNA",588,0,51
+"f0c46bd05c436695840300e1a13c17c0","SHARK_Phytoplankton_2019_UMSC",172,0,51
+"f0c46bd05c436695840300e1a13c17c0","SHARK_Phytoplankton_2019_UMSC_DNA",640,0,51
