@@ -1,0 +1,121 @@
+{
+  "schema_version": "1.0.0",
+  "frozen_at_utc": "2026-08-08T08:00:00Z",
+  "protocol_source": "docs/DATASET_SYSTEMATIC_SEARCH.md sections 2-4 and 12.6",
+  "geographic_scope": {
+    "bbox_wgs84": [-5.0, 48.0, 13.06914, 62.0],
+    "wkt_wgs84": "POLYGON ((-5 48, 13.06914 48, 13.06914 62, -5 62, -5 48))",
+    "terms": [
+      "North Sea", "Greater North Sea", "German Bight",
+      "Dutch Continental Shelf", "Belgian Part of the North Sea",
+      "Skagerrak", "Kattegat"
+    ]
+  },
+  "biological_terms": [
+    "phytoplankton", "Phaeocystis", "diatom", "dinoflagellate",
+    "coccolithophore", "picoplankton", "nanophytoplankton"
+  ],
+  "measurement_terms": [
+    "abundance", "biomass", "biovolume", "carbon", "species composition",
+    "bloom monitoring", "chlorophyll", "pigment", "flow cytometry"
+  ],
+  "review": {
+    "query_designer": "Codex implementation",
+    "second_scientific_reviewer": "Dr. Researcher",
+    "status": "approved",
+    "effect": "Stage 1 search is executable; ambiguous choices remain flagged for later independent review."
+  },
+  "source_strategies": [
+    {
+      "source_family": "PLET",
+      "api_version": "documented web export interface, accessed 2026-08-08",
+      "strategy": "Archive the complete dataset catalogue and official automation guidance; the catalogue itself is the dataset-discovery response.",
+      "synonyms": ["N/A (Complete catalogue export)"],
+      "filters": ["None"],
+      "expected_response_fields": ["html table", "dataset title", "provider", "access status", "doi"],
+      "license": "per underlying dataset"
+    },
+    {
+      "source_family": "ICES DOME",
+      "api_version": "OpenAPI v1",
+      "strategy": "Archive the official OpenAPI definition, phytoplankton view, available-year list, and current phytoplankton cache metadata.",
+      "synonyms": ["N/A (Data service rather than catalogue)"],
+      "filters": ["None"],
+      "expected_response_fields": ["OpenAPI json", "html view", "community years array", "phytoplankton cache timestamp"],
+      "license": "CC BY 4.0"
+    },
+    {
+      "source_family": "EMODnet ERDDAP",
+      "api_version": "ERDDAP search/index.json",
+      "strategy": "Search every controlled biological and measurement term iteratively by page (up to 1000 items/page).",
+      "synonyms": ["All biological and measurement terms"],
+      "filters": ["None (API lacks spatial bounds)"],
+      "expected_response_fields": ["Dataset ID", "Title", "Summary"],
+      "license": "per dataset"
+    },
+    {
+      "source_family": "OBIS",
+      "api_version": "OBIS v3",
+      "strategy": "Search datasets within the full frozen WKT for phytoplankton and prespecified lifeform clades.",
+      "synonyms": ["Bacillariophyta", "Dinoflagellata", "Haptophyta", "Cyanobacteria", "Chlorophyta", "Phaeocystis"],
+      "filters": ["geometry = frozen WKT polygon"],
+      "expected_response_fields": ["id", "dataset_id", "url", "title", "updated", "extent", "published", "abstract", "statistics", "keywords", "core", "extensions", "intellectualrights", "archive"],
+      "license": "per dataset"
+    },
+    {
+      "source_family": "SMHI SHARK",
+      "api_version": "SHARK dataset list API",
+      "strategy": "Retrieve the complete Phytoplankton datatype dataset list.",
+      "synonyms": ["Phytoplankton"],
+      "filters": ["datatype=Phytoplankton"],
+      "expected_response_fields": ["dataset_name", "dataset_file_name", "version", "datatype"],
+      "license": "CC0 metadata; per delivered dataset"
+    },
+    {
+      "source_family": "PANGAEA",
+      "api_version": "Elasticsearch panmd search/scroll",
+      "strategy": "Run one prospective Boolean union of all geography and biological terms and exhaust the scroll cursor.",
+      "synonyms": ["All biological and measurement terms"],
+      "filters": ["Boolean union of geographic terms AND biological terms"],
+      "expected_response_fields": ["_id", "URI", "xml", "westBoundLongitude", "southBoundLatitude", "eastBoundLongitude", "northBoundLatitude", "agg-location", "sp-lastModified", "minDateTime", "maxDateTime", "techKeyword", "agg-topic", "agg-method", "sp-dataStatus", "parentURI", "parentIdDataSet"],
+      "license": "per dataset"
+    },
+    {
+      "source_family": "GBIF",
+      "api_version": "GBIF REST v1 dataset/search",
+      "strategy": "Search each biological term globally and each measurement term qualified by phytoplankton, exhaust every result page.",
+      "synonyms": ["All biological terms", "'phytoplankton' prepended to measurement terms"],
+      "filters": ["None (API lacks spatial dataset filter)"],
+      "expected_response_fields": ["key", "title", "doi", "modified", "publishingCountry", "description", "decades", "keywords", "type", "license"],
+      "license": "per dataset"
+    },
+    {
+      "source_family": "Marine Scotland",
+      "api_version": "DKAN REST node API",
+      "strategy": "Retrieve the complete dataset-node catalogue in pages and screen locally against frozen terms.",
+      "synonyms": ["N/A (Complete catalogue export)"],
+      "filters": ["parameters[type]=dataset"],
+      "expected_response_fields": ["nid", "uuid", "title", "uri", "vid", "created", "changed", "status"],
+      "license": "per dataset"
+    },
+    {
+      "source_family": "Cefas Data Hub/DASSH",
+      "api_version": "Cefas Data Portal API v2 plus PLET/DASSH catalogue",
+      "strategy": "Archive configuration, endpoint catalogue, and OpenAPI definition; exhaust holdings searches for every controlled biological and measurement term.",
+      "synonyms": ["All biological and measurement terms"],
+      "filters": ["enableThesaurus=false"],
+      "expected_response_fields": ["id", "versionId", "title", "links", "startDate", "recordsets", "status"],
+      "license": "per dataset"
+    },
+    {
+      "source_family": "ICES Figshare",
+      "api_version": "Figshare public API v2",
+      "strategy": "POST search_for ':institution: ices-library' to article search, retrieve pages using X-Cursor; archive DS22 and DS24 records directly.",
+      "synonyms": [":institution: ices-library", "DS22", "DS24"],
+      "filters": ["institution: ices-library"],
+      "expected_response_fields": ["id", "title", "doi", "url_public_html", "version", "published_date", "modified_date", "defined_type_name", "description", "tags", "keywords", "license"],
+      "license": "per article"
+    }
+  ],
+  "known_item_benchmarks": ["DS02", "DS04", "DS05", "DS06", "DS07", "DS08", "DS10", "DS16", "DS24"]
+}
