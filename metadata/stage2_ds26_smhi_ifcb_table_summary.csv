@@ -1,0 +1,4 @@
+"table_name","row_count","column_count","key_field","unique_key_count"
+"event.txt",17731,42,"id",17731
+"occurrence.txt",121103,29,"occurrenceID",121103
+"extendedmeasurementorfact.txt",1111062,14,"id|occurrenceID|measurementID",138395

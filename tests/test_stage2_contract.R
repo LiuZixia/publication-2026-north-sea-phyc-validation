@@ -264,3 +264,95 @@ test_that("DS06 remains pending despite its provisional direct-carbon tier", {
   expect_equal(summary$duplicate_record_count, 0L)
   expect_match(summary$screening_detail, "not-yet-assessed")
 })
+
+test_that("rank-2 DS26 recurrent SMHI IFCB observations are acquired and pinned", {
+  contract <- read_stage2_contract(at_root("config", "stage2_record_screening_contract.json"))
+  pin <- read.csv(at_root("metadata", "stage2_ds26_smhi_ifcb_active_run.csv"),
+                  stringsAsFactors = FALSE, check.names = FALSE)
+  manifest <- read.csv(at_root("metadata", "stage2_ds26_smhi_ifcb_acquisition_manifest.csv"),
+                       stringsAsFactors = FALSE, check.names = FALSE)
+  files <- read.csv(at_root("metadata", "stage2_ds26_smhi_ifcb_figshare_file_inventory.csv"),
+                    stringsAsFactors = FALSE, check.names = FALSE,
+                    colClasses = c(file_id = "character"))
+  expect_equal(nrow(pin), 1L)
+  expect_identical(pin$work_item_id, "REGISTER:DS26")
+  expect_equal(pin$artifact_count, 3L)
+  expect_equal(pin$total_size_bytes, 18376897)
+  expect_equal(nrow(manifest), 3L)
+  expect_silent(validate_stage2_table(manifest, "acquisition_manifest", contract))
+  expect_equal(sum(manifest$source_role == "canonical_provider"), 2L)
+  expect_equal(sum(manifest$source_role == "comparator"), 1L)
+  expect_true(all(manifest$file_validation_state == "verified"))
+  expect_true(all(manifest$license_state == "open"))
+  expect_equal(nrow(files), 4L)
+  expect_equal(sum(files$size_bytes), 8104707049)
+  expect_true(all(files$acquisition_state == "metadata_only_pending_role_and_size_review"))
+
+  run_dir <- at_root("data", "raw", pin$run_relative_path[[1]])
+  expect_identical(calculate_checksum(file.path(run_dir, "manifest.csv")),
+                   pin$manifest_checksum_sha256[[1]])
+  expect_identical(calculate_checksum(file.path(run_dir, "figshare_file_inventory.csv")),
+                   pin$figshare_inventory_checksum_sha256[[1]])
+})
+
+test_that("DS26 exact screening supports only the prespecified secondary IFCB role", {
+  contract <- read_stage2_contract(at_root("config", "stage2_record_screening_contract.json"))
+  tables <- read.csv(at_root("metadata", "stage2_ds26_smhi_ifcb_table_summary.csv"),
+                     stringsAsFactors = FALSE, check.names = FALSE)
+  measurements <- read.csv(at_root("metadata", "stage2_ds26_smhi_ifcb_measurement_summary.csv"),
+                           stringsAsFactors = FALSE, check.names = FALSE)
+  events <- read.csv(at_root("metadata", "stage2_ds26_smhi_ifcb_event_summary.csv"),
+                     stringsAsFactors = FALSE, check.names = FALSE)
+  inventory <- read.csv(at_root("metadata", "stage2_ds26_smhi_ifcb_variable_inventory.csv"),
+                        stringsAsFactors = FALSE, check.names = FALSE)
+  summary <- read.csv(at_root("metadata", "stage2_ds26_smhi_ifcb_screening_summary.csv"),
+                      stringsAsFactors = FALSE, check.names = FALSE)
+  expect_identical(tables$row_count, c(17731L, 121103L, 1111062L))
+  expect_equal(nrow(inventory), 85L)
+  expect_silent(validate_stage2_table(inventory, "variable_inventory", contract))
+  expect_equal(nrow(events), 3L)
+  expect_equal(sum(events$core_occurrence_rows), 3212L)
+  expect_equal(sum(events$external_transfer_occurrence_rows), 57844L)
+  expect_equal(sum(events$outside_domain_occurrence_rows), 60047L)
+  expect_equal(sum(events$invalid_coordinate_occurrence_rows), 0L)
+  expect_setequal(events$source_dataset, c(
+    "SHARK_PlanktonImaging_2016_SMHI_Tangesund",
+    "SHARK_PlanktonImaging_2022_2024_SMHI_Baltic",
+    "SHARK_PlanktonImaging_2022_2024_SMHI_Skagerrak_Kattegat"
+  ))
+  expect_true(all(c("Carbon content", "Biovolume concentration", "Abundance",
+                    "Classifier F1 score model accuracy", "Classifier used", "Trophic type") %in%
+                    measurements$measurement_type))
+  expect_silent(validate_stage2_table(summary, "dataset_screening_summary", contract))
+  expect_identical(summary$provisional_tier, "B")
+  expect_identical(summary$analysis_role, "lifeform_only")
+  expect_identical(summary$screening_decision, "secondary")
+  expect_equal(summary$core_record_count, 3212L)
+  expect_equal(summary$external_transfer_record_count, 57844L)
+  expect_match(summary$screening_detail, "Only four calendar years")
+  expect_match(summary$screening_detail, "machine-predicted")
+})
+
+test_that("the DS26 annotated image library is method evidence not a second network", {
+  contract <- read_stage2_contract(at_root("config", "stage2_record_screening_contract.json"))
+  pin <- read.csv(at_root("metadata", "stage2_ds26_ifcb_reference_active_run.csv"),
+                  stringsAsFactors = FALSE, check.names = FALSE)
+  manifest <- read.csv(at_root("metadata", "stage2_ds26_ifcb_reference_acquisition_manifest.csv"),
+                       stringsAsFactors = FALSE, check.names = FALSE)
+  summary <- read.csv(at_root("metadata", "stage2_ds26_ifcb_reference_summary.csv"),
+                      stringsAsFactors = FALSE, check.names = FALSE)
+  expect_equal(nrow(pin), 1L)
+  expect_equal(pin$file_count, 4L)
+  expect_equal(pin$total_size_bytes, 8104707049)
+  expect_equal(nrow(manifest), 4L)
+  expect_silent(validate_stage2_table(manifest, "acquisition_manifest", contract))
+  expect_true(all(manifest$provider_dataset_id == "FIGSHARE:25883455"))
+  expect_true(all(manifest$source_role == "comparator"))
+  expect_true(all(manifest$license_state == "open"))
+  expect_true(all(manifest$redistribution_state == "allowed"))
+  expect_true(all(grepl("not an independent monitoring network", manifest$status_detail, fixed = TRUE)))
+  expect_equal(summary$annotated_image_count, 86232L)
+  expect_equal(summary$class_count, 146L)
+  expect_false(summary$independent_monitoring_network)
+  expect_false(summary$observation_record_source)
+})

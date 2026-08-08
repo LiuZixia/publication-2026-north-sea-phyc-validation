@@ -1,0 +1,4 @@
+"source_dataset","occurrence_rows","unique_events","earliest_date","latest_date","core_occurrence_rows","external_transfer_occurrence_rows","outside_domain_occurrence_rows","invalid_coordinate_occurrence_rows","carbon_occurrence_rows","biovolume_occurrence_rows","abundance_occurrence_rows"
+"SHARK_PlanktonImaging_2016_SMHI_Tangesund",43499,2743,"2016-08-10","2016-10-17",0,43499,0,0,43499,43499,43499
+"SHARK_PlanktonImaging_2022_2024_SMHI_Baltic",60028,4705,"2022-05-19","2024-12-14",0,0,60028,0,60028,60028,60028
+"SHARK_PlanktonImaging_2022_2024_SMHI_Skagerrak_Kattegat",17576,1416,"2022-05-22","2024-12-15",3212,14345,19,0,17135,17135,17137

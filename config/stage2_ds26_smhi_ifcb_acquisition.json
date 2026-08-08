@@ -1,0 +1,20 @@
+{
+  "schema_version": "1.0.0",
+  "frozen_at_utc": "2026-08-08T19:56:00Z",
+  "classification": "stage2_ranked_canonical_provider_acquisition",
+  "work_item_id": "REGISTER:DS26",
+  "ds_id": "DS26",
+  "acquisition_rank": 2,
+  "provider": "Swedish Meteorological and Hydrological Institute (SMHI)",
+  "ipt_resource_key": "shark-planktonimaging",
+  "ipt_provider_version": "2025-02-28",
+  "ipt_archive_url": "https://www.gbif.se/ipt/archive.do?r=shark-planktonimaging",
+  "ipt_eml_url": "https://www.gbif.se/ipt/eml.do?r=shark-planktonimaging",
+  "figshare_article_id": 25883455,
+  "figshare_article_api_url": "https://api.figshare.com/v2/articles/25883455",
+  "expected_title_pattern": "SMHI IFCB Plankton Image Reference Library",
+  "acquisition_run_id": "DS26_SMHI_IFCB_20260808T195600Z",
+  "required_free_gb": 1,
+  "selection_rule": "Acquire the SMHI-published recurrent IFCB Darwin Core archive and EML as the observation source. Archive the official SciLifeLab Figshare article metadata, but do not download annotated image-library files until their method-evidence role, sizes, and licence are diagnosed from that response.",
+  "contract_path": "config/stage2_record_screening_contract.json"
+}

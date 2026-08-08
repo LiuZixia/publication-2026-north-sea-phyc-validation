@@ -42,3 +42,9 @@ stage,action,requirement,test_file,test_name,coverage
 2,5,Screen every SHARK row against the exact frozen domain and transition regions,tests/test_stage2_contract.R,DS06 variable inventory and exact spatial screen reconcile every source row,automated
 2,6,Audit cross-package SHARK duplicate candidates using provider sample identity and scientific fields,tests/test_stage2_contract.R,DS06 cross-package duplicate evidence preserves distinct scientific rows,automated
 2,7,Keep provisional tier assignment distinct from final eligibility,tests/test_stage2_contract.R,DS06 remains pending despite its provisional direct-carbon tier,automated
+2,1,Acquire rank-2 DS26 only after the rank-1 DS06 checkpoint,tests/test_stage2_contract.R,rank-2 DS26 recurrent SMHI IFCB observations are acquired and pinned,automated
+2,2,Archive the provider-managed DS26 observation files and official reference-library evidence,tests/test_stage2_contract.R,rank-2 DS26 recurrent SMHI IFCB observations are acquired and pinned,automated
+2,3,Inventory every DS26 Darwin Core table and measurement field,tests/test_stage2_contract.R,DS26 exact screening supports only the prespecified secondary IFCB role,automated
+2,5,Apply exact frozen-domain screening to every DS26 occurrence,tests/test_stage2_contract.R,DS26 exact screening supports only the prespecified secondary IFCB role,automated
+2,7,Keep machine-classified short IFCB coverage secondary to recurrent total-biomass truth,tests/test_stage2_contract.R,DS26 exact screening supports only the prespecified secondary IFCB role,automated
+2,6,Treat the annotated IFCB reference library as method evidence rather than an independent network,tests/test_stage2_contract.R,the DS26 annotated image library is method evidence not a second network,automated

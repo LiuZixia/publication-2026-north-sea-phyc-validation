@@ -1,42 +1,43 @@
 # Pending
 
-- **Updated (UTC):** 2026-08-08T19:52:37Z
-- **Current stage:** Stage 2 ranked acquisition in progress. Rank-1 DS06 canonical files and initial record screening are complete; final eligibility and later ranks remain pending. CMEMS PhyC inspection remains prohibited.
+- **Updated (UTC):** 2026-08-08T20:21:20Z
+- **Current stage:** Stage 2 ranked acquisition in progress. Ranks 1–2 are acquired and screened; rank 3 DS02 is next after validation/commit. CMEMS PhyC inspection remains prohibited.
 
 ## First Priority
 
-**Commit the validated DS06 milestone, then acquire rank-2 `REGISTER:DS26` from its canonical provider route.**
+**Validate and commit the DS26 milestone, then acquire rank-3 `REGISTER:DS02` from the canonical RWS route.**
 
-Completion evidence: versioned raw provider files, licences, checksums, schema inventory, dates, coordinates, measurement/method fields, exact domain screening, and provider/aggregator lineage are recorded under the frozen Stage 2 contract. If DS26 is an image reference library rather than a recurrent observation series, record that result and route it to its defensible method/temporal-benchmark role rather than forcing primary eligibility.
+Completion evidence for DS02: provider-version raw files and terms are archived and checksummed; overlapping RWS/PLET/EMODnet/ICES copies are linked; variables, coordinates, dates, methods, cadence, abundance/biovolume/carbon convertibility, exact domain state, and preliminary role are recorded without PhyC.
 
 ## Ordered Next Actions
 
-1. Commit the fully validated and reconciled DS06 milestone.
-2. Execute rank-2 DS26 canonical acquisition and record-level screening; distinguish the manually annotated IFCB image library from any recurrent SHARK/IFCB observation stream.
-3. Continue in frozen rank order with DS02, DS04, DS05, and DS07. Provider records remain canonical; PLET, DOME, EMODnet, EurOBIS, OBIS, GBIF, and DASSH copies are lineage/gap evidence only.
-4. Freeze the exact CMEMS product metadata and temporal coverage without downloading or inspecting PhyC values, then populate DS06 overlap potential.
-5. Carry DS06 to Stage 5 qualification: establish canonical samples, method epochs, compatible size domains/volumes, total-community completeness, quality-flag meanings, cadence, and lower/central/upper biomass construction where conversion is used.
-6. Acquire only DS08's open abundance children; contact-required carbon and biovolume children remain unavailable unless provider terms change.
-7. Resolve every licence and preliminary evidence role before Stage 2 closure; preserve all excluded and pending records.
+1. Reconcile and commit the fully validated DS26 milestone.
+2. Acquire and screen rank-3 DS02 RWS phytoplankton from its highest-resolution provider route. Do not substitute PLET or aggregator rows for canonical observations.
+3. Continue in frozen rank order with DS04, DS05, and DS07; link DASSH as a DS07 aggregator copy.
+4. Freeze exact CMEMS product identity and temporal metadata without downloading or inspecting values, then populate observation overlap potential.
+5. Carry DS06 and DS26 into later method/sample qualification. DS26 remains secondary unless a prospective amendment and independent evidence change its role.
+6. Acquire only DS08 open abundance children; contact-required carbon and biovolume remain unavailable unless terms change.
+7. Resolve all licences and roles before Stage 2 closure while preserving excluded and pending records.
 
 ## Needs User Action, Non-Blocking
 
-1. Send the seven drafts in `docs/access_requests/DRAFT_EMAILS.md`, filling sender details and recording `sent_utc`; current availability decisions already apply and no analysis waits for replies.
+1. Send the seven drafts in `docs/access_requests/DRAFT_EMAILS.md`, filling sender details and recording `sent_utc`; current availability decisions already apply.
 2. Appoint an independent scientific reviewer once preliminary results exist; review is mandatory before the Stage 7 manifest freeze.
 
 ## Warnings and Scientific Risks
 
-- DS06 confirms direct taxon-level carbon but is mainly Skagerrak/Kattegat external-transfer evidence. It cannot substitute for an independent core North Sea monitoring network.
-- DS06's 209,656 carbon rows and 186,334 biovolume rows are not sample totals. Summation before sampled-volume, method, size-domain, replicate, autotrophy, and completeness checks would overstate evidence.
-- Four provider sample IDs occur in more than one SHARK package. Their 51-field scientific rows are not exact copies and are retained; their later sample-level relationship must remain visible during harmonization.
-- Exact CMEMS temporal overlap is still `unknown`. The screening summary's zero overlap count is explicitly a not-yet-assessed placeholder under a pending decision, never evidence of absence.
-- The confirmatory core analysis still rests on uncertain Tier C abundance-to-carbon conversion through DS22; offshore evidence still rests on Tier D/E CPR.
-- No dataset is eligible merely because it is ranked, open, in-domain, or contains carbon units.
+- DS26's high row count is not long recurrence: it covers 2016 and 2022–2024 only.
+- IFCB carbon/biovolume depends on machine classification and image-derived volume. Classifier F1, size selectivity, unidentified ROIs, trophic status, and aggregation compatibility must propagate into later uncertainty.
+- DS06 and DS26 share the SMHI provider family. They cannot satisfy a two-independent-network recurrence rule in the transition region.
+- DS26 has core-coordinate rows, but this does not make the provider series independent core total-biomass truth.
+- The 8.10 GB annotated library is method evidence only; image counts must never inflate observation, event, or network counts.
+- Core/offshore confirmatory evidence still depends on later ranked providers and Tier C conversion; offshore remains Tier D/E CPR.
+- No dataset is eligible merely because it is open, high-frequency, in-domain, or reports carbon units.
 
 ## Deferred or Out of Scope
 
 - Do not inspect CMEMS PhyC until the eligible observation manifest, observation-only outcomes, recurrence labels, and validation splits are frozen.
 - Do not construct events, thresholds, recurrence, splits, or performance measures during Stage 2.
-- Do not treat source rows as independent samples or monitoring networks.
+- Do not treat source rows, occurrence rows, images, or classifier training items as independent samples or networks.
 - Do not treat missing or inadequately observed windows as negatives.
 - Do not treat total PhyC as a taxon, lifeform, or *Phaeocystis* measurement.
