@@ -31,6 +31,9 @@ ranked_output <- unlist(lapply(c(
   "scripts/00_downloads/06_acquire_ds26_smhi_ifcb.R",
   "scripts/00_downloads/07_acquire_ds26_ifcb_reference_library.R",
   "scripts/02_inventory_screen_ds26_smhi_ifcb.R",
+  "scripts/00_downloads/08_acquire_ds02_rws_catalogue.R",
+  "scripts/00_downloads/09_diagnose_ds02_rws_v3_access.R",
+  "scripts/02_screen_ds02_rws_catalogue.R",
   "scripts/02_refresh_stage2_acquisition_status.R"
 ), run_step), use.names = FALSE)
 
@@ -50,5 +53,5 @@ writeLines(c(
   "session_info:", capture.output(sessionInfo())
 ), log_path, useBytes = TRUE)
 message(sprintf(paste0(
-  "Stage 2 contract plus completed dataset-level work through DS26 validated; ",
+  "Stage 2 contract and current acquisition checkpoints through rank-3 DS02 validated; ",
   "the Stage 2 gate remains open; log: %s"), log_path))

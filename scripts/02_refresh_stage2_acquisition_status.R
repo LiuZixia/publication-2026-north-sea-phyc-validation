@@ -50,15 +50,23 @@ if (!is.null(summary)) {
   matched <- match(status$work_item_id, summary$work_item_id)
   has_summary <- !is.na(matched)
   decision <- summary$screening_decision[matched[has_summary]]
+  record_count <- summary$record_count[matched[has_summary]]
   status$current_work_state[has_summary] <- ifelse(decision == "pending", "in_progress", "complete")
-  status$acquisition_state[has_summary] <- "acquired_and_record_screened"
+  status$acquisition_state[has_summary] <- ifelse(
+    record_count > 0L, "acquired_and_record_screened", "catalogue_archived_observations_pending"
+  )
   status$screening_decision[has_summary] <- decision
   status$provisional_tier[has_summary] <- summary$provisional_tier[matched[has_summary]]
   status$status_evidence_path[has_summary] <- summary$status_evidence_path[matched[has_summary]]
   status$status_detail[has_summary] <- ifelse(
     decision == "pending",
-    paste0("Acquisition and initial record screening exist, but the per-dataset decision remains pending; ",
-           "this ranked item is not complete."),
+    ifelse(
+      record_count > 0L,
+      paste0("Acquisition and initial record screening exist, but the per-dataset decision remains ",
+             "pending; this ranked item is not complete."),
+      paste0("The canonical provider catalogue is archived and screened, but no observation records ",
+             "are acquired; this ranked item is in progress and not complete.")
+    ),
     paste0("Acquisition and record screening are complete at the dataset level with decision '",
            decision, "'.")
   )

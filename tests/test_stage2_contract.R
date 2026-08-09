@@ -64,10 +64,13 @@ test_that("the live Stage 2 status overlay distinguishes progress from the froze
   expect_identical(status$frozen_work_state, work$work_state)
   expect_identical(status$current_work_state[status$ds_id == "DS06"], "in_progress")
   expect_identical(status$current_work_state[status$ds_id == "DS26"], "complete")
-  expect_true(all(status$current_work_state[status$acquisition_rank >= 3L] == "not_started"))
+  expect_identical(status$current_work_state[status$ds_id == "DS02"], "in_progress")
+  expect_identical(status$acquisition_state[status$ds_id == "DS02"],
+                   "catalogue_archived_observations_pending")
+  expect_true(all(status$current_work_state[status$acquisition_rank >= 4L] == "not_started"))
   expect_equal(sum(status$current_work_state == "complete"), 1L)
-  expect_equal(sum(status$current_work_state == "in_progress"), 1L)
-  expect_equal(sum(status$current_work_state == "not_started"), 17L)
+  expect_equal(sum(status$current_work_state == "in_progress"), 2L)
+  expect_equal(sum(status$current_work_state == "not_started"), 16L)
   expect_false(all(status$current_work_state == "complete"))
 })
 
@@ -395,4 +398,75 @@ test_that("the DS26 annotated image library is method evidence not a second netw
   expect_equal(summary$class_count, 146L)
   expect_false(summary$independent_monitoring_network)
   expect_false(summary$observation_record_source)
+})
+
+test_that("rank-3 DS02 starts from the canonical RWS catalogue without substituting PLET", {
+  contract <- read_stage2_contract(at_root("config", "stage2_record_screening_contract.json"))
+  pin <- read.csv(at_root("metadata", "stage2_ds02_rws_catalogue_active_run.csv"),
+                  stringsAsFactors = FALSE, check.names = FALSE)
+  manifest <- read.csv(at_root("metadata", "stage2_ds02_rws_catalogue_acquisition_manifest.csv"),
+                       stringsAsFactors = FALSE, check.names = FALSE)
+  expect_equal(nrow(pin), 1L)
+  expect_identical(pin$work_item_id, "REGISTER:DS02")
+  expect_equal(pin$artifact_count, 3L)
+  expect_equal(nrow(manifest), 3L)
+  expect_silent(validate_stage2_table(manifest, "acquisition_manifest", contract))
+  expect_true(all(manifest$provider == "Rijkswaterstaat (RWS)"))
+  expect_true(all(manifest$source_role == "canonical_provider"))
+  expect_true(all(manifest$license_state == "open"))
+  expect_true(all(manifest$redistribution_state == "allowed"))
+  expect_false(any(grepl("PLET", manifest$provider)))
+
+  run_dir <- at_root("data", "raw", pin$run_relative_path[[1]])
+  expect_identical(calculate_checksum(file.path(run_dir, "manifest.csv")),
+                   pin$manifest_checksum_sha256[[1]])
+  expect_identical(calculate_checksum(file.path(run_dir, "rws_extended_catalogue.json")),
+                   pin$catalogue_checksum_sha256[[1]])
+})
+
+test_that("DS02 canonical catalogue evidence keeps observations and eligibility pending", {
+  contract <- read_stage2_contract(at_root("config", "stage2_record_screening_contract.json"))
+  links <- read.csv(at_root("metadata", "stage2_ds02_rws_catalogue_link_summary.csv"),
+                    stringsAsFactors = FALSE, check.names = FALSE)
+  summary <- read.csv(at_root("metadata", "stage2_ds02_rws_screening_summary.csv"),
+                      stringsAsFactors = FALSE, check.names = FALSE)
+  registry <- read.csv(at_root("metadata", "stage2_ds02_rws_catalogue_output_registry.csv"),
+                       stringsAsFactors = FALSE, check.names = FALSE)
+  access <- read.csv(at_root("metadata", "stage2_ds02_rws_v3_access_diagnosis.csv"),
+                     stringsAsFactors = FALSE, check.names = FALSE)
+  access_pin <- read.csv(at_root("metadata", "stage2_ds02_rws_v3_access_active_run.csv"),
+                         stringsAsFactors = FALSE, check.names = FALSE)
+  expect_equal(links$catalogue_metadata_rows, 2757L)
+  expect_equal(links$catalogue_location_rows, 2635L)
+  expect_equal(links$catalogue_metadata_location_links, 104679L)
+  expect_equal(links$core_locations, 1092L)
+  expect_equal(links$external_transfer_locations, 0L)
+  expect_equal(links$outside_domain_locations, 1543L)
+  expect_equal(links$invalid_coordinate_locations, 0L)
+  expect_equal(links$domain_linked_metadata_rows, 2158L)
+  expect_equal(links$count_or_biovolume_metadata_rows, 21L)
+  expect_equal(links$explicit_marine_phytoplankton_metadata_rows, 0L)
+  expect_equal(links$observation_rows_acquired, 0L)
+  expect_silent(validate_stage2_table(summary, "dataset_screening_summary", contract))
+  expect_identical(summary$screening_decision, "pending")
+  expect_identical(summary$provisional_tier, "C")
+  expect_equal(summary$record_count, 0L)
+  expect_match(summary$screening_detail, "no explicit marine phytoplankton", ignore.case = TRUE)
+  expect_match(summary$screening_detail, "HTTP 401")
+  expect_match(summary$screening_detail, "not substituted")
+  expect_match(summary$screening_detail, "never absence or a negative")
+  expect_equal(nrow(registry), 4L)
+  expect_true(all(file.exists(at_root(registry$path))))
+  expect_true(all(vapply(seq_len(nrow(registry)), function(i) {
+    identical(calculate_checksum(at_root(registry$path[[i]])), registry$checksum_sha256[[i]])
+  }, logical(1))))
+  expect_equal(nrow(access), 1L)
+  expect_equal(access$http_status, 401L)
+  expect_false(access$authentication_sent)
+  expect_equal(access$observation_rows_acquired, 0L)
+  expect_identical(access$access_state, "credential_or_provider_export_required")
+  expect_identical(calculate_checksum(at_root("data", "raw", access$evidence_relative_path)),
+                   access$evidence_checksum_sha256)
+  expect_identical(access_pin$response_headers_checksum_sha256,
+                   access$evidence_checksum_sha256)
 })

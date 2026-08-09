@@ -50,3 +50,8 @@ stage,action,requirement,test_file,test_name,coverage
 2,6,Treat the annotated IFCB reference library as method evidence rather than an independent network,tests/test_stage2_contract.R,the DS26 annotated image library is method evidence not a second network,automated
 2,quality,Distinguish the checksum-frozen Stage 2 work-order baseline from current per-dataset progress,tests/test_stage2_contract.R,the live Stage 2 status overlay distinguishes progress from the frozen baseline,automated
 2,quality,Audit DS26 event hierarchy before interpreting occurrence-unlinked rows,tests/test_stage2_contract.R,DS26 exact screening supports only the prespecified secondary IFCB role,automated
+2,1,Start rank-3 DS02 only after the DS26 checkpoint,tests/test_stage2_contract.R,rank-3 DS02 starts from the canonical RWS catalogue without substituting PLET,automated
+2,2,Archive and checksum the canonical RWS catalogue and official route/licence evidence,tests/test_stage2_contract.R,rank-3 DS02 starts from the canonical RWS catalogue without substituting PLET,automated
+2,3,Inventory and exact-screen the canonical RWS catalogue before observation requests,tests/test_stage2_contract.R,DS02 canonical catalogue evidence keeps observations and eligibility pending,automated
+2,7,Do not promote catalogue evidence or zero acquired records to eligibility or ecological absence,tests/test_stage2_contract.R,DS02 canonical catalogue evidence keeps observations and eligibility pending,automated
+2,2,Archive the current RWS biological API access response before declaring a credential blocker,tests/test_stage2_contract.R,DS02 canonical catalogue evidence keeps observations and eligibility pending,automated

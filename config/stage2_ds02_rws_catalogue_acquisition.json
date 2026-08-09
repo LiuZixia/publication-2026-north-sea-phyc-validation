@@ -1,0 +1,31 @@
+{
+  "schema_version": "1.0.0",
+  "frozen_at_utc": "2026-08-09T07:00:00Z",
+  "classification": "stage2_ranked_canonical_provider_catalogue_acquisition",
+  "work_item_id": "REGISTER:DS02",
+  "ds_id": "DS02",
+  "acquisition_rank": 3,
+  "provider": "Rijkswaterstaat (RWS)",
+  "provider_service": "WaterWebservices DD API 2.0",
+  "catalogue_endpoint": "https://ddapi20-waterwebservices.rijkswaterstaat.nl/METADATASERVICES/OphalenCatalogus",
+  "official_phytoplankton_page": "https://waterinfo-extra.rws.nl/monitoring/biologie/fytoplankton/",
+  "official_api_documentation_page": "https://rijkswaterstaatdata.nl/waterdata/",
+  "catalogue_filter": {
+    "Compartimenten": true,
+    "Grootheden": true,
+    "Parameters": true,
+    "Eenheden": true,
+    "Hoedanigheden": true,
+    "Typeringen": true,
+    "WaardeBewerkingsMethoden": true,
+    "BioTaxon": true,
+    "Organen": true,
+    "ProcesTypes": true
+  },
+  "acquisition_run_id": "DS02_RWS_CATALOGUE_20260809T070000Z",
+  "required_free_gb": 1,
+  "minimum_catalogue_bytes": 100000,
+  "selection_rule": "Archive the complete current RWS WaterWebservices catalogue with the official extended biological/taxon fields. Select DS02 locations and metadata from the archived catalogue before requesting observations; PLET, EMODnet, ICES, and OBIS remain duplicate/completeness comparators and never replace the canonical RWS response.",
+  "license": "CC0",
+  "contract_path": "config/stage2_record_screening_contract.json"
+}

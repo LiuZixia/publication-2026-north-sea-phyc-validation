@@ -1,0 +1,17 @@
+{
+  "schema_version": "1.0.0",
+  "frozen_at_utc": "2026-08-09T07:08:00Z",
+  "classification": "stage2_canonical_provider_access_diagnosis",
+  "work_item_id": "REGISTER:DS02",
+  "ds_id": "DS02",
+  "acquisition_rank": 3,
+  "provider": "Rijkswaterstaat (RWS)",
+  "route": "DD API V3 biological data service",
+  "endpoint": "https://ddapi-rws.ecosys.nl/index.html",
+  "request_method": "GET",
+  "authentication_sent": false,
+  "expected_http_status": 401,
+  "diagnostic_run_id": "DS02_RWS_V3_ACCESS_20260809T070800Z",
+  "required_free_gb": 1,
+  "decision_rule": "An unauthenticated HTTP 401 diagnoses that the current canonical biological API is not anonymously accessible. It does not make DS02 ecologically absent and does not authorize substitution of PLET observations. Provider credentials or a canonical RWS export are required before observation acquisition can continue."
+}
