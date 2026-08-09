@@ -29,13 +29,17 @@ inventory_path <- "metadata/stage2_ds26_smhi_ifcb_variable_inventory.csv"
 table_summary_path <- "metadata/stage2_ds26_smhi_ifcb_table_summary.csv"
 measurement_summary_path <- "metadata/stage2_ds26_smhi_ifcb_measurement_summary.csv"
 event_summary_path <- "metadata/stage2_ds26_smhi_ifcb_event_summary.csv"
+event_linkage_path <- "metadata/stage2_ds26_smhi_ifcb_event_linkage_audit.csv"
 screening_path <- "data/interim/stage2_ds26_smhi_ifcb_record_screening.csv"
 dataset_summary_path <- "metadata/stage2_ds26_smhi_ifcb_screening_summary.csv"
 registry_path <- "metadata/stage2_ds26_smhi_ifcb_output_registry.csv"
+output_schema_version <- "1.1.0"
 
 if (file.exists(registry_path)) {
   registry <- utils::read.csv(registry_path, stringsAsFactors = FALSE, check.names = FALSE)
-  valid <- nrow(registry) == 6L && all(file.exists(registry$path)) &&
+  valid <- "output_schema_version" %in% names(registry) &&
+    all(registry$output_schema_version == output_schema_version) &&
+    nrow(registry) == 7L && all(file.exists(registry$path)) &&
     all(vapply(seq_len(nrow(registry)), function(i) {
       identical(calculate_checksum(registry$path[[i]]), registry$checksum_sha256[[i]])
     }, logical(1)))
@@ -43,7 +47,14 @@ if (file.exists(registry_path)) {
     message("Verified existing DS26 inventory and screen; no rebuild required.")
     quit(save = "no", status = 0L)
   }
-  stop("DS26 output registry exists but generated artifacts differ.", call. = FALSE)
+  legacy_valid <- !"output_schema_version" %in% names(registry) && nrow(registry) == 6L &&
+    all(file.exists(registry$path)) && all(vapply(seq_len(nrow(registry)), function(i) {
+      identical(calculate_checksum(registry$path[[i]]), registry$checksum_sha256[[i]])
+    }, logical(1)))
+  if (!legacy_valid) {
+    stop("DS26 output registry exists but generated artifacts differ.", call. = FALSE)
+  }
+  message("Migrating the verified DS26 derived-output registry to event-linkage schema 1.1.0.")
 }
 
 read_member <- function(member) {
@@ -64,6 +75,70 @@ if (!identical(c(event = nrow(events), occurrence = nrow(occurrences),
 }
 event_index <- match(occurrences$id, events$id)
 if (anyNA(event_index)) stop("A DS26 occurrence lacks its Darwin Core event.", call. = FALSE)
+if (any(!measurements$id %in% events$id)) {
+  stop("A DS26 measurement/fact row lacks its Darwin Core event.", call. = FALSE)
+}
+
+# Darwin Core event.txt is hierarchical: one dataset container owns sampling_event parents,
+# which in turn own sample leaves. Occurrences attach to sample leaves, so an event-table row
+# without occurrences is not automatically a zero-detection sample or a negative window.
+occurrence_linked_event <- events$id %in% unique(occurrences$id)
+event_measurement_linked <- events$id %in% unique(measurements$id)
+event_types <- c("dataset_event", "sampling_event", "sample")
+if (!setequal(unique(events$eventType), event_types)) {
+  stop("DS26 event types differ from the audited three-level hierarchy.", call. = FALSE)
+}
+event_linkage <- do.call(rbind, lapply(event_types, function(type) {
+  index <- which(events$eventType == type)
+  data.frame(
+    event_type = type,
+    event_table_rows = length(index),
+    occurrence_linked_event_rows = sum(occurrence_linked_event[index]),
+    occurrence_unlinked_event_rows = sum(!occurrence_linked_event[index]),
+    event_measurement_linked_event_rows = sum(event_measurement_linked[index]),
+    occurrence_unlinked_with_event_measurement_rows =
+      sum(!occurrence_linked_event[index] & event_measurement_linked[index]),
+    interpretation = switch(type,
+      dataset_event = "Dataset-level hierarchy container; not a sampled window.",
+      sampling_event = paste0(
+        "Parent acquisition-event rows whose child sample leaves carry taxon occurrences; ",
+        "absence of a direct occurrence link is structural, not a zero detection."),
+      sample = paste0(
+        "Leaf sample rows. Any leaf without taxon occurrences remains unknown until provider ",
+        "and quality metadata establish whether it is a true zero detection or a publication/QC artifact.")
+    ),
+    stringsAsFactors = FALSE,
+    check.names = FALSE
+  )
+}))
+event_linkage <- rbind(event_linkage, data.frame(
+  event_type = "all_event_table_rows",
+  event_table_rows = nrow(events),
+  occurrence_linked_event_rows = sum(occurrence_linked_event),
+  occurrence_unlinked_event_rows = sum(!occurrence_linked_event),
+  event_measurement_linked_event_rows = sum(event_measurement_linked),
+  occurrence_unlinked_with_event_measurement_rows =
+    sum(!occurrence_linked_event & event_measurement_linked),
+  interpretation = paste0(
+    "Aggregate includes structural parent/container rows and must not be interpreted as a count ",
+    "of adequately observed zero-detection samples."),
+  stringsAsFactors = FALSE,
+  check.names = FALSE
+))
+sample_linkage <- event_linkage[event_linkage$event_type == "sample", , drop = FALSE]
+unlinked_sample_ids <- events$id[events$eventType == "sample" & !occurrence_linked_event]
+unlinked_sample_measurements <- measurements[
+  measurements$id %in% unlinked_sample_ids &
+    (is.na(measurements$occurrenceID) | !nzchar(measurements$occurrenceID)), , drop = FALSE
+]
+if (sample_linkage$event_table_rows != 8865L ||
+    sample_linkage$occurrence_linked_event_rows != 8864L ||
+    sample_linkage$occurrence_unlinked_event_rows != 1L ||
+    length(unlinked_sample_ids) != 1L ||
+    !any(unlinked_sample_measurements$measurementType == "Imaging instrument flag" &
+           unlinked_sample_measurements$measurementValue == "Missing cells")) {
+  stop("DS26 leaf-sample occurrence linkage differs from the audited archive state.", call. = FALSE)
+}
 
 semantic_role <- function(column_name) {
   if (column_name %in% c("id", "eventID", "parentEventID", "occurrenceID", "measurementID",
@@ -296,7 +371,13 @@ dataset_summary <- data.frame(
   screening_decision = "secondary",
   exclusion_reason_code = "none",
   screening_detail = paste0(
-    "Publisher-managed SMHI IFCB archive contains ", nrow(events) - 1L, " sampling events and ",
+    "Publisher-managed SMHI IFCB archive contains ", nrow(events),
+    " event-table rows: one dataset_event container, ",
+    sum(events$eventType == "sampling_event"), " sampling_event parents, and ",
+    sum(events$eventType == "sample"), " sample leaves. Taxon occurrences link to ",
+    sum(occurrence_linked_event & events$eventType == "sample"), " sample leaves; the one unlinked ",
+    "sample has event-level measurements and an Imaging instrument flag of 'Missing cells', so it ",
+    "remains unknown rather than a negative until provider/QC qualification resolves its meaning. The archive has ",
     nrow(occurrences), " machine-classified occurrence rows from ",
     min(occurrence_event$eventDate, na.rm = TRUE), " to ", max(occurrence_event$eventDate, na.rm = TRUE),
     ". Exact geometry retains ", sum(screening$domain_state == "core"), " core and ",
@@ -317,19 +398,22 @@ write_csv_atomic(inventory, inventory_path)
 write_csv_atomic(table_summary, table_summary_path)
 write_csv_atomic(measurement_summary, measurement_summary_path)
 write_csv_atomic(event_summary, event_summary_path)
+write_csv_atomic(event_linkage, event_linkage_path)
 write_csv_atomic(screening, screening_path)
 write_csv_atomic(dataset_summary, dataset_summary_path)
 registry <- data.frame(
   artifact_role = c("variable_inventory", "table_summary", "measurement_summary", "event_summary",
-                    "record_screening", "dataset_screening_summary"),
+                    "event_linkage_audit", "record_screening", "dataset_screening_summary"),
   path = c(inventory_path, table_summary_path, measurement_summary_path, event_summary_path,
-           screening_path, dataset_summary_path),
+           event_linkage_path, screening_path, dataset_summary_path),
   row_count = c(nrow(inventory), nrow(table_summary), nrow(measurement_summary), nrow(event_summary),
-                nrow(screening), nrow(dataset_summary)),
+                nrow(event_linkage), nrow(screening), nrow(dataset_summary)),
   checksum_sha256 = vapply(c(inventory_path, table_summary_path, measurement_summary_path,
-                             event_summary_path, screening_path, dataset_summary_path),
+                             event_summary_path, event_linkage_path, screening_path,
+                             dataset_summary_path),
                            calculate_checksum, character(1)),
   generated_from_manifest_sha256 = pin$manifest_checksum_sha256[[1]],
+  output_schema_version = output_schema_version,
   stringsAsFactors = FALSE,
   check.names = FALSE
 )

@@ -30,7 +30,8 @@ ranked_output <- unlist(lapply(c(
   "scripts/02_summarize_ds06_smhi_shark_screening.R",
   "scripts/00_downloads/06_acquire_ds26_smhi_ifcb.R",
   "scripts/00_downloads/07_acquire_ds26_ifcb_reference_library.R",
-  "scripts/02_inventory_screen_ds26_smhi_ifcb.R"
+  "scripts/02_inventory_screen_ds26_smhi_ifcb.R",
+  "scripts/02_refresh_stage2_acquisition_status.R"
 ), run_step), use.names = FALSE)
 
 test_output <- capture.output(
@@ -48,4 +49,6 @@ writeLines(c(
   "test_output:", test_output,
   "session_info:", capture.output(sessionInfo())
 ), log_path, useBytes = TRUE)
-message(sprintf("Stage 2 contract, EMODnet closure, DS06, and DS26 validation passed; log: %s", log_path))
+message(sprintf(paste0(
+  "Stage 2 contract plus completed dataset-level work through DS26 validated; ",
+  "the Stage 2 gate remains open; log: %s"), log_path))

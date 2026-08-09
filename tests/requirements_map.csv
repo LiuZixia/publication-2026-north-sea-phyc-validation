@@ -48,3 +48,5 @@ stage,action,requirement,test_file,test_name,coverage
 2,5,Apply exact frozen-domain screening to every DS26 occurrence,tests/test_stage2_contract.R,DS26 exact screening supports only the prespecified secondary IFCB role,automated
 2,7,Keep machine-classified short IFCB coverage secondary to recurrent total-biomass truth,tests/test_stage2_contract.R,DS26 exact screening supports only the prespecified secondary IFCB role,automated
 2,6,Treat the annotated IFCB reference library as method evidence rather than an independent network,tests/test_stage2_contract.R,the DS26 annotated image library is method evidence not a second network,automated
+2,quality,Distinguish the checksum-frozen Stage 2 work-order baseline from current per-dataset progress,tests/test_stage2_contract.R,the live Stage 2 status overlay distinguishes progress from the frozen baseline,automated
+2,quality,Audit DS26 event hierarchy before interpreting occurrence-unlinked rows,tests/test_stage2_contract.R,DS26 exact screening supports only the prespecified secondary IFCB role,automated

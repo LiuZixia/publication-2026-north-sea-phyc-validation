@@ -1,0 +1,5 @@
+"event_type","event_table_rows","occurrence_linked_event_rows","occurrence_unlinked_event_rows","event_measurement_linked_event_rows","occurrence_unlinked_with_event_measurement_rows","interpretation"
+"dataset_event",1,0,1,1,1,"Dataset-level hierarchy container; not a sampled window."
+"sampling_event",8865,0,8865,8865,8865,"Parent acquisition-event rows whose child sample leaves carry taxon occurrences; absence of a direct occurrence link is structural, not a zero detection."
+"sample",8865,8864,1,8865,1,"Leaf sample rows. Any leaf without taxon occurrences remains unknown until provider and quality metadata establish whether it is a true zero detection or a publication/QC artifact."
+"all_event_table_rows",17731,8864,8867,17731,8867,"Aggregate includes structural parent/container rows and must not be interpreted as a count of adequately observed zero-detection samples."

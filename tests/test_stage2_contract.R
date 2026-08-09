@@ -53,6 +53,24 @@ test_that("the Stage 1 shortlist is frozen into the exact Stage 2 rank order", {
                   "acquire_highest_resolution_canonical_provider_record_then_screen"))
 })
 
+test_that("the live Stage 2 status overlay distinguishes progress from the frozen baseline", {
+  work <- read.csv(at_root("metadata", "stage2_acquisition_work_order.csv"),
+                   stringsAsFactors = FALSE, check.names = FALSE)
+  status <- read.csv(at_root("metadata", "stage2_acquisition_status.csv"),
+                     stringsAsFactors = FALSE, check.names = FALSE)
+  expect_equal(nrow(work), 19L)
+  expect_true(all(work$work_state == "not_started"))
+  expect_identical(status$work_item_id, work$work_item_id)
+  expect_identical(status$frozen_work_state, work$work_state)
+  expect_identical(status$current_work_state[status$ds_id == "DS06"], "in_progress")
+  expect_identical(status$current_work_state[status$ds_id == "DS26"], "complete")
+  expect_true(all(status$current_work_state[status$acquisition_rank >= 3L] == "not_started"))
+  expect_equal(sum(status$current_work_state == "complete"), 1L)
+  expect_equal(sum(status$current_work_state == "in_progress"), 1L)
+  expect_equal(sum(status$current_work_state == "not_started"), 17L)
+  expect_false(all(status$current_work_state == "complete"))
+})
+
 test_that("all unmatched WFS candidates remain pending for record-level evidence", {
   contract <- read_stage2_contract(at_root("config", "stage2_record_screening_contract.json"))
   queue <- read.csv(
@@ -303,10 +321,14 @@ test_that("DS26 exact screening supports only the prespecified secondary IFCB ro
                            stringsAsFactors = FALSE, check.names = FALSE)
   events <- read.csv(at_root("metadata", "stage2_ds26_smhi_ifcb_event_summary.csv"),
                      stringsAsFactors = FALSE, check.names = FALSE)
+  linkage <- read.csv(at_root("metadata", "stage2_ds26_smhi_ifcb_event_linkage_audit.csv"),
+                      stringsAsFactors = FALSE, check.names = FALSE)
   inventory <- read.csv(at_root("metadata", "stage2_ds26_smhi_ifcb_variable_inventory.csv"),
                         stringsAsFactors = FALSE, check.names = FALSE)
   summary <- read.csv(at_root("metadata", "stage2_ds26_smhi_ifcb_screening_summary.csv"),
                       stringsAsFactors = FALSE, check.names = FALSE)
+  registry <- read.csv(at_root("metadata", "stage2_ds26_smhi_ifcb_output_registry.csv"),
+                       stringsAsFactors = FALSE, check.names = FALSE)
   expect_identical(tables$row_count, c(17731L, 121103L, 1111062L))
   expect_equal(nrow(inventory), 85L)
   expect_silent(validate_stage2_table(inventory, "variable_inventory", contract))
@@ -323,14 +345,32 @@ test_that("DS26 exact screening supports only the prespecified secondary IFCB ro
   expect_true(all(c("Carbon content", "Biovolume concentration", "Abundance",
                     "Classifier F1 score model accuracy", "Classifier used", "Trophic type") %in%
                     measurements$measurement_type))
+  expect_identical(linkage$event_type,
+                   c("dataset_event", "sampling_event", "sample", "all_event_table_rows"))
+  expect_identical(linkage$event_table_rows, c(1L, 8865L, 8865L, 17731L))
+  expect_identical(linkage$occurrence_linked_event_rows, c(0L, 0L, 8864L, 8864L))
+  expect_identical(linkage$occurrence_unlinked_event_rows, c(1L, 8865L, 1L, 8867L))
+  expect_identical(linkage$event_measurement_linked_event_rows, c(1L, 8865L, 8865L, 17731L))
+  expect_identical(linkage$occurrence_unlinked_with_event_measurement_rows,
+                   c(1L, 8865L, 1L, 8867L))
   expect_silent(validate_stage2_table(summary, "dataset_screening_summary", contract))
   expect_identical(summary$provisional_tier, "B")
   expect_identical(summary$analysis_role, "lifeform_only")
   expect_identical(summary$screening_decision, "secondary")
   expect_equal(summary$core_record_count, 3212L)
   expect_equal(summary$external_transfer_record_count, 57844L)
+  expect_match(summary$screening_detail, "17731 event-table rows")
+  expect_match(summary$screening_detail, "8864 sample leaves")
+  expect_match(summary$screening_detail, "remains unknown rather than a negative")
   expect_match(summary$screening_detail, "Only four calendar years")
   expect_match(summary$screening_detail, "machine-predicted")
+  expect_equal(nrow(registry), 7L)
+  expect_true(all(registry$output_schema_version == "1.1.0"))
+  expect_identical(registry$row_count[registry$artifact_role == "event_linkage_audit"], 4L)
+  expect_true(all(file.exists(at_root(registry$path))))
+  expect_true(all(vapply(seq_len(nrow(registry)), function(i) {
+    identical(calculate_checksum(at_root(registry$path[[i]])), registry$checksum_sha256[[i]])
+  }, logical(1))))
 })
 
 test_that("the DS26 annotated image library is method evidence not a second network", {
