@@ -2,25 +2,34 @@
 
 ## Ordered Actions
 
-1. **FIRST PRIORITY — Begin Stage 3 with temporal and cadence coverage.** Generate per-dataset/network/station/subregion/method-epoch/year coverage tables from the usable Stage 2 records, preserving unknown cadence and preventing claims finer than the observations support.
-2. **Generate Stage 3 spatial, vertical, method, and biological coverage evidence.** Produce station/subregion and effort summaries, method epochs, variable availability, potentially carbon-convertible fractions, known size-domain blind spots, and CMEMS-period overlap from product metadata only—without extracting PhyC values.
-3. **Apply the Stage 3 role gate.** Classify each dataset-region-period combination as eligible, secondary, exploratory, or unusable for each proposed analysis window and reference tier, and carry all access-driven coverage gaps into Stage 4.
+1. **FIRST PRIORITY — Execute Stage 4 observation-only feasibility and design.** Use `metadata/stage3/gate/dataset_region_period_role_gate.csv`, not dataset-wide labels, to determine independent networks, subregions, years, reference tiers, and analysis windows that can proceed. Completion requires explicit estimable/non-estimable decisions without inspecting PhyC.
+2. **Freeze target seasons and adequacy rules prospectively.** Convert the Stage 3 cadence and seasonal-effort evidence into network-specific adequately observed year/window rules; preserve positive, negative, and unknown states. Regenerate affected coverage classifications prospectively if Stage 4 rules require them.
+3. **Resolve Stage 5 compatibility prerequisites for Stage 4 candidates.** Audit sampling methods, size domains, taxonomic fields, accepted-name linkage, and abundance-to-carbon inputs. Do not treat Stage 3 `eligible` as final biomass compatibility.
+4. **Declare spatial limits and transfer units.** Identify subregions with no Tier A–C reference, retain the required Tier D/E CPR offshore arm as secondary evidence, and freeze network/region independence decisions.
+5. **Prospectively register candidate CMEMS product metadata/selection criteria at the prescribed later stage.** Until then, `cmems_metadata_overlap.csv` correctly remains unknown; do not infer no overlap and do not inspect PhyC.
+
+## Completion Criteria and Expected Outputs
+
+- A Stage 4 feasibility register covering every Stage 3 eligible combination and every frozen subregion.
+- Named independent-network, region, year, analysis-window, and reference-tier decisions with reasons and unknown states.
+- A prospective protocol amendment only if the primary question is not estimable; no post-PhyC narrowing.
+- Updated requirements/tests, calculated status, inventories, and milestone trackers for the Stage 4 gate.
 
 ## Blockers and Missing Inputs
 
-- DS28 LifeWatch HPLC lacks an exact DOI, IPT resource name, API URL, and archived payload; it is now explicitly temporarily unavailable pending provider identification.
-- Contact-required DS08 high-tier children, DS17, DS18, DS19, DS20, DS21, DS23, and DS28 remain unavailable unless provider responses and usable terms arrive; current consequences must remain applied.
+- DS08, DS23, and DS28 remain temporarily unavailable under the frozen access policy; their absence cannot be converted into biological negatives.
+- Exact candidate CMEMS product metadata is not yet prospectively frozen, so Stage 3 records temporal overlap as unknown.
+- Method epochs remain source-specific compatibility work; pooling is prohibited until resolved.
 
 ## Known Warnings and Scientific Risks
 
-- The existing `data/raw/stage2/downloaded_files_inventory.md` is a historical generated Markdown artifact in immutable raw storage; it must remain immutable and be marked superseded by the tracked generated CSV inventory.
-- The ranked Stage 2 work order is fully dispositioned, but this is not final scientific eligibility: later observation-only audits can still exclude or downgrade acquired evidence.
-- DS27 relies on the installed system `ncdump` utility because no NetCDF R package is installed. The script processes all pinned files under R control and must fail rather than emit a zero-row placeholder if that decoder is unavailable.
-- Moving or renaming raw evidence could break pinned response paths and checksums; raw files will remain immutable unless a scripted, provenance-preserving migration is demonstrably required.
-- The Stage 2 publication gate, Stage 1 regression, static checks, and deterministic inventory pass; future changes must preserve those gates.
-- The Stage 2 consolidation gate must remain an offline replay gate; any future provider acquisition must be invoked separately and explicitly.
+- The 330 Stage 3 eligible rows are not 330 independent observations; they are dataset-region-year/method-epoch/window routing combinations.
+- DS03 duplicates the DS02 RWS_MWTL independence unit and remains secondary.
+- Only DS03 and DS09 currently have defensible provider-station identities in the Stage 3 adapter evidence. Other locations are coordinate/transect proxies or reported visits.
+- Five primary candidates depend on later abundance-to-carbon conversion; uncertainty must propagate into outcome and validation stages.
+- Stage 3 does not yet establish adequately observed bloom/non-bloom windows, recurrence, event counts, or held-out feasibility.
 
 ## Deferred / Out of Scope
 
-- Stage 4 feasibility, Stage 5 harmonization/biomass conversion, and all later outcome construction remain deferred until the Stage 3 coverage gate passes.
-- CMEMS value acquisition, PhyC inspection, outcome construction, modelling, dashboards, and additional papers remain out of scope until their staged gates authorize them.
+- Stage 5 harmonization, Stage 6 outcomes/recurrence, Stage 7 manifest/splits, Stage 8 CMEMS acquisition, and all PhyC modelling remain deferred until their ordered gates.
+- No CMEMS PhyC extraction, visualization, feature selection, or performance inspection is authorized now.

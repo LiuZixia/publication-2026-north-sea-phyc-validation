@@ -1,0 +1,15 @@
+"ds_id","monitoring_network","observation_start","observation_end","candidate_cmems_product_id","candidate_product_start","candidate_product_end","temporal_overlap_state","phy_c_values_accessed"
+"DS09","AWI_SYLT","1992-08-26","2004-12-30","not_prospectively_frozen","","","unknown_until_product_metadata_is_frozen",FALSE
+"DS04","BSH","2008-02-04","2011-01-23","not_prospectively_frozen","","","unknown_until_product_metadata_is_frozen",FALSE
+"DS07","CEFAS_SMARTBUOY","2001-04-23","2019-12-22","not_prospectively_frozen","","","unknown_until_product_metadata_is_frozen",FALSE
+"DS12","CPR_SURVEY","1946-01-07","2020-12-23","not_prospectively_frozen","","","unknown_until_product_metadata_is_frozen",FALSE
+"DS27","HEREON_FERRYBOX","2002-03-01","2005-10-24","not_prospectively_frozen","","","unknown_until_product_metadata_is_frozen",FALSE
+"DS24","ICES_OSPAR_COMP4","2014-11-01","2020-12-28","not_prospectively_frozen","","","unknown_until_product_metadata_is_frozen",FALSE
+"DS16","MSS_STONEHAVEN","2000-01-06","2019-12-18","not_prospectively_frozen","","","unknown_until_product_metadata_is_frozen",FALSE
+"DS05","NOVANA","2000-01-10","2019-12-19","not_prospectively_frozen","","","unknown_until_product_metadata_is_frozen",FALSE
+"DS02","RWS_MWTL","2000-01-09","2019-10-29","not_prospectively_frozen","","","unknown_until_product_metadata_is_frozen",FALSE
+"DS03","RWS_MWTL","1990-01-01","2022-09-20","not_prospectively_frozen","","","unknown_until_product_metadata_is_frozen",FALSE
+"DS26","SMHI_IFCB","2016-08-10","2024-12-15","not_prospectively_frozen","","","unknown_until_product_metadata_is_frozen",FALSE
+"DS06","SMHI_SHARK","1994-04-12","2024-12-15","not_prospectively_frozen","","","unknown_until_product_metadata_is_frozen",FALSE
+"DS10","VLIZ_LIFEWATCH","2017-05-08","2019-12-18","not_prospectively_frozen","","","unknown_until_product_metadata_is_frozen",FALSE
+"DS11","VLIZ_LIFEWATCH","2000-01-04","2019-12-19","not_prospectively_frozen","","","unknown_until_product_metadata_is_frozen",FALSE

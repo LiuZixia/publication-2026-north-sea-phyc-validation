@@ -1,4 +1,4 @@
-# Traceability helpers for Stage 1 and Stage 2 file inventories.
+# Traceability helpers for Stage 1 through Stage 3 file inventories.
 
 normalize_repo_path <- function(path) {
   path <- gsub("\\\\", "/", path)
@@ -25,6 +25,13 @@ inventory_stage <- function(path) {
       identical(p, "scripts/02_stage2/control/98_legacy_raw_inventory.R") ||
       identical(p, "R/03_stage2_contract.R") || grepl("stage2", b, ignore.case = TRUE)) {
     return("stage2")
+  }
+
+  if (grepl("^metadata/stage3/", p) || grepl("^scripts/03_stage3/", p) ||
+      grepl("^data/interim/stage3", p) || grepl("^config/stage3_", p) ||
+      identical(p, "R/05_stage3_contract.R") || identical(p, "tests/test_stage3_coverage.R") ||
+      grepl("^outputs/(figures/stage3_|logs/stage3_)", p)) {
+    return("stage3")
   }
 
   NA_character_
@@ -75,8 +82,13 @@ producer_for_inventory <- function(path, category, scripts = script_files_for_in
   if (identical(p, "metadata/stage1/qualification/provider_access_requests.csv")) return("historical_curated_input")
   if (grepl("^outputs/logs/stage1_validation_", p)) return("scripts/01_stage1/99_validate_stage1.R")
   if (grepl("^outputs/logs/stage2_contract_validation_", p)) return("scripts/02_stage2/control/99_validate_stage2.R")
+  if (grepl("^outputs/logs/stage3_validation_", p)) return("scripts/03_stage3/00_run_stage3.R")
+  if (grepl("^data/interim/stage3_support/ds[0-9]{2}_sample_support[.]csv$", p)) {
+    return("scripts/03_stage3/01_build_coverage.R")
+  }
   if (p %in% c("metadata/stage1/inventory/file_inventory.csv",
-               "metadata/stage2/inventory/file_inventory.csv")) {
+               "metadata/stage2/inventory/file_inventory.csv",
+               "metadata/stage3/inventory/file_inventory.csv")) {
     return("scripts/00_traceability/01_build_stage_file_inventory.R")
   }
 
@@ -150,6 +162,26 @@ producer_for_inventory <- function(path, category, scripts = script_files_for_in
     "emodnet_wfs_geometry_evidence.csv" = "scripts/02_stage2/wfs/01_screen_geometry.R",
     "emodnet_wfs_screening.csv" = "scripts/02_stage2/wfs/03_resolve_survivors.R",
     "emodnet_wfs_survivor_resolution.csv" = "scripts/02_stage2/wfs/03_resolve_survivors.R",
+    "stage3_input_manifest.csv" = "scripts/03_stage3/00_build_input_manifest.R",
+    "input_manifest_checksums.csv" = "scripts/03_stage3/00_build_input_manifest.R",
+    "temporal_cadence_by_year.csv" = "scripts/03_stage3/01_build_coverage.R",
+    "temporal_cadence_by_station_year.csv" = "scripts/03_stage3/01_build_coverage.R",
+    "station_temporal_availability.csv" = "scripts/03_stage3/01_build_coverage.R",
+    "time_of_day_coverage.csv" = "scripts/03_stage3/01_build_coverage.R",
+    "seasonal_effort.csv" = "scripts/03_stage3/01_build_coverage.R",
+    "spatial_support.csv" = "scripts/03_stage3/01_build_coverage.R",
+    "vertical_support.csv" = "scripts/03_stage3/01_build_coverage.R",
+    "stage3_sample_support.csv" = "scripts/03_stage3/01_build_coverage.R",
+    "method_biological_coverage.csv" = "scripts/03_stage3/02_build_method_biology.R",
+    "method_epoch_register.csv" = "scripts/03_stage3/02_build_method_biology.R",
+    "network_year_variable_matrix.csv" = "scripts/03_stage3/02_build_method_biology.R",
+    "dataset_region_period_role_gate.csv" = "scripts/03_stage3/03_apply_role_gate.R",
+    "cmems_metadata_overlap.csv" = "scripts/03_stage3/03_apply_role_gate.R",
+    "coverage_gaps.csv" = "scripts/03_stage3/03_apply_role_gate.R",
+    "stage3_gate_status.csv" = "scripts/03_stage3/99_validate_stage3.R",
+    "stage3_output_registry.csv" = "scripts/03_stage3/98_build_output_registry.R",
+    "stage3_temporal_coverage.png" = "scripts/03_stage3/04_make_coverage_figures.R",
+    "stage3_spatial_support.png" = "scripts/03_stage3/04_make_coverage_figures.R",
     "stage_status.md" = "scripts/99_stage_status.R",
     "downloaded_files_inventory.md" = "scripts/02_stage2/control/98_legacy_raw_inventory.R"
   )
@@ -251,7 +283,7 @@ git_tracked_paths <- function() {
 }
 
 build_stage_inventory <- function(stage, raw_checksum_map, scripts = script_files_for_inventory()) {
-  stopifnot(stage %in% c("stage1", "stage2"))
+  stopifnot(stage %in% c("stage1", "stage2", "stage3"))
   repo_files <- c(
     list.files("metadata", recursive = TRUE, full.names = TRUE, all.files = FALSE),
     list.files("config", recursive = TRUE, full.names = TRUE, all.files = FALSE),
@@ -285,7 +317,8 @@ build_stage_inventory <- function(stage, raw_checksum_map, scripts = script_file
 
   safe_to_hash <- is.na(sha) & categories != "raw_evidence"
   self_inventory <- paths %in% c("metadata/stage1/inventory/file_inventory.csv",
-                                 "metadata/stage2/inventory/file_inventory.csv")
+                                 "metadata/stage2/inventory/file_inventory.csv",
+                                 "metadata/stage3/inventory/file_inventory.csv")
   safe_to_hash[self_inventory] <- FALSE
   sha[safe_to_hash] <- vapply(paths[safe_to_hash], calculate_checksum, character(1))
   checksum_source[safe_to_hash] <- "calculated_by_inventory_script"

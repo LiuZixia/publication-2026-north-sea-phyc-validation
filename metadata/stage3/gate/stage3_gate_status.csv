@@ -1,0 +1,2 @@
+"gate_state","execution_mode","stage2_work_items","complete_work_items","unavailable_work_items","observation_datasets_parsed","sample_support_units","eligible_gate_rows","secondary_gate_rows","exploratory_gate_rows","unusable_gate_rows","deterministic_replay","phy_c_values_accessed","stage4_authorized_next"
+"passed","offline_existing_stage2_evidence_no_downloads_no_phyc",19,16,3,14,826087,330,1268,51,839,TRUE,FALSE,TRUE

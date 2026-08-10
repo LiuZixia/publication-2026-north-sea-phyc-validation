@@ -119,6 +119,9 @@ if (file.exists("metadata/stage1/qualification/ds_crosswalk.csv")) {
 stage2_access_path <- "metadata/stage2/control/access_dispositions.csv"
 if (file.exists(stage2_access_path)) {
   access <- utils::read.csv(stage2_access_path, stringsAsFactors = FALSE, check.names = FALSE)
+  legacy_requests <- utils::read.csv("metadata/stage1/qualification/provider_access_requests.csv",
+                                    stringsAsFactors = FALSE, check.names = FALSE)
+  sent <- !is.na(legacy_requests$sent_utc) & nzchar(trimws(legacy_requests$sent_utc))
   required <- access$email_requirement == "required"
   ranked_unavailable <- access$in_ranked_work_order &
     access$current_stage_action == "proceed_without_dataset"
@@ -127,6 +130,8 @@ if (file.exists(stage2_access_path)) {
     kv("Required and temporarily unavailable", sum(required)),
     kv("Optional metadata enhancements", sum(access$email_requirement == "optional_enhancement")),
     kv("Ranked Stage 2 items unavailable", sum(ranked_unavailable)),
+    kv("Sent", sum(sent)),
+    kv("Drafted, awaiting a human to send", sum(!sent)),
     kv("Drafts", "docs/access_requests/DRAFT_EMAILS.md"),
     "",
     "No request carries a deadline. Required-email datasets are unavailable under the frozen policy",
@@ -184,9 +189,38 @@ if (file.exists(stage2_status_path)) {
     "A pending scientific decision or an unavailable dataset is not an ecological negative.", "")
 }
 
-# ---- Downstream stages -------------------------------------------------------
-lines <- c(lines, section("Stages 3-12"),
-  "Not started. Coverage adequacy, harmonization, recurrence labels, validation splits, and CMEMS acquisition remain pending.",
+# ---- Stage 3 and downstream stages -------------------------------------------
+stage3_gate_path <- "metadata/stage3/gate/stage3_gate_status.csv"
+if (file.exists(stage3_gate_path)) {
+  stage3 <- utils::read.csv(stage3_gate_path, stringsAsFactors = FALSE, check.names = FALSE)
+  if (nrow(stage3) == 1L && identical(stage3$gate_state, "passed")) {
+    role_gate <- utils::read.csv("metadata/stage3/gate/dataset_region_period_role_gate.csv",
+                                 stringsAsFactors = FALSE, check.names = FALSE)
+    eligible_ds <- sort(unique(role_gate$ds_id[role_gate$stage3_role == "eligible"]))
+    lines <- c(lines, section("Stage 3 — Coverage Audit and Scientific-Use Gate"),
+      kv("Gate state", stage3$gate_state),
+      kv("Stage 2 work items retained", stage3$stage2_work_items),
+      kv("Complete / unavailable", paste(stage3$complete_work_items,
+                                          stage3$unavailable_work_items, sep = " / ")),
+      kv("Observation datasets parsed", stage3$observation_datasets_parsed),
+      kv("Defensible sample/support units", fmt(stage3$sample_support_units)),
+      kv("Datasets with at least one eligible combination", paste(eligible_ds, collapse = ", ")),
+      kv("Deterministic replay", stage3$deterministic_replay),
+      kv("PhyC values accessed", stage3$phy_c_values_accessed),
+      kv("Operational description", "docs/stages/STAGE3.md"),
+      "", "Eligibility is combination-specific and still requires Stage 4 feasibility and Stage 5 compatibility.",
+      "Unavailable access remains unknown, never an ecological zero.", "")
+  } else {
+    lines <- c(lines, section("Stage 3 — Coverage Audit and Scientific-Use Gate"),
+      "In progress. A unique generated `passed` gate is not present.", "")
+  }
+} else {
+  lines <- c(lines, section("Stage 3 — Coverage Audit and Scientific-Use Gate"),
+    "In progress. A generated validation gate is not yet present.", "")
+}
+
+lines <- c(lines, section("Stages 4-12"),
+  "Pending. Stage 4 must assess observation-only feasibility before harmonization, outcomes, splits, or CMEMS acquisition.",
   "", "No CMEMS PhyC value has been acquired or inspected.", "")
 
 dir.create("outputs", showWarnings = FALSE)

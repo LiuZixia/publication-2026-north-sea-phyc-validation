@@ -50,6 +50,13 @@ stage,action,requirement,test_file,test_name,coverage
 2,6,Treat the annotated IFCB reference library as method evidence rather than an independent network,tests/test_stage2_contract.R,the DS26 annotated image library is method evidence not a second network,automated
 2,quality,Distinguish the checksum-frozen Stage 2 work-order baseline from current per-dataset progress,tests/test_stage2_contract.R,the live Stage 2 status overlay distinguishes progress from the frozen baseline,automated
 2,quality,Audit DS26 event hierarchy before interpreting occurrence-unlinked rows,tests/test_stage2_contract.R,DS26 exact screening supports only the prespecified secondary IFCB role,automated
+3,1,Retain every ranked Stage 2 work item including unavailable dispositions,tests/test_stage3_coverage.R,Stage 3 freezes the complete Stage 2 handoff,automated
+3,1,Parse every observation-bearing acquired dataset through an explicit source adapter,tests/test_stage3_coverage.R,sample support uses defensible dataset/sample keys and all observation adapters,automated
+3,2,Preserve measured variables and prohibit cross-lifeform dominance without carbon or biovolume,tests/test_stage3_coverage.R,known biological roles survive the Stage 3 audit,automated
+3,3,Calculate cadence seasonal spatial vertical method and biological coverage without inventing stations,tests/test_stage3_coverage.R,coverage outputs have stable keys and do not overstate stations,automated
+3,gate,Resolve scientific use by dataset region period window and tier without PhyC,tests/test_stage3_coverage.R,role gate is region-period-window-tier resolved and PhyC blind,automated
+3,quality,Generate every declared coverage table and non-interpolated figure,tests/test_stage3_coverage.R,required Stage 3 outputs and figures exist,automated
+3,quality,Rebuild Stage 3 deterministically from pinned evidence,scripts/03_stage3/99_validate_stage3.R,same-input checksum comparison and complete Stage 3 test suite,automated
 2,1,Start rank-3 DS02 only after the DS26 checkpoint,tests/test_stage2_contract.R,rank-3 DS02 starts from the canonical RWS catalogue without substituting PLET,automated
 2,2,Archive and checksum the canonical RWS catalogue and official route/licence evidence,tests/test_stage2_contract.R,rank-3 DS02 starts from the canonical RWS catalogue without substituting PLET,automated
 2,3,Inventory and exact-screen the canonical RWS catalogue before observation requests,tests/test_stage2_contract.R,DS02 catalogue-only checkpoint remains pinned after observation intake,automated

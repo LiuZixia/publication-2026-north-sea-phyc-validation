@@ -1,4 +1,4 @@
-# Generate complete Stage 1 and Stage 2 file inventories from the worktree and raw manifests.
+# Generate complete Stage 1 through Stage 3 file inventories from the worktree and raw manifests.
 #
 # Raw payload checksums are read from their acquisition manifests. Unregistered raw files at most
 # 25 MiB are checksummed directly; larger unregistered files remain visible as unresolved instead of
@@ -9,15 +9,18 @@ source("R/04_stage_inventory.R")
 
 dir.create("metadata/stage1/inventory", recursive = TRUE, showWarnings = FALSE)
 dir.create("metadata/stage2/inventory", recursive = TRUE, showWarnings = FALSE)
+dir.create("metadata/stage3/inventory", recursive = TRUE, showWarnings = FALSE)
 
 checksum_map <- read_manifest_checksum_map()
-inventories <- lapply(c("stage1", "stage2"), build_stage_inventory,
+inventories <- lapply(c("stage1", "stage2", "stage3"), build_stage_inventory,
                       raw_checksum_map = checksum_map)
-names(inventories) <- c("stage1", "stage2")
+names(inventories) <- c("stage1", "stage2", "stage3")
 
 utils::write.csv(inventories$stage1, "metadata/stage1/inventory/file_inventory.csv",
                  row.names = FALSE, na = "")
 utils::write.csv(inventories$stage2, "metadata/stage2/inventory/file_inventory.csv",
+                 row.names = FALSE, na = "")
+utils::write.csv(inventories$stage3, "metadata/stage3/inventory/file_inventory.csv",
                  row.names = FALSE, na = "")
 
 summary_rows <- do.call(rbind, lapply(names(inventories), function(stage) {
@@ -44,6 +47,6 @@ utils::write.csv(unresolved, "metadata/stage_file_inventory_unresolved.csv",
                  row.names = FALSE, na = "")
 
 message(sprintf(
-  "Generated Stage 1/2 inventories: %d files; %d unresolved generated/raw artifacts.",
+  "Generated Stage 1/2/3 inventories: %d files; %d unresolved generated/raw artifacts.",
   sum(vapply(inventories, nrow, integer(1))), nrow(unresolved)
 ))
