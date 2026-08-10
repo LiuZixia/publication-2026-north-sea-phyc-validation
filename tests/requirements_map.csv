@@ -57,6 +57,14 @@ stage,action,requirement,test_file,test_name,coverage
 3,gate,Resolve scientific use by dataset region period window and tier without PhyC,tests/test_stage3_coverage.R,role gate is region-period-window-tier resolved and PhyC blind,automated
 3,quality,Generate every declared coverage table and non-interpolated figure,tests/test_stage3_coverage.R,required Stage 3 outputs and figures exist,automated
 3,quality,Rebuild Stage 3 deterministically from pinned evidence,scripts/03_stage3/99_validate_stage3.R,same-input checksum comparison and complete Stage 3 test suite,automated
+4,1,Count independent primary reference routes without inspecting PhyC,tests/test_stage4_feasibility.R,Stage 4 retains all datasets and authorizes only explicit Stage 5 roles,automated
+4,2,Cover every frozen subregion and candidate window while preserving unknown adequacy,tests/test_stage4_feasibility.R,feasibility covers every frozen subregion and candidate window,automated
+4,3,Use coverage years only as a recurrence feasibility ceiling,tests/test_stage4_feasibility.R,feasibility covers every frozen subregion and candidate window,automated
+4,4,Retain provisional lifeform candidates without assigning recurrence,tests/test_stage4_feasibility.R,lifeforms and scope limitations remain observation-only and conservative,automated
+4,5,Identify method size spatial access product and event limitations,tests/test_stage4_feasibility.R,lifeforms and scope limitations remain observation-only and conservative,automated
+4,6,Declare candidate windows without promoting daily timing,tests/test_stage4_feasibility.R,window conclusions do not promote daily timing or freeze the final window,automated
+4,gate,Authorize only named Stage 5 harmonization roles,tests/test_stage4_feasibility.R,Stage 4 gate permits Stage 5 only,automated
+4,quality,Rebuild Stage 4 deterministically from Stage 3 outputs,scripts/04_stage4/99_validate_stage4.R,same-input checksum comparison and Stage 4 tests,automated
 2,1,Start rank-3 DS02 only after the DS26 checkpoint,tests/test_stage2_contract.R,rank-3 DS02 starts from the canonical RWS catalogue without substituting PLET,automated
 2,2,Archive and checksum the canonical RWS catalogue and official route/licence evidence,tests/test_stage2_contract.R,rank-3 DS02 starts from the canonical RWS catalogue without substituting PLET,automated
 2,3,Inventory and exact-screen the canonical RWS catalogue before observation requests,tests/test_stage2_contract.R,DS02 catalogue-only checkpoint remains pinned after observation intake,automated

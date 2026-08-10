@@ -219,8 +219,35 @@ if (file.exists(stage3_gate_path)) {
     "In progress. A generated validation gate is not yet present.", "")
 }
 
-lines <- c(lines, section("Stages 4-12"),
-  "Pending. Stage 4 must assess observation-only feasibility before harmonization, outcomes, splits, or CMEMS acquisition.",
+# ---- Stage 4 and downstream stages -------------------------------------------
+stage4_gate_path <- "metadata/stage4/gate/stage4_gate_status.csv"
+if (file.exists(stage4_gate_path)) {
+  stage4 <- utils::read.csv(stage4_gate_path, stringsAsFactors = FALSE, check.names = FALSE)
+  if (nrow(stage4) == 1L && stage4$gate_state == "conditional_proceed_to_stage5_harmonization") {
+    lines <- c(lines, section("Stage 4 — Feasibility and Confirmatory Design"),
+      kv("Gate state", stage4$gate_state),
+      kv("Primary validation feasibility", stage4$primary_validation_feasibility),
+      kv("Independent primary candidate networks", stage4$independent_primary_candidate_networks),
+      kv("Direct-carbon anchor networks", stage4$direct_carbon_anchor_networks),
+      kv("Conversion candidate networks", stage4$conversion_candidate_networks),
+      kv("Primary-window candidates", stage4$primary_window_candidates),
+      kv("Stage 5 harmonization authorized", stage4$stage5_harmonization_authorized),
+      kv("Stage 6 outcomes authorized", stage4$stage6_outcome_authorized),
+      kv("CMEMS acquisition authorized", stage4$cmems_acquisition_authorized),
+      kv("Operational description", "docs/stages/STAGE4.md"),
+      "", "The handoff is conditional: adequacy, conversion, events, recurrence, spatial scope,",
+      "and exact product overlap remain unresolved without PhyC inspection.", "")
+  } else {
+    lines <- c(lines, section("Stage 4 — Feasibility and Confirmatory Design"),
+      "Not passed. A unique conditional Stage 5 handoff is not present.", "")
+  }
+} else {
+  lines <- c(lines, section("Stage 4 — Feasibility and Confirmatory Design"),
+    "In progress. A generated Stage 4 gate is not yet present.", "")
+}
+
+lines <- c(lines, section("Stages 5-12"),
+  "Stage 5 may proceed only for the roles named by Stage 4; later stages remain unauthorized.",
   "", "No CMEMS PhyC value has been acquired or inspected.", "")
 
 dir.create("outputs", showWarnings = FALSE)

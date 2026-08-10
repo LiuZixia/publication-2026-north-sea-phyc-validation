@@ -2,34 +2,30 @@
 
 ## Ordered Actions
 
-1. **FIRST PRIORITY — Execute Stage 4 observation-only feasibility and design.** Use `metadata/stage3/gate/dataset_region_period_role_gate.csv`, not dataset-wide labels, to determine independent networks, subregions, years, reference tiers, and analysis windows that can proceed. Completion requires explicit estimable/non-estimable decisions without inspecting PhyC.
-2. **Freeze target seasons and adequacy rules prospectively.** Convert the Stage 3 cadence and seasonal-effort evidence into network-specific adequately observed year/window rules; preserve positive, negative, and unknown states. Regenerate affected coverage classifications prospectively if Stage 4 rules require them.
-3. **Resolve Stage 5 compatibility prerequisites for Stage 4 candidates.** Audit sampling methods, size domains, taxonomic fields, accepted-name linkage, and abundance-to-carbon inputs. Do not treat Stage 3 `eligible` as final biomass compatibility.
-4. **Declare spatial limits and transfer units.** Identify subregions with no Tier A–C reference, retain the required Tier D/E CPR offshore arm as secondary evidence, and freeze network/region independence decisions.
-5. **Prospectively register candidate CMEMS product metadata/selection criteria at the prescribed later stage.** Until then, `cmems_metadata_overlap.csv` correctly remains unknown; do not infer no overlap and do not inspect PhyC.
-
-## Completion Criteria and Expected Outputs
-
-- A Stage 4 feasibility register covering every Stage 3 eligible combination and every frozen subregion.
-- Named independent-network, region, year, analysis-window, and reference-tier decisions with reasons and unknown states.
-- A prospective protocol amendment only if the primary question is not estimable; no post-PhyC narrowing.
-- Updated requirements/tests, calculated status, inventories, and milestone trackers for the Stage 4 gate.
+1. **FIRST PRIORITY — Execute Stage 5 observation harmonization.** Build source-specific acquisition/parsing and harmonization paths for DS02, DS04, DS05, DS06, DS07, and DS16, with DS22 retained as conversion authority. Completion requires immutable registered inputs, preserved original fields, validated keys/units/quality flags, and reproducible interim tables.
+2. **Audit identity and conversion feasibility.** Resolve provider-versus-aggregator overlap and document whether the five Tier C candidates can be converted using defensible taxon/life-stage/method mappings anchored to DS06/DS22. Completion requires data-level duplicate evidence and conversion eligibility records, not narrative assumptions.
+3. **Freeze the remaining observation-only design inputs before Stage 6.** Obtain and register prospective target-season definitions, minimum observations, maximum allowable gaps, and the decision on whether an offshore central/northern spatial unit requires a protocol amendment. Completion requires machine-readable parameters and a dated rationale before outcomes are constructed.
+4. **Reassess the Stage 4 gate from harmonized observations.** Calculate adequately sampled years, independent network support, event-count potential, and lifeform recurrence potential without PhyC. Completion requires an updated deterministic gate that either authorizes Stage 6 or records the specific failed criteria.
 
 ## Blockers and Missing Inputs
 
-- DS08, DS23, and DS28 remain temporarily unavailable under the frozen access policy; their absence cannot be converted into biological negatives.
-- Exact candidate CMEMS product metadata is not yet prospectively frozen, so Stage 3 records temporal overlap as unknown.
-- Method epochs remain source-specific compatibility work; pooling is prohibited until resolved.
+- Numeric target-season adequacy parameters are not prospectively specified: target seasons, minimum observations, and maximum gaps require a scientific decision before Stage 6.
+- The two frozen hydrographic polygons cannot separately diagnose the anticipated offshore central/northern evidence gap; changing spatial units requires a prospective protocol amendment.
+- Event counts and observed recurrence remain unavailable until Stage 5 harmonization and Stage 6 observation-only construction.
+- Exact CMEMS product identifier, version, variable, depth, extraction, masking, and collocation metadata remain unfrozen; CMEMS acquisition is not authorized.
+- Source access, licenses, schemas, and downloadable records for the six primary candidates must be confirmed through the scripted Stage 5 acquisition workflow.
 
 ## Known Warnings and Scientific Risks
 
-- The 330 Stage 3 eligible rows are not 330 independent observations; they are dataset-region-year/method-epoch/window routing combinations.
-- DS03 duplicates the DS02 RWS_MWTL independence unit and remains secondary.
-- Only DS03 and DS09 currently have defensible provider-station identities in the Stage 3 adapter evidence. Other locations are coordinate/transect proxies or reported visits.
-- Five primary candidates depend on later abundance-to-carbon conversion; uncertainty must propagate into outcome and validation stages.
-- Stage 3 does not yet establish adequately observed bloom/non-bloom windows, recurrence, event counts, or held-out feasibility.
+- The Stage 4 gate is `conditional_proceed_to_stage5_harmonization`; primary validation feasibility is `not_yet_demonstrated`.
+- Coverage-year counts are feasibility ceilings, not adequately sampled years, negative windows, or recurrence evidence.
+- Stage 3 `eligible` means permitted to enter compatibility/design checks, not final inclusion.
+- DS06 is the only Tier A direct-carbon anchor. The other five primary networks depend on scientifically defensible Tier C conversion and may fail after record-level audit.
+- Daily validation is not a confirmatory candidate on current evidence. The primary window remains unresolved between `7_day` and `cadence_matched` pending adequacy and event auditing.
+- Confirmatory lifeform strata are not frozen; Stage 4 contains only recurrence potential and protocol-defined reference routes.
 
 ## Deferred / Out of Scope
 
-- Stage 5 harmonization, Stage 6 outcomes/recurrence, Stage 7 manifest/splits, Stage 8 CMEMS acquisition, and all PhyC modelling remain deferred until their ordered gates.
-- No CMEMS PhyC extraction, visualization, feature selection, or performance inspection is authorized now.
+- Stage 6 outcomes, events, recurrence strata, and validation splits remain unauthorized.
+- CMEMS PhyC acquisition, inspection, matching, tuning, and performance evaluation remain unauthorized.
+- Dataset discovery is not being reopened merely because only six networks currently have a primary Stage 5 role; all 19 retained Stage 2 datasets remain represented in the provisional manifest.

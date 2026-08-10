@@ -1,0 +1,8 @@
+"question","stage4_state","next_gate","phy_c_inspected"
+"primary_total_biomass_validation","conditionally_supportable_for_stage5_harmonization_only","stage5",FALSE
+"network_transfer","potentially_supportable_six_independent_primary_candidates","stage5_stage7",FALSE
+"region_transfer","potentially_supportable_two_broad_regions_only","spatial_amendment_stage5_stage7",FALSE
+"heldout_event_evaluation","not_yet_estimable_without_events","stage6_stage7",FALSE
+"lifeform_stratified_validation","not_yet_estimable_without_converted_dominance_and_recurrence","stage5_stage6",FALSE
+"basin_wide_offshore_claim","not_operationally_assessable_with_current_spatial_units","protocol_decision",FALSE
+"daily_confirmatory_validation","not_confirmatory","none_secondary_only",FALSE

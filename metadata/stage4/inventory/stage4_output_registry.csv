@@ -1,0 +1,9 @@
+"path","checksum_sha256","size_bytes"
+"metadata/stage4/feasibility/lifeform_feasibility.csv","56953c4c2708576c7eafca8aba9f08aae818a1d6ac507c264a82368eaf65a077",963
+"metadata/stage4/feasibility/provisional_dataset_manifest.csv","e7ed33e90063d4908c050900a37b5f40bab812c2a659c3b1c7d00b3c0433229f",6108
+"metadata/stage4/feasibility/question_feasibility.csv","2fb3273385818d038a313b4c88596e17741ba71d473b6c63197707b4707f98c5",766
+"metadata/stage4/feasibility/scope_limitations.csv","066080d28c3ec199ca2acc694e7da7dd427efdbfddf90cd8e3f4a1c231b37a0b",1228
+"metadata/stage4/feasibility/subregion_window_feasibility.csv","52e27cba18cac53f2b5a73af65c90f0653f053af1e0ee61182da48a63a10e64d",2544
+"metadata/stage4/feasibility/window_candidate_register.csv","5817100b251933a2fc99e58be3b0c1037a18a12166ceaee5f7dc600aa16bb8a9",521
+"metadata/stage4/gate/stage4_gate_status.csv","93de717dcf0a47f0f4fcc7b7f4081ba7b5dcad98ccdbc13f551e76867330797e",622
+"outputs/reports/stage4_feasibility.md","aea5707bc1989243f1eae26bb598dd0b6413bd9f3a29426e2505dfc34acf50ec",5493

@@ -1,0 +1,9 @@
+decision_id,decision_state,registered_value,scientific_basis,downstream_consequence
+primary_reference_route,frozen,tier_c_abundance_to_carbon_expected_with_ds06_direct_carbon_anchor,README observation-adequacy limit and Stage 4 action 9,Stage 5 must carry conversion uncertainty and may not promote lower-tier comparators
+primary_window,frozen_candidate_set_not_final,7_day|cadence_matched,Stage 3 independent-network and recurrence-year-count ceilings,Stage 7 must freeze one primary window before PhyC acquisition
+daily_window,frozen_role,not_confirmatory,Daily support lacks recurrence-year-count potential across both frozen subregions,Daily analyses may be secondary only where observation cadence supports them
+target_bloom_season,decision_required,not_yet_prespecified,Outcome protocol requires a prospective network-specific target season,Adequately sampled years cannot yet be calculated
+adequacy_minimum_observations,decision_required,not_yet_prespecified,No numeric rule exists in the frozen protocols,Adequately observed positive negative and unknown windows cannot yet be constructed
+adequacy_maximum_gap,decision_required,not_yet_prespecified,No numeric rule exists in the frozen protocols,Adequately sampled years and recurrence cannot yet be calculated
+offshore_spatial_unit,protocol_amendment_required,not_represented_by_current_two_polygon_scheme,Stage 4 action 2 requires an offshore central and northern adequacy decision,Basin-wide offshore adequacy cannot be declared from the broad core polygon
+cmems_product_metadata,scheduled_later_stage,not_prospectively_frozen,Stages 7 and 8 own product freeze and audit,Temporal overlap remains unknown and no PhyC access is authorized

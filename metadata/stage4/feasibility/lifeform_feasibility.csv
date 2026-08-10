@@ -1,0 +1,6 @@
+"lifeform","prospective_role","primary_networks_with_lifeform_fields","primary_networks_with_direct_carbon_or_biovolume","recurrence_state","dominance_state","confirmatory_now","phy_c_inspected"
+"diatom","confirmatory_candidate_pending_stage5_stage6",6,1,"not_calculated_before_stage6","pending_stage5_carbon_or_biovolume_shares",FALSE,FALSE
+"phaeocystis_haptophyte","confirmatory_candidate_pending_stage5_stage6",6,1,"not_calculated_before_stage6","pending_stage5_carbon_or_biovolume_shares",FALSE,FALSE
+"dinoflagellate","confirmatory_candidate_pending_stage5_stage6",6,1,"not_calculated_before_stage6","pending_stage5_carbon_or_biovolume_shares",FALSE,FALSE
+"coccolithophore","exploratory_unless_stage6_rules_pass",6,1,"not_calculated_before_stage6","pending_stage5_carbon_or_biovolume_shares",FALSE,FALSE
+"pico_nanophytoplankton","exploratory_unless_stage6_rules_pass",6,1,"not_calculated_before_stage6","pending_stage5_carbon_or_biovolume_shares",FALSE,FALSE

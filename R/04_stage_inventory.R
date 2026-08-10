@@ -34,6 +34,13 @@ inventory_stage <- function(path) {
     return("stage3")
   }
 
+  if (grepl("^metadata/stage4/", p) || grepl("^scripts/04_stage4/", p) ||
+      grepl("^config/stage4_", p) || identical(p, "R/06_stage4_contract.R") ||
+      identical(p, "tests/test_stage4_feasibility.R") || identical(p, "docs/stages/STAGE4.md") ||
+      grepl("^outputs/(reports/stage4_|logs/stage4_)", p)) {
+    return("stage4")
+  }
+
   NA_character_
 }
 
@@ -83,12 +90,14 @@ producer_for_inventory <- function(path, category, scripts = script_files_for_in
   if (grepl("^outputs/logs/stage1_validation_", p)) return("scripts/01_stage1/99_validate_stage1.R")
   if (grepl("^outputs/logs/stage2_contract_validation_", p)) return("scripts/02_stage2/control/99_validate_stage2.R")
   if (grepl("^outputs/logs/stage3_validation_", p)) return("scripts/03_stage3/00_run_stage3.R")
+  if (grepl("^outputs/logs/stage4_validation_", p)) return("scripts/04_stage4/00_run_stage4.R")
   if (grepl("^data/interim/stage3_support/ds[0-9]{2}_sample_support[.]csv$", p)) {
     return("scripts/03_stage3/01_build_coverage.R")
   }
   if (p %in% c("metadata/stage1/inventory/file_inventory.csv",
                "metadata/stage2/inventory/file_inventory.csv",
-               "metadata/stage3/inventory/file_inventory.csv")) {
+               "metadata/stage3/inventory/file_inventory.csv",
+               "metadata/stage4/inventory/file_inventory.csv")) {
     return("scripts/00_traceability/01_build_stage_file_inventory.R")
   }
 
@@ -182,6 +191,15 @@ producer_for_inventory <- function(path, category, scripts = script_files_for_in
     "stage3_output_registry.csv" = "scripts/03_stage3/98_build_output_registry.R",
     "stage3_temporal_coverage.png" = "scripts/03_stage3/04_make_coverage_figures.R",
     "stage3_spatial_support.png" = "scripts/03_stage3/04_make_coverage_figures.R",
+    "provisional_dataset_manifest.csv" = "scripts/04_stage4/00_build_feasibility.R",
+    "subregion_window_feasibility.csv" = "scripts/04_stage4/00_build_feasibility.R",
+    "window_candidate_register.csv" = "scripts/04_stage4/00_build_feasibility.R",
+    "lifeform_feasibility.csv" = "scripts/04_stage4/00_build_feasibility.R",
+    "scope_limitations.csv" = "scripts/04_stage4/00_build_feasibility.R",
+    "question_feasibility.csv" = "scripts/04_stage4/00_build_feasibility.R",
+    "stage4_gate_status.csv" = "scripts/04_stage4/99_validate_stage4.R",
+    "stage4_output_registry.csv" = "scripts/04_stage4/98_build_output_registry.R",
+    "stage4_feasibility.md" = "scripts/04_stage4/01_build_report.R",
     "stage_status.md" = "scripts/99_stage_status.R",
     "downloaded_files_inventory.md" = "scripts/02_stage2/control/98_legacy_raw_inventory.R"
   )
@@ -283,7 +301,7 @@ git_tracked_paths <- function() {
 }
 
 build_stage_inventory <- function(stage, raw_checksum_map, scripts = script_files_for_inventory()) {
-  stopifnot(stage %in% c("stage1", "stage2", "stage3"))
+  stopifnot(stage %in% c("stage1", "stage2", "stage3", "stage4"))
   repo_files <- c(
     list.files("metadata", recursive = TRUE, full.names = TRUE, all.files = FALSE),
     list.files("config", recursive = TRUE, full.names = TRUE, all.files = FALSE),
@@ -318,7 +336,8 @@ build_stage_inventory <- function(stage, raw_checksum_map, scripts = script_file
   safe_to_hash <- is.na(sha) & categories != "raw_evidence"
   self_inventory <- paths %in% c("metadata/stage1/inventory/file_inventory.csv",
                                  "metadata/stage2/inventory/file_inventory.csv",
-                                 "metadata/stage3/inventory/file_inventory.csv")
+                                 "metadata/stage3/inventory/file_inventory.csv",
+                                 "metadata/stage4/inventory/file_inventory.csv")
   safe_to_hash[self_inventory] <- FALSE
   sha[safe_to_hash] <- vapply(paths[safe_to_hash], calculate_checksum, character(1))
   checksum_source[safe_to_hash] <- "calculated_by_inventory_script"
