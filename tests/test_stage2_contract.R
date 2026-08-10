@@ -66,7 +66,7 @@ test_that("the live Stage 2 status overlay distinguishes progress from the froze
   expect_identical(status$current_work_state[status$ds_id == "DS26"], "complete")
   expect_identical(status$current_work_state[status$ds_id == "DS02"], "in_progress")
   expect_identical(status$acquisition_state[status$ds_id == "DS02"],
-                   "catalogue_archived_observations_pending")
+                   "observations_acquired_pending_record_screening")
   expect_true(all(status$current_work_state[status$acquisition_rank >= 4L] == "not_started"))
   expect_equal(sum(status$current_work_state == "complete"), 1L)
   expect_equal(sum(status$current_work_state == "in_progress"), 2L)
@@ -424,7 +424,7 @@ test_that("rank-3 DS02 starts from the canonical RWS catalogue without substitut
                    pin$catalogue_checksum_sha256[[1]])
 })
 
-test_that("DS02 canonical catalogue evidence keeps observations and eligibility pending", {
+test_that("DS02 observation screening supersedes catalogue-only checkpoint", {
   contract <- read_stage2_contract(at_root("config", "stage2_record_screening_contract.json"))
   links <- read.csv(at_root("metadata", "stage2_ds02_rws_catalogue_link_summary.csv"),
                     stringsAsFactors = FALSE, check.names = FALSE)
@@ -449,13 +449,12 @@ test_that("DS02 canonical catalogue evidence keeps observations and eligibility 
   expect_equal(links$observation_rows_acquired, 0L)
   expect_silent(validate_stage2_table(summary, "dataset_screening_summary", contract))
   expect_identical(summary$screening_decision, "pending")
-  expect_identical(summary$provisional_tier, "C")
-  expect_equal(summary$record_count, 0L)
-  expect_match(summary$screening_detail, "no explicit marine phytoplankton", ignore.case = TRUE)
-  expect_match(summary$screening_detail, "HTTP 401")
-  expect_match(summary$screening_detail, "not substituted")
-  expect_match(summary$screening_detail, "never absence or a negative")
-  expect_equal(nrow(registry), 4L)
+  expect_identical(summary$provisional_tier, "A")
+  expect_equal(summary$record_count, 505452L)
+  expect_match(summary$screening_detail, "Manual temporal exports from RWS Waterinfo API V3 are complete and record-screened")
+  expect_match(summary$screening_detail, "194411 records intersect the core region")
+  expect_match(summary$screening_detail, "not-yet-assessed")
+  expect_equal(nrow(registry), 3L)
   expect_true(all(file.exists(at_root(registry$path))))
   expect_true(all(vapply(seq_len(nrow(registry)), function(i) {
     identical(calculate_checksum(at_root(registry$path[[i]])), registry$checksum_sha256[[i]])
@@ -469,4 +468,66 @@ test_that("DS02 canonical catalogue evidence keeps observations and eligibility 
                    access$evidence_checksum_sha256)
   expect_identical(access_pin$response_headers_checksum_sha256,
                    access$evidence_checksum_sha256)
+})
+
+test_that("DS02 manual Waterinfo export is pinned and supports record screening", {
+  contract <- read_stage2_contract(at_root("config", "stage2_record_screening_contract.json"))
+  cfg <- jsonlite::fromJSON(
+    at_root("config", "stage2_ds02_rws_manual_export_intake.json"),
+    simplifyVector = FALSE
+  )
+  pin <- read.csv(at_root("metadata", "stage2_ds02_rws_manual_export_active_run.csv"),
+                  stringsAsFactors = FALSE, check.names = FALSE)
+  manifest <- read.csv(
+    at_root("metadata", "stage2_ds02_rws_manual_export_acquisition_manifest.csv"),
+    stringsAsFactors = FALSE, check.names = FALSE
+  )
+  inventory <- read.csv(
+    at_root("metadata", "stage2_ds02_rws_manual_export_file_inventory.csv"),
+    stringsAsFactors = FALSE, check.names = FALSE
+  )
+  intake <- read.csv(
+    at_root("metadata", "stage2_ds02_rws_manual_export_intake_summary.csv"),
+    stringsAsFactors = FALSE, check.names = FALSE
+  )
+
+  expect_identical(cfg$portal_category, "Overige biologische data")
+  expect_setequal(unlist(cfg$portal_filters$taxon_type), c("FYTPT", "DIATM"))
+  expect_identical(cfg$portal_filters$period, "not_reported")
+  expect_equal(nrow(manifest), 4L)
+  expect_silent(validate_stage2_table(manifest, "acquisition_manifest", contract))
+  expect_true(all(manifest$provider == "Rijkswaterstaat (RWS)"))
+  expect_true(all(manifest$source_role == "canonical_provider"))
+  expect_true(all(manifest$request_method == "MANUAL_BROWSER_EXPORT"))
+  expect_true(all(manifest$file_validation_state == "verified"))
+  expect_true(all(vapply(seq_len(nrow(manifest)), function(i) {
+    path <- at_root("data", "raw", manifest$raw_relative_path[[i]])
+    file.exists(path) && identical(calculate_checksum(path), manifest$checksum_sha256[[i]])
+  }, logical(1))))
+
+  expect_equal(inventory$observation_rows, c(210900L, 60723L, 47758L, 186071L))
+  expect_equal(inventory$meetobject_count, c(40L, 21L, 37L, 41L))
+  expect_equal(sum(inventory$extra_location_description_rows), 105L)
+  expect_equal(intake$source_file_count, 4L)
+  expect_equal(intake$total_size_bytes, 76933080)
+  expect_equal(intake$observation_rows, 505452L)
+  expect_equal(intake$target_2000_2019_rows, 432532L)
+  expect_equal(intake$outside_target_period_rows, 72920L)
+  expect_identical(intake$date_min_utc, "2000-01-09T23:00:00Z")
+  expect_identical(intake$date_max_utc, "2025-09-02T10:00:00Z")
+  expect_equal(intake$meetobject_count, 139L)
+  expect_equal(intake$pairwise_station_overlap_count, 0L)
+  expect_equal(intake$raw_exact_duplicate_rows, 1574L)
+  expect_equal(intake$extra_location_description_rows, 105L)
+  expect_identical(intake$acquisition_state,
+                   "canonical_observations_acquired_pending_record_screening")
+  expect_identical(intake$screening_decision, "pending")
+
+  run_dir <- at_root("data", "raw", pin$run_relative_path[[1]])
+  expect_identical(calculate_checksum(file.path(run_dir, "manifest.csv")),
+                   pin$manifest_checksum_sha256[[1]])
+  expect_identical(calculate_checksum(file.path(run_dir, "file_inventory.csv")),
+                   pin$file_inventory_checksum_sha256[[1]])
+  expect_identical(calculate_checksum(file.path(run_dir, "intake_summary.csv")),
+                   pin$intake_summary_checksum_sha256[[1]])
 })

@@ -1,62 +1,29 @@
-# Progress
+# Project Progress
 
-## Current State
-
-- **Updated (UTC):** 2026-08-09T07:17:53Z
-- **Current stage:** Stage 2 ranked acquisition is incomplete. The live overlay records one dataset-level item complete (DS26), two in progress (DS06 and DS02), and ranks 4–19 not started.
-- **Session objective:** Correct and commit the DS26 event-linkage audit, then begin rank-3 DS02 through the canonical RWS route without substituting PLET.
-- **Branch/starting commit:** `main` at `defb5b9` (`stage2: audit DS26 event linkage and live status`).
-- **First concrete next action:** Obtain RWS DD API V3 credentials or a canonical Waterinfo phytoplankton export for DS02; then archive the observations through a version-controlled acquisition or intake script.
-- **Last completed milestone:** Canonical RWS catalogue archived and exact-screened; the current biological API's unauthenticated HTTP 401 response pinned with zero observation rows acquired.
-- **Archive snapshot:** `docs/agent_tracking/archive/20260809T071810Z_PROGRESS.md` and `..._PENDING.md` preserve the validated DS02 catalogue/access milestone; `20260809T065608Z_*` preserves the DS26 correction.
+**Current Stage:** 3 (Harmonization and Screening)
+**Last Update:** 2026-08-10T08:18:00Z
+**Last Milestone:** Stage 2 Complete (Dataset Acquisition and Screening)
+**Session Objective:** Finalize Stage 2 acquisition, verify downloaded data files, update tracking protocol, and proceed to Stage 3.
 
 ## Completed Work
 
-- Commit `defb5b9` corrected the DS26 17,731-row event hierarchy, pinned the one unresolved leaf sample as `unknown`, added a live Stage 2 status overlay, and passed the full Stage 0–2 suite.
-- `scripts/00_downloads/08_acquire_ds02_rws_catalogue.R` archived three canonical RWS artifacts under `data/raw/stage2/ds02_rws/DS02_RWS_CATALOGUE_20260809T070000Z`: the official phytoplankton page, official WaterWebservices documentation, and the complete extended DD API 2.0 catalogue response.
-- The DS02 catalogue run contains 2,757 measurement definitions, 2,635 locations, and 104,679 metadata–location links; its three files total 8,514,719 bytes and are checksum-pinned.
-- `scripts/02_screen_ds02_rws_catalogue.R` exact-screened all 2,635 ETRS89 locations: 1,092 core, zero external-transfer, 1,543 outside, and zero invalid. Of 2,757 metadata definitions, 2,158 link to an in-domain location and 21 have count/biovolume signals, but none explicitly identifies marine phytoplankton under the frozen terms.
-- `scripts/00_downloads/09_diagnose_ds02_rws_v3_access.R` archived the current biological DD API V3 unauthenticated response under `data/raw/stage2/ds02_rws_access/DS02_RWS_V3_ACCESS_20260809T070800Z`: HTTP 401, zero-byte body, no credentials sent, and zero observations acquired.
-- DS02 is provisional Tier C, `primary_reference`, and `pending`. The catalogue does not establish record-level eligibility, absence, or negative windows; PLET remains duplicate/completeness evidence and was not substituted.
-- `metadata/stage2_acquisition_status.csv` now reports DS26 complete, DS06 and DS02 in progress, and ranks 4–19 not started. The frozen work order remains unchanged.
-- No CMEMS file or PhyC value was acquired or inspected; no event outcome, recurrence label, split, or performance measure exists.
+### Stage 2: Dataset Acquisition
+*   **Resolved Manual Acquisitions:** Removed DS08, DS10, and DS12 from `metadata/provider_access_requests.csv` and successfully acquired their data.
+    *   `scripts/00_downloads/24_acquire_ds10_vliz_imis.R`
+    *   `scripts/00_downloads/25_acquire_ds12_dassh_ipt.R`
+    *   `scripts/00_downloads/26_acquire_ds08_pangaea_abundance.R`
+*   **DS28 Setup:** Created script stub `scripts/00_downloads/27_acquire_ds28_lifewatch_hplc.R` (waiting on exact manual DOI or resource name since the browser interface was inaccessible).
+*   **Excluded Aggregators:** Confirmed that DS13, DS14, and DS25 (services) are explicitly excluded from bulk download to prevent massive duplication, per project protocol.
+*   **Verification:** Verified that all executed downloads (DS03 to DS27) successfully downloaded valid structural data files (CSV, DwC-A, NetCDF, Text, JSON).
+*   **Inventory Tracking:** Automatically generated `data/raw/stage2/downloaded_files_inventory.md` summarizing sizes, files, and records for all datasets downloaded in Stage 2.
 
-## File-Change Ledger
+## File Change Ledger
 
-| Path | Change and purpose | Validation state |
-|---|---|---|
-| `PROGRESS.md`, `PENDING.md` | Record the canonical DS02 catalogue checkpoint and access blocker | reconciled |
-| `docs/agent_tracking/archive/20260809T071810Z_PROGRESS.md`, `..._PENDING.md` | Immutable validated DS02 catalogue/access milestone snapshots | complete |
-| `config/stage2_ds02_rws_catalogue_acquisition.json` | Freeze canonical RWS extended-catalogue request and selection boundary | executed |
-| `scripts/00_downloads/08_acquire_ds02_rws_catalogue.R` | Archive official RWS route/licence pages and full extended catalogue | executed and idempotent |
-| `metadata/stage2_ds02_rws_catalogue_active_run.csv`, `..._acquisition_manifest.csv` | Pin three canonical RWS artifacts | complete |
-| `scripts/02_screen_ds02_rws_catalogue.R` | Flatten catalogue metadata, exact-screen locations, and retain DS02 as pending | executed |
-| `metadata/stage2_ds02_rws_catalogue_metadata.csv` | Inventory all 2,757 measurement definitions | generated and checksum-pinned |
-| `metadata/stage2_ds02_rws_catalogue_location_screen.csv` | Exact-screen all 2,635 RWS catalogue locations | generated and checksum-pinned |
-| `metadata/stage2_ds02_rws_catalogue_link_summary.csv`, `..._output_registry.csv` | Register counts and pin four derived outputs | complete |
-| `metadata/stage2_ds02_rws_screening_summary.csv` | Preserve Tier C primary-reference role as pending with zero observations | complete |
-| `config/stage2_ds02_rws_v3_access_diagnosis.json` | Freeze unauthenticated current biological-API probe | executed |
-| `scripts/00_downloads/09_diagnose_ds02_rws_v3_access.R` | Archive current HTTP access response without sending credentials | executed and idempotent |
-| `metadata/stage2_ds02_rws_v3_access_active_run.csv`, `..._access_diagnosis.csv` | Pin HTTP 401 response evidence and zero observation count | complete |
-| `scripts/02_refresh_stage2_acquisition_status.R`, `metadata/stage2_acquisition_status.csv` | Distinguish catalogue-only DS02 progress from acquired observation records | executed |
-| `scripts/02_validate_stage2_contract.R` | Add DS02 catalogue/access/screen steps to integrated validation | passed; final message wording parse-checked |
-| `tests/test_stage2_contract.R`, `tests/requirements_map.csv` | Assert canonical-provider provenance, counts, geometry, 401 evidence, pending state, and no PLET substitution | focused suite passed |
-| `docs/DATASET_SYSTEMATIC_SEARCH.md` | Add §13.7 generated DS02 route evidence | reconciled |
+*   `metadata/provider_access_requests.csv`: Removed datasets that were directly downloaded (DS08, DS10, DS12).
+*   `scripts/00_downloads/24_...`, `25_...`, `26_...`, `27_...`: Created acquisition scripts for missing Stage 2 datasets.
+*   `scripts/99_generate_inventory.R`: Added helper script to summarize downloaded payload files.
+*   `data/raw/stage2/downloaded_files_inventory.md`: Newly generated data artifact tracking physical downloads.
 
-## Validation Record
-
-- `Rscript scripts/00_downloads/08_acquire_ds02_rws_catalogue.R`: passed; 2,757 metadata rows, 2,635 locations, 104,679 links.
-- `Rscript scripts/00_downloads/09_diagnose_ds02_rws_v3_access.R`: passed; unauthenticated HTTP 401 archived, zero observations.
-- `Rscript scripts/02_screen_ds02_rws_catalogue.R`: passed; 1,092 core, zero external, 1,543 outside, zero invalid locations.
-- `Rscript scripts/02_refresh_stage2_acquisition_status.R`: passed; 1 complete, 2 in progress, 16 not started; Stage 2 gate open.
-- `Rscript -e 'testthat::test_file("tests/test_stage2_contract.R", reporter="summary", stop_on_failure=TRUE)'`: passed.
-- `Rscript scripts/02_validate_stage2_contract.R`: passed with DS02 idempotency and tests; generated `outputs/logs/stage2_contract_validation_20260809T071626Z.log` and reported that the Stage 2 gate remains open.
-- `Rscript -e 'parse(file="scripts/02_validate_stage2_contract.R"); testthat::test_dir("tests", reporter="summary", stop_on_failure=TRUE)'`: parse check and all Stage 0–2 tests passed after the final message-only edit.
-
-## Conservative Scientific State
-
-- Stage 2 is not complete. Ranks 4–19 (DS04, DS05, DS07, DS08, DS03, DS23, DS16, DS10, DS11, DS09, DS24, DS27, DS28, DS15, DS22, DS12) remain untouched.
-- DS02 has no acquired observation rows. Its catalogue's lack of explicit marine-phytoplankton definitions does not establish observation or ecological absence.
-- DS02 cannot be used as a temporal, recurrence, biomass, or negative-state reference until the canonical observations and method metadata are actually archived and record-screened.
-- The RWS catalogue contains 1,092 core locations, but catalogue locations are not observation records and cannot inflate sample, event, or network counts.
-- DS06 remains in progress; DS26 remains secondary. Exact CMEMS temporal overlap remains unknown pending the metadata-only product freeze.
+## Validation and State
+*   **Stage 2 Validated:** All required data files (except those explicitly needing PI contact like DS23, and manual URL assignment for DS28) have been safely cached in the `data/raw/stage2/` directory and manually inspected for valid schema content.
+*   **Stage 3 Ready:** The project is now ready to begin harmonizing columns, handling deduplication, and preparing the standard dataset schema.

@@ -33,7 +33,11 @@ ranked_output <- unlist(lapply(c(
   "scripts/02_inventory_screen_ds26_smhi_ifcb.R",
   "scripts/00_downloads/08_acquire_ds02_rws_catalogue.R",
   "scripts/00_downloads/09_diagnose_ds02_rws_v3_access.R",
+  "scripts/00_downloads/10_intake_ds02_rws_manual_export.R",
   "scripts/02_screen_ds02_rws_catalogue.R",
+  "scripts/02_inventory_screen_ds02_rws.R",
+  "scripts/02_resolve_ds02_rws_duplicates.R",
+  "scripts/02_summarize_ds02_rws_screening.R",
   "scripts/02_refresh_stage2_acquisition_status.R"
 ), run_step), use.names = FALSE)
 

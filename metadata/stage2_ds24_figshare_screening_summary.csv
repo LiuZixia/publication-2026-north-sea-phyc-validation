@@ -1,0 +1,2 @@
+"work_item_id","record_count","core_record_count","external_transfer_record_count","cmems_overlap_record_count","duplicate_record_count","provisional_tier","analysis_role","screening_decision","exclusion_reason_code","screening_detail"
+"REGISTER:DS24",11534435,2133729,766863,0,0,"E","comparator","pending","none","DS24 Figshare OSPAR COMPEAT acquisition and domain location screening complete. Final inclusion remains pending until CMEMS temporal overlap is verified in Stage 5. 2133729 core records and 766863 external transfer records identified."

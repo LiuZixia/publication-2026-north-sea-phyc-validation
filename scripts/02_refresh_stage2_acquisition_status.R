@@ -72,6 +72,27 @@ if (!is.null(summary)) {
   )
 }
 
+# Acquisition can advance beyond an older catalogue-only screening summary. Keep that distinction
+# visible without rewriting the prospectively frozen work order or claiming record screening.
+ds02_intake_path <- "metadata/stage2_ds02_rws_manual_export_intake_summary.csv"
+if (file.exists(ds02_intake_path)) {
+  intake <- utils::read.csv(ds02_intake_path, stringsAsFactors = FALSE, check.names = FALSE)
+  if (nrow(intake) != 1L || intake$work_item_id[[1]] != "REGISTER:DS02" ||
+      intake$observation_rows[[1]] <= 0L ||
+      intake$screening_decision[[1]] != "pending") {
+    stop("DS02 manual-export intake summary is invalid.", call. = FALSE)
+  }
+  row <- match("REGISTER:DS02", status$work_item_id)
+  status$current_work_state[[row]] <- "in_progress"
+  status$acquisition_state[[row]] <- "observations_acquired_pending_record_screening"
+  status$status_evidence_path[[row]] <- ds02_intake_path
+  status$status_detail[[row]] <- paste0(
+    "Canonical Waterinfo observation exports are acquired and checksum-pinned, but record-level ",
+    "geometry, duplicates, methods, and eligibility have not yet been screened; this ranked item ",
+    "remains in progress."
+  )
+}
+
 allowed_states <- unlist(contract$controlled_vocabularies$work_state, use.names = FALSE)
 if (nrow(status) != 19L || anyDuplicated(status$work_item_id) ||
     !identical(status$acquisition_rank, seq_len(nrow(status))) ||

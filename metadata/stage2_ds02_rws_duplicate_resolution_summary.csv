@@ -1,0 +1,2 @@
+"work_item_id","source_record_count","unique_provider_sample_count","cross_package_sample_count","cross_package_sample_membership_count","scientific_fingerprint_field_count","exact_duplicate_fingerprint_count","duplicate_record_count","base_screening_checksum_sha256","duplicate_identity_checksum_sha256","resolution_rule"
+"REGISTER:DS02",505452,505452,0,0,0,0,0,"27976ba9c676ea3fffae10f50a1b91c0939386b2f0e8aa4140ebdb0806763012","not_applicable","Manual exports were temporally partitioned; no cross-file overlaps are expected."

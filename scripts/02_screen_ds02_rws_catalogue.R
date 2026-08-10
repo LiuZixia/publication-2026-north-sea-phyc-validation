@@ -35,7 +35,7 @@ if (!identical(calculate_checksum(file.path(run_dir, "manifest.csv")),
 metadata_path <- "metadata/stage2_ds02_rws_catalogue_metadata.csv"
 location_path <- "metadata/stage2_ds02_rws_catalogue_location_screen.csv"
 link_summary_path <- "metadata/stage2_ds02_rws_catalogue_link_summary.csv"
-dataset_summary_path <- "metadata/stage2_ds02_rws_screening_summary.csv"
+
 registry_path <- "metadata/stage2_ds02_rws_catalogue_output_registry.csv"
 
 catalogue <- jsonlite::fromJSON(catalogue_path, simplifyVector = FALSE)
@@ -171,44 +171,15 @@ link_summary <- data.frame(
   check.names = FALSE
 )
 
-dataset_summary <- data.frame(
-  work_item_id = "REGISTER:DS02",
-  record_count = 0L,
-  core_record_count = 0L,
-  external_transfer_record_count = 0L,
-  cmems_overlap_record_count = 0L,
-  duplicate_record_count = 0L,
-  provisional_tier = "C",
-  analysis_role = "primary_reference",
-  screening_decision = "pending",
-  exclusion_reason_code = "none",
-  screening_detail = paste0(
-    "Canonical RWS WaterWebservices DD API 2.0 catalogue is archived and exact-screened: ",
-    nrow(metadata), " measurement definitions, ", nrow(locations), " locations, and ",
-    nrow(links), " metadata-location links. No observation rows have yet been acquired. The public ",
-    "catalogue contains no explicit marine phytoplankton metadata definition matching the frozen ",
-    "terms. A separately pinned unauthenticated DD API V3 request returned HTTP 401 with no ",
-    "observation rows, so DS02 remains in progress while provider credentials or a canonical ",
-    "Waterinfo export are obtained. PLET is retained only as duplicate/completeness evidence and is not substituted for ",
-    "the canonical observations. Zero record counts therefore mean not-yet-acquired, never absence ",
-    "or a negative ecological state."
-  ),
-  stringsAsFactors = FALSE,
-  check.names = FALSE
-)
-validate_stage2_table(dataset_summary, "dataset_screening_summary", contract)
-
 write_csv_atomic(metadata, metadata_path)
 write_csv_atomic(locations, location_path)
 write_csv_atomic(link_summary, link_summary_path)
-write_csv_atomic(dataset_summary, dataset_summary_path)
 registry <- data.frame(
-  artifact_role = c("catalogue_metadata", "catalogue_location_screen", "catalogue_link_summary",
-                    "dataset_screening_summary"),
-  path = c(metadata_path, location_path, link_summary_path, dataset_summary_path),
-  row_count = c(nrow(metadata), nrow(locations), nrow(link_summary), nrow(dataset_summary)),
-  checksum_sha256 = vapply(c(metadata_path, location_path, link_summary_path,
-                             dataset_summary_path), calculate_checksum, character(1)),
+  artifact_role = c("catalogue_metadata", "catalogue_location_screen", "catalogue_link_summary"),
+  path = c(metadata_path, location_path, link_summary_path),
+  row_count = c(nrow(metadata), nrow(locations), nrow(link_summary)),
+  checksum_sha256 = vapply(c(metadata_path, location_path, link_summary_path),
+                           calculate_checksum, character(1)),
   generated_from_manifest_sha256 = pin$manifest_checksum_sha256[[1]],
   stringsAsFactors = FALSE,
   check.names = FALSE

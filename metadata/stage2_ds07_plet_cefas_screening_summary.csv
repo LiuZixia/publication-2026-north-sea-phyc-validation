@@ -1,0 +1,2 @@
+"work_item_id","record_count","core_record_count","external_transfer_record_count","cmems_overlap_record_count","duplicate_record_count","provisional_tier","analysis_role","screening_decision","exclusion_reason_code","screening_detail"
+"REGISTER:DS07",359879,251037,0,0,0,"A","primary_reference","pending","none","PLET acquisition and domain location screening complete. Final inclusion remains pending until CMEMS temporal overlap is verified in Stage 5. 251037 core records and 0 external transfer records identified."

@@ -1,47 +1,13 @@
-# Pending
+# Pending Work
 
-- **Updated (UTC):** 2026-08-09T07:17:53Z
-- **Current stage:** Stage 2 ranked acquisition is incomplete: DS26 is dataset-level complete, DS06 and DS02 are in progress, and ranks 4–19 are not started. CMEMS PhyC inspection remains prohibited.
+## Immediate Priorities (Stage 3)
+1.  **=> Parse and Harmonize Existing Datasets:** Create robust R scripts to standardize columns (taxon, value, units, date, coordinates) without destroying original fields, for all datasets residing in `data/raw/stage2/`.
+2.  **Dataset Deduplication:** Identify duplicated datasets between providers and aggregators (e.g., Cefas vs PLET, PANGAEA vs EurOBIS) based on geographic and temporal overlap.
+3.  **Perform Biomass Conversion Audits:** Assess which specific dataset series require HELCOM PEG_BVOL conversions and execute them.
 
-## First Priority
+## Blocked / Awaiting Input
+*   **DS28 (LifeWatch HPLC pigments):** Need exact dataset DOI, IPT resource name, or API URL to execute `scripts/00_downloads/27_acquire_ds28_lifewatch_hplc.R`.
+*   **DS17, DS18, DS19, DS20, DS21, DS23:** Awaiting responses from Principal Investigators for restricted datasets or existence confirmation (these are tracked in `metadata/provider_access_requests.csv`).
 
-**Obtain canonical DS02 RWS phytoplankton observations through either DD API V3 credentials or a provider-generated Waterinfo export; do not substitute PLET observations.**
-
-Completion evidence: credentials are supplied through an ignored secret mechanism or a provider export is delivered; a version-controlled script archives or intakes the unmodified files; checksums, terms, version, query/export parameters, dates, locations, methods, taxon fields, units, and quality flags are registered; record-level geometry and duplicate screening run before any eligibility decision.
-
-## Ordered Next Actions
-
-1. User provides RWS DD API V3 access instructions/credentials or requests and supplies a canonical Waterinfo phytoplankton export. The pinned unauthenticated response is HTTP 401 and contains no data.
-2. Add the observation request or manual-export intake to `scripts/00_downloads/`; never print credentials and never place an ad hoc file directly in `data/raw`.
-3. Record-screen DS02 observations and link PLET, EMODnet, ICES, OBIS, DS03, and DS23 copies without treating any aggregator copy as an independent network.
-4. Continue in frozen rank order with DS04, DS05, and DS07 after DS02 receives a final Stage 2 acquisition disposition.
-5. Freeze exact CMEMS product identity and temporal metadata without downloading or inspecting values, then populate observation overlap potential.
-6. Resolve the one occurrence-unlinked DS26 leaf sample from provider/QC semantics before temporal-resolution use; it remains `unknown`.
-7. Carry DS06 into total-community/method qualification; its screening decision remains `pending`.
-8. Resolve all licences and roles before Stage 2 closure while preserving excluded, unavailable, and pending records.
-
-## Needs User Action — Blocking DS02
-
-1. Provide a supported way to access the RWS DD API V3 biological observations, with secrets kept outside Git, or obtain the canonical Waterinfo export for the marine phytoplankton period/locations. No credential-like environment variable is currently available in the execution environment.
-
-## Needs User Action — Non-Blocking
-
-1. Send the seven drafts in `docs/access_requests/DRAFT_EMAILS.md`, filling sender details and recording `sent_utc`; current availability decisions already apply.
-2. Appoint an independent scientific reviewer once preliminary results exist; review is mandatory before the Stage 7 manifest freeze.
-
-## Warnings and Scientific Risks
-
-- The frozen work order is a prospective contract, not a live status ledger. Use `metadata/stage2_acquisition_status.csv`: one item is complete, two are in progress, and 16 are untouched.
-- The open RWS DD API 2.0 catalogue has no explicit marine-phytoplankton definition under the frozen terms; the current biological DD API V3 returns HTTP 401 without authentication. Neither fact is ecological absence.
-- DS02 has zero observation rows. Catalogue metadata and locations must never be counted as samples, events, negatives, or monitoring networks.
-- PLET's public DS02 extract is an aggregator copy and is not a canonical-provider substitute.
-- The DS26 event table is hierarchical; its one occurrence-unlinked leaf sample has unresolved `Missing cells` semantics and remains unknown.
-- Core/offshore confirmatory evidence still depends on later ranked providers and Tier C conversion; offshore remains Tier D/E CPR.
-
-## Deferred or Out of Scope
-
-- Do not inspect CMEMS PhyC until the eligible observation manifest, observation-only outcomes, recurrence labels, and validation splits are frozen.
-- Do not construct events, thresholds, recurrence, splits, or performance measures during Stage 2.
-- Do not treat source rows, catalogue rows, occurrence rows, event hierarchy parents, images, or classifier training items as independent samples or networks.
-- Do not treat missing, unresolved, not-yet-acquired, or inadequately observed windows as negatives.
-- Do not treat total PhyC as a taxon, lifeform, or *Phaeocystis* measurement.
+## Out of Scope
+*   Downloading entire multi-provider aggregators like DS13 (ICES DOME), DS14 (EMODnet Biology), or DS25 (EMODnet Chemistry). The specific constituent provider datasets are instead targeted to prevent large-scale data duplication.

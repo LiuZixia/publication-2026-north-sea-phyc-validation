@@ -1,0 +1,79 @@
+{
+  "schema_version": "1.0.0",
+  "frozen_at_utc": "2026-08-09T09:24:21Z",
+  "classification": "stage2_ranked_canonical_provider_manual_export_intake",
+  "work_item_id": "REGISTER:DS02",
+  "ds_id": "DS02",
+  "acquisition_rank": 3,
+  "provider": "Rijkswaterstaat (RWS)",
+  "provider_service": "Waterinfo AquaDesk bulk download",
+  "portal_url": "https://waterinfo.rws.nl/nav/bulkdownload",
+  "official_phytoplankton_page": "https://waterinfo-extra.rws.nl/monitoring/biologie/fytoplankton/",
+  "manual_export_date": "2026-08-09",
+  "manual_export_reason": "The current canonical RWS biological DD API V3 route returned HTTP 401 without credentials. The user therefore used the provider-supported Waterinfo bulk-download interface and delivered the unmodified exports for scripted intake.",
+  "portal_category": "Overige biologische data",
+  "portal_filters": {
+    "taxon_type": ["FYTPT", "DIATM"],
+    "period": "not_reported",
+    "measurement_object": "not_reported",
+    "compartment": "not_reported",
+    "quantity": "not_reported",
+    "parameter": "not_reported"
+  },
+  "acquisition_run_id": "DS02_RWS_MANUAL_EXPORT_20260809T091700Z",
+  "raw_parent_relative_path": "stage2/ds02_rws",
+  "required_free_gb": 0.1,
+  "expected_columns": [
+    "Datum",
+    "Meetobject",
+    "Organisatie",
+    "Parameter",
+    "Meetpakket",
+    "Compartiment",
+    "Grootheid",
+    "Taxon type",
+    "Taxon groep",
+    "Taxon naam",
+    "Aantal",
+    "Waarde",
+    "Eenheid",
+    "Collectie commentaar",
+    "LengthClass",
+    "MeasurementPackage",
+    "Capacity",
+    "SamplingMethod",
+    "Supplier",
+    "AnalysisMethod",
+    "LifeForm",
+    "Purpose",
+    "AnalysisPackage",
+    "Appearance",
+    "LifeStage"
+  ],
+  "expected_files": [
+    {
+      "filename": "RWSNL_Observations_FYTPT_DIATM_1.csv",
+      "size_bytes": 32034620,
+      "checksum_sha256": "8cbd8caa3f10f134776bbdbede356c4ce5a543f0021584cfc83bfd11f8e8ec72"
+    },
+    {
+      "filename": "RWSNL_Observations_FYTPT_DIATM_2.csv",
+      "size_bytes": 9255804,
+      "checksum_sha256": "cb5af98c969419464f8fb91ab2d20c2dc1835a19702cdbb6bb844ecdcb515f9c"
+    },
+    {
+      "filename": "RWSNL_Observations_FYTPT_DIATM_3.csv",
+      "size_bytes": 7259381,
+      "checksum_sha256": "d7fc1cefb887250bdbed9d3a5e06d58ba0430006646a587b1b9eee76c4466142"
+    },
+    {
+      "filename": "RWSNL_Observations_FYTPT_DIATM_4.csv",
+      "size_bytes": 28383275,
+      "checksum_sha256": "978d8986803d57284dfef0485ae2b451f3d7b127ed5edd8dc4d4eaff512c4e15"
+    }
+  ],
+  "known_provider_export_anomaly": "Part 4 contains 105 rows with one unheaded measurement-object description field inserted after Meetobject. The intake must diagnose and count these rows, preserve the raw file, and align fields in memory only after verifying the exact anomaly signature.",
+  "selection_rule": "Register all four provider-export parts unchanged. Content outside the DS02 2000-2019 target period or outside the frozen spatial domain is retained in raw form and screened later; no row is treated as a sample, negative window, or eligible reference during intake.",
+  "license": "CC0",
+  "contract_path": "config/stage2_record_screening_contract.json"
+}
