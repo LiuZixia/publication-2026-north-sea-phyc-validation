@@ -1,7 +1,7 @@
 {
   "schema_version": "1.0.0",
   "versioned_at_utc": "2026-08-08T14:45:00Z",
-  "purpose": "Bridge between the narrative candidate register (docs/DATASET_SYSTEMATIC_SEARCH.md §6 and §12) and the executed Stage 1 search. Each entry declares how a register DS-ID is located in metadata/candidate_registry.csv, plus the attributes needed to rank acquisition. Resolution is performed by scripts/01_build_ds_crosswalk.R; nothing here is a count.",
+  "purpose": "Bridge between the narrative candidate register (docs/DATASET_SYSTEMATIC_SEARCH.md §6 and §12) and the executed Stage 1 search. Each entry declares how a register DS-ID is located in metadata/stage1/search/candidate_registry.csv, plus the attributes needed to rank acquisition. Resolution is performed by scripts/01_stage1/02_build_ds_crosswalk.R; nothing here is a count.",
   "provenance_rule": "Every attribute is transcribed from the cited register section. Attributes are provisional register claims, not verified facts: verification is Stage 2. A DS-ID that cannot be resolved against archived evidence is reported unresolved and triggers query diagnosis, never a manual registry insertion.",
   "ranking": {
     "formula": "priority_score = 3*tier_rank + 2*domain_rank + 2*access_rank + 2*cmems_overlap_rank",

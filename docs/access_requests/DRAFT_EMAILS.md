@@ -1,8 +1,8 @@
 # Provider Access Request Drafts
 
-Seven ready-to-send drafts. Replace `[YOUR NAME]`, `[YOUR AFFILIATION]`, and `[YOUR EMAIL]` before sending, and confirm the current contact address on each provider's page — addresses change and none is hard-coded here.
+Nine ready-to-send drafts. Replace `[YOUR NAME]`, `[YOUR AFFILIATION]`, and `[YOUR EMAIL]` before sending, and confirm the current contact address on each provider's page — addresses change and none is hard-coded here.
 
-**The study does not wait on any of these.** Under `config/access_and_licence_policy.json`, a dataset obtainable only by request is treated as unavailable at the current stage and its consequence is applied immediately. A reply is welcome and re-admits the dataset through the normal Stage 2 route, recorded as a dated addition in the protocol-change register. Record the send date in `metadata/provider_access_requests.csv` (`sent_utc`).
+**The study does not wait on any of these.** Under `config/access_and_licence_policy.json`, a dataset obtainable only by request is treated as unavailable at the current stage and its consequence is applied immediately. A reply is welcome and re-admits the dataset through the normal Stage 2 route, recorded as a dated addition in the protocol-change register. Record the send date in `metadata/stage1/qualification/provider_access_requests.csv` (`sent_utc`).
 
 Each draft states plainly what is being asked and why. None implies that a refusal blocks the work, because it does not.
 
@@ -155,6 +155,52 @@ Each draft states plainly what is being asked and why. None implies that a refus
 > Point 3 matters to me: I intend to use the CPR data as Tier D/E corroboration of annual bloom recurrence, explicitly not as a total-biomass reference, and I would rather state that limitation in the terms you would use.
 >
 > I am happy to discuss collaboration or co-authorship arrangements as your data policy requires. There is no deadline on this request, since the open OBIS route already supports the analysis.
+>
+> With thanks and best wishes,
+> [YOUR NAME], [YOUR AFFILIATION], [YOUR EMAIL]
+
+---
+
+## DS23 — NIOZ Wadden Sea phytoplankton (data and terms request)
+
+**To:** NIOZ Data Portal support or the principal investigator identified for the Marsdiep time series
+**Subject:** Data and licence request — NIOZ Marsdiep long-term phytoplankton series
+
+> Dear Colleagues,
+>
+> I am assembling independent in-situ phytoplankton observations for validation of Copernicus Marine North-West Shelf modelled phytoplankton carbon. The long-running NIOZ Marsdiep series is important as an independent Dutch coastal sentinel and as a duplicate check against national RWS monitoring.
+>
+> I found the series metadata through GBIF (`10.15468/okwkou`), but I do not have a provider-level observation delivery with the method and usage information needed for analysis. Could you advise:
+>
+> 1. the preferred provider data route and licence terms;
+> 2. the sampling, preservation, counting, and biomass-method metadata;
+> 3. whether the GBIF records are a complete representation of the provider series; and
+> 4. how the series should be cited.
+>
+> My analysis proceeds without the series for now and records the Marsdiep/Wadden Sea gap explicitly, so there is no deadline attached to this request.
+>
+> With thanks and best wishes,
+> [YOUR NAME], [YOUR AFFILIATION], [YOUR EMAIL]
+
+---
+
+## DS28 — LifeWatch Belgium HPLC pigments (identity and access enquiry)
+
+**To:** VLIZ LifeWatch Belgium data support
+**Subject:** Dataset identity and access — Belgian North Sea HPLC pigment time series
+
+> Dear Colleagues,
+>
+> I am validating Copernicus Marine North-West Shelf modelled phytoplankton carbon against independent North Sea observations. A reported LifeWatch Belgium HPLC pigment series, sampled in Belgian waters since approximately 2002, could provide a useful Tier E pigment comparator alongside the LifeWatch FlowCam observations.
+>
+> I have not been able to identify an exact DOI, Marine Data Archive record, IPT resource, or API endpoint for that specific HPLC series. Could you tell me:
+>
+> 1. the exact dataset title and persistent identifier or machine-readable access route;
+> 2. its licence and citation requirements;
+> 3. the station, date, pigment, quality-control, and analytical-method fields available; and
+> 4. whether any CHEMTAX group estimates are provider products or would need to be derived by users.
+>
+> Until an exact series and its terms are identified, I treat this candidate as unavailable and do not infer pigment or haptophyte evidence from catalogue descriptions. There is no deadline on the enquiry.
 >
 > With thanks and best wishes,
 > [YOUR NAME], [YOUR AFFILIATION], [YOUR EMAIL]

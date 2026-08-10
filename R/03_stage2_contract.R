@@ -19,6 +19,55 @@ read_stage2_contract <- function(path = "config/stage2_record_screening_contract
   contract
 }
 
+# Resolve paths embedded in checksum-pinned historical configurations without modifying those
+# configurations. The relocated file must retain the exact checksum declared by its frozen config.
+stage2_relocated_path <- function(frozen_path) {
+  if (file.exists(frozen_path)) return(frozen_path)
+  relocations <- c(
+    "metadata/stage2_wfs_geometry_queue.csv" = "metadata/stage2/control/wfs_geometry_queue.csv",
+    "metadata/stage2_emodnet_wfs_geometry_evidence.csv" =
+      "metadata/stage2/screening/emodnet_wfs_geometry_evidence.csv",
+    "metadata/stage2_ds26_smhi_ifcb_figshare_file_inventory.csv" =
+      "metadata/stage2/acquisition/ds26_smhi_ifcb_figshare_file_inventory.csv"
+  )
+  relocated <- unname(relocations[[frozen_path]])
+  if (is.null(relocated) || !file.exists(relocated)) {
+    stop(sprintf("Frozen Stage 2 artifact is missing and has no registered relocation: %s", frozen_path),
+         call. = FALSE)
+  }
+  relocated
+}
+
+# Update paths stored inside generated Stage 2 output registries after the metadata consolidation.
+# Unlike stage2_relocated_path(), this is only for generated registries: frozen configuration bytes
+# and immutable raw evidence are never changed. A relocation is accepted only when exactly one
+# stage-owned destination already exists.
+stage2_relocated_generated_path <- function(path) {
+  if (file.exists(path) || !grepl("^metadata/stage2_", path)) return(path)
+  filename <- sub("^stage2_", "", basename(path))
+  candidates <- file.path(
+    "metadata", "stage2", c("control", "acquisition", "screening", "inventory"), filename
+  )
+  existing <- candidates[file.exists(candidates)]
+  if (length(existing) != 1L) {
+    stop(sprintf("Generated Stage 2 path has %d possible relocations: %s",
+                 length(existing), path), call. = FALSE)
+  }
+  existing[[1]]
+}
+
+relocate_stage2_registry_paths <- function(registry, registry_path, column = "path") {
+  if (!column %in% names(registry)) {
+    stop(sprintf("Stage 2 registry lacks path column '%s': %s", column, registry_path),
+         call. = FALSE)
+  }
+  relocated <- vapply(registry[[column]], stage2_relocated_generated_path, character(1))
+  changed <- !identical(as.character(registry[[column]]), relocated)
+  registry[[column]] <- relocated
+  if (changed) write_csv_atomic(registry, registry_path)
+  registry
+}
+
 stage2_table_spec <- function(contract, table_name) {
   spec <- contract$tables[[table_name]]
   if (is.null(spec)) stop(sprintf("Unknown Stage 2 contract table: %s", table_name), call. = FALSE)

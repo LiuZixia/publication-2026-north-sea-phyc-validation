@@ -1,4 +1,0 @@
-"artifact_role","path","row_count","checksum_sha256","base_screening_checksum_sha256"
-"duplicate_map","data/interim/stage2_ds02_rws_duplicate_map.csv",0,"a2aef4ca453012517450bd84643a1d52b76ac84bffd29b3791c23c97b2f28c24","27976ba9c676ea3fffae10f50a1b91c0939386b2f0e8aa4140ebdb0806763012"
-"resolved_record_screening","data/interim/stage2_ds02_rws_record_screening_resolved.csv",505452,"3855d17985b283f78f9fb149131724e36c6483715c149b41bb15ecdcf8feacbd","27976ba9c676ea3fffae10f50a1b91c0939386b2f0e8aa4140ebdb0806763012"
-"duplicate_resolution_summary","metadata/stage2_ds02_rws_duplicate_resolution_summary.csv",1,"3c12a73792601e37a1e00e1ba4431adbe6f1e02ca474c29e11b8db5ec241fc2f","27976ba9c676ea3fffae10f50a1b91c0939386b2f0e8aa4140ebdb0806763012"

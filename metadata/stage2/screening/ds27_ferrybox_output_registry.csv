@@ -1,0 +1,5 @@
+"artifact_role","path","row_count","checksum_sha256","generated_from_manifest_sha256","decoder"
+"file_screening","metadata/stage2/screening/ds27_ferrybox_file_screening.csv",679,"b80d9e68ef4d0b516ea165b66b970e35a3fb9d8c61dae0d46ef99461b0fcb7ea","073f1c280f6e76894aed87c589382b76b1abac2850c26f2650efc406e46e5ecb","R-controlled ncdump"
+"variable_inventory","metadata/stage2/screening/ds27_ferrybox_variable_inventory.csv",8827,"67c53838e85f10194122d9e0cc6c93e927eba6948e1e11f6ea173fac3cb90d39","073f1c280f6e76894aed87c589382b76b1abac2850c26f2650efc406e46e5ecb","R-controlled ncdump"
+"component_summary","metadata/stage2/screening/ds27_ferrybox_component_summary.csv",2,"2fe450901afbde861456598cbad1a98f77b80af1793e487f6e191196bf1ad13a","073f1c280f6e76894aed87c589382b76b1abac2850c26f2650efc406e46e5ecb","R-controlled ncdump"
+"dataset_screening_summary","metadata/stage2/screening/ds27_ferrybox_screening_summary.csv",1,"9a286f2a74d39a223b4b6566de2e42ebd9723993f9d3249d9c37466904fe4552","073f1c280f6e76894aed87c589382b76b1abac2850c26f2650efc406e46e5ecb","R-controlled ncdump"

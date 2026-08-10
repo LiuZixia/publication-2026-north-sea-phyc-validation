@@ -10,7 +10,7 @@
     "rationale": "Access latency is unbounded and unmanaged: a provider may never reply. Waiting on a deadline makes the analysable scope a function of correspondence timing. Declaring the dataset unavailable now makes the scope a design decision taken in the open and recorded before results exist.",
     "no_deadlines": "There are deliberately no response deadlines. Requests are still sent, and a reply is welcome, but nothing in the plan waits on one.",
     "reversal": "If a provider does reply, the dataset re-enters through the normal Stage 2 route and the change is recorded in the protocol-change register as a dated addition, never as a silent improvement to a result.",
-    "determined_from": "Archived licence and access evidence in metadata/candidate_registry.csv, computed by stage1_access_class() and stage1_availability(). The narrative register's access claim is not used, because the archive disagrees with it: the register calls DS08 a public-then-request dataset, while the archive shows all 28 of its carbon and all 24 of its biovolume children state an unknown licence requiring author contact."
+    "determined_from": "Archived licence and access evidence in metadata/stage1/search/candidate_registry.csv, computed by stage1_access_class() and stage1_availability(). The narrative register's access claim is not used, because the archive disagrees with it: the register calls DS08 a public-then-request dataset, while the archive shows all 28 of its carbon and all 24 of its biovolume children state an unknown licence requiring author contact."
   },
 
   "licence_rule": {
@@ -20,7 +20,7 @@
     },
     "unverified": {
       "definition": "The record is openly reachable but states no licence.",
-      "treatment": "Usable for exploratory Stage 2 to Stage 4 work. Never redistributed. The licence must be resolved before the Stage 7 confirmatory manifest freeze, and each such dataset is flagged in metadata/stage1_acquisition_shortlist.csv as resolve_licence_before_stage7_manifest_freeze.",
+      "treatment": "Usable for exploratory Stage 2 to Stage 4 work. Never redistributed. The licence must be resolved before the Stage 7 confirmatory manifest freeze, and each such dataset is flagged in metadata/stage1/qualification/acquisition_shortlist.csv as resolve_licence_before_stage7_manifest_freeze.",
       "rationale": "Screening a dataset out for a missing licence statement before knowing whether the study needs it wastes effort on datasets that will not be used, and risks discarding usable evidence. Authorization is sought once a dataset is shown to be necessary."
     },
     "contact_required": {

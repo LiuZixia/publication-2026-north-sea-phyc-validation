@@ -32,7 +32,7 @@ test_that("every Stage 2 table schema can be instantiated and rejects drift", {
     expect_identical(names(empty), stage2_field_names(contract, table_name), info = table_name)
   }
 
-  work <- read.csv(at_root("metadata", "stage2_acquisition_work_order.csv"),
+  work <- read.csv(at_root("metadata", "stage2", "control", "acquisition_work_order.csv"),
                    stringsAsFactors = FALSE, check.names = FALSE)
   expect_error(validate_stage2_table(work[-1], "acquisition_work_order", contract),
                "columns differ")
@@ -43,8 +43,9 @@ test_that("every Stage 2 table schema can be instantiated and rejects drift", {
 
 test_that("the Stage 1 shortlist is frozen into the exact Stage 2 rank order", {
   contract <- read_stage2_contract(at_root("config", "stage2_record_screening_contract.json"))
-  shortlist <- read.csv(at_root("metadata", "stage1_acquisition_shortlist.csv"), stringsAsFactors = FALSE)
-  work <- read.csv(at_root("metadata", "stage2_acquisition_work_order.csv"),
+  shortlist <- read.csv(at_root("metadata", "stage1", "qualification", "acquisition_shortlist.csv"),
+                        stringsAsFactors = FALSE)
+  work <- read.csv(at_root("metadata", "stage2", "control", "acquisition_work_order.csv"),
                    stringsAsFactors = FALSE, check.names = FALSE)
   expect_silent(validate_stage2_work_order(work, contract))
   expect_identical(work$ds_id, shortlist$ds_id[order(shortlist$acquisition_rank)])
@@ -54,30 +55,122 @@ test_that("the Stage 1 shortlist is frozen into the exact Stage 2 rank order", {
 })
 
 test_that("the live Stage 2 status overlay distinguishes progress from the frozen baseline", {
-  work <- read.csv(at_root("metadata", "stage2_acquisition_work_order.csv"),
+  work <- read.csv(at_root("metadata", "stage2", "control", "acquisition_work_order.csv"),
                    stringsAsFactors = FALSE, check.names = FALSE)
-  status <- read.csv(at_root("metadata", "stage2_acquisition_status.csv"),
+  status <- read.csv(at_root("metadata", "stage2", "control", "acquisition_status.csv"),
                      stringsAsFactors = FALSE, check.names = FALSE)
   expect_equal(nrow(work), 19L)
   expect_true(all(work$work_state == "not_started"))
   expect_identical(status$work_item_id, work$work_item_id)
   expect_identical(status$frozen_work_state, work$work_state)
-  expect_identical(status$current_work_state[status$ds_id == "DS06"], "in_progress")
+  expect_identical(status$current_work_state[status$ds_id == "DS06"], "complete")
   expect_identical(status$current_work_state[status$ds_id == "DS26"], "complete")
-  expect_identical(status$current_work_state[status$ds_id == "DS02"], "in_progress")
+  expect_identical(status$current_work_state[status$ds_id == "DS02"], "complete")
   expect_identical(status$acquisition_state[status$ds_id == "DS02"],
-                   "observations_acquired_pending_record_screening")
-  expect_true(all(status$current_work_state[status$acquisition_rank >= 4L] == "not_started"))
-  expect_equal(sum(status$current_work_state == "complete"), 1L)
-  expect_equal(sum(status$current_work_state == "in_progress"), 2L)
-  expect_equal(sum(status$current_work_state == "not_started"), 16L)
-  expect_false(all(status$current_work_state == "complete"))
+                   "acquired_and_record_screened")
+  state_counts <- table(factor(status$current_work_state,
+                               levels = c("complete", "unavailable", "in_progress", "not_started")))
+  expect_equal(sum(state_counts), nrow(work))
+  expect_gt(unname(state_counts[["complete"]]), 0L)
+  expect_equal(unname(state_counts[["unavailable"]]), 3L)
+  expect_equal(unname(state_counts[["complete"]]), 16L)
+  expect_equal(unname(state_counts[["in_progress"]]), 0L)
+  expect_equal(unname(state_counts[["not_started"]]), 0L)
+  expect_true(all(status$current_work_state %in% c("complete", "unavailable")))
+})
+
+test_that("email-required access cases are explicitly unavailable without blocking open DS12 data", {
+  access <- read.csv(at_root("metadata", "stage2", "control", "access_dispositions.csv"),
+                     stringsAsFactors = FALSE, check.names = FALSE)
+  expect_equal(nrow(access), 9L)
+  expect_equal(sum(access$email_requirement == "required"), 8L)
+  expect_true(all(access$current_stage_action[access$email_requirement == "required"] ==
+                    "proceed_without_dataset"))
+  expect_identical(access$archived_payload_state[access$ds_id == "DS08"],
+                   "login_html_not_observation_data")
+  expect_identical(access$availability_state[access$ds_id == "DS12"],
+                   "available_open_evidence_email_optional")
+  expect_identical(access$current_stage_action[access$ds_id == "DS12"],
+                   "continue_existing_open_evidence")
+  expect_setequal(access$ds_id[access$in_ranked_work_order &
+                                access$current_stage_action == "proceed_without_dataset"],
+                  c("DS08", "DS23", "DS28"))
+  expect_true(all(nzchar(access$reason_email_needed)))
+})
+
+test_that("DS12 public CPR evidence is record-screened only for its secondary Tier D/E role", {
+  contract <- read_stage2_contract(at_root("config", "stage2_record_screening_contract.json"))
+  summary <- read.csv(at_root("metadata", "stage2", "screening",
+                              "ds12_cpr_screening_summary.csv"),
+                      stringsAsFactors = FALSE, check.names = FALSE)
+  locations <- read.csv(at_root("metadata", "stage2", "screening",
+                                "ds12_cpr_location_summary.csv"),
+                        stringsAsFactors = FALSE, check.names = FALSE)
+  inventory <- read.csv(at_root("metadata", "stage2", "screening",
+                                "ds12_cpr_variable_inventory.csv"),
+                        stringsAsFactors = FALSE, check.names = FALSE,
+                        colClasses = "character")
+  registry <- read.csv(at_root("metadata", "stage2", "screening",
+                               "ds12_cpr_output_registry.csv"),
+                       stringsAsFactors = FALSE, check.names = FALSE)
+  expect_silent(validate_stage2_table(summary, "dataset_screening_summary", contract))
+  expect_silent(validate_stage2_table(inventory, "variable_inventory", contract))
+  expect_identical(summary$work_item_id, "REGISTER:DS12")
+  expect_identical(summary$provisional_tier, "D")
+  expect_identical(summary$analysis_role, "lifeform_only")
+  expect_identical(summary$screening_decision, "secondary")
+  expect_gt(summary$record_count, 0L)
+  expect_equal(summary$record_count, locations$usable_secondary_event_rows)
+  expect_equal(summary$core_record_count, locations$core_event_rows)
+  expect_equal(summary$external_transfer_record_count, locations$external_transfer_event_rows)
+  expect_equal(locations$duplicate_event_id_rows, 0L)
+  expect_gt(locations$events_with_pci, 0L)
+  expect_gt(locations$events_with_occurrences, 0L)
+  expect_match(summary$screening_detail, "never total-community biomass")
+  expect_true(all(file.exists(at_root(registry$path))))
+  expect_identical(unname(vapply(at_root(registry$path), calculate_checksum, character(1))),
+                   registry$checksum_sha256)
+})
+
+test_that("DS27 FerryBox screening retains fluorescence and excludes the pCO2-only component", {
+  contract <- read_stage2_contract(at_root("config", "stage2_record_screening_contract.json"))
+  summary <- read.csv(at_root("metadata", "stage2", "screening",
+                              "ds27_ferrybox_screening_summary.csv"),
+                      stringsAsFactors = FALSE, check.names = FALSE)
+  files <- read.csv(at_root("metadata", "stage2", "screening",
+                            "ds27_ferrybox_file_screening.csv"),
+                    stringsAsFactors = FALSE, check.names = FALSE)
+  inventory <- read.csv(at_root("metadata", "stage2", "screening",
+                                "ds27_ferrybox_variable_inventory.csv"),
+                        stringsAsFactors = FALSE, check.names = FALSE,
+                        colClasses = "character")
+  components <- read.csv(at_root("metadata", "stage2", "screening",
+                                 "ds27_ferrybox_component_summary.csv"),
+                         stringsAsFactors = FALSE, check.names = FALSE)
+  registry <- read.csv(at_root("metadata", "stage2", "screening",
+                               "ds27_ferrybox_output_registry.csv"),
+                       stringsAsFactors = FALSE, check.names = FALSE)
+  expect_silent(validate_stage2_table(summary, "dataset_screening_summary", contract))
+  expect_silent(validate_stage2_table(inventory, "variable_inventory", contract))
+  expect_equal(nrow(files), 679L)
+  expect_identical(summary$provisional_tier, "E")
+  expect_identical(summary$analysis_role, "comparator")
+  expect_identical(summary$screening_decision, "secondary")
+  expect_equal(summary$record_count, sum(files$usable_secondary_rows))
+  expect_gt(summary$record_count, 0L)
+  pco2 <- components[components$provider_dataset_id == "PANGAEA.930383", ]
+  expect_identical(pco2$screening_decision, "excluded")
+  expect_identical(pco2$exclusion_reason_code, "non_phytoplankton_record")
+  expect_match(summary$screening_detail, "Fluorescence is not carbon")
+  expect_true(all(file.exists(at_root(registry$path))))
+  expect_identical(unname(vapply(at_root(registry$path), calculate_checksum, character(1))),
+                   registry$checksum_sha256)
 })
 
 test_that("all unmatched WFS candidates remain pending for record-level evidence", {
   contract <- read_stage2_contract(at_root("config", "stage2_record_screening_contract.json"))
   queue <- read.csv(
-    at_root("metadata", "stage2_wfs_geometry_queue.csv"),
+    at_root("metadata", "stage2", "control", "wfs_geometry_queue.csv"),
     stringsAsFactors = FALSE,
     check.names = FALSE,
     colClasses = c(wfs_dataset_id = "character")
@@ -98,7 +191,10 @@ test_that("all unmatched WFS candidates remain pending for record-level evidence
 })
 
 test_that("the Stage 2 freeze pins every contract input and routing artifact", {
-  freeze <- jsonlite::fromJSON(at_root("metadata", "stage2_contract_freeze.json"), simplifyVector = FALSE)
+  freeze <- jsonlite::fromJSON(
+    at_root("metadata", "stage2", "control", "contract_freeze.json"),
+    simplifyVector = FALSE
+  )
   expect_identical(freeze$status, "prospectively_frozen_before_observation_acquisition")
   expect_identical(freeze$shortlist_rows, 19L)
   expect_identical(freeze$wfs_pending_rows, 40L)
@@ -122,7 +218,7 @@ test_that("source-record identity follows the frozen Stage 0 generator", {
 })
 
 test_that("the complete WFS geometry run is pinned and reconciled", {
-  pin <- read.csv(at_root("metadata", "stage2_emodnet_wfs_active_run.csv"),
+  pin <- read.csv(at_root("metadata", "stage2", "acquisition", "emodnet_wfs_active_run.csv"),
                   stringsAsFactors = FALSE, check.names = FALSE)
   expect_equal(nrow(pin), 1L)
   run_dir <- at_root("data", "raw", pin$run_relative_path[[1]])
@@ -141,10 +237,10 @@ test_that("the complete WFS geometry run is pinned and reconciled", {
 
 test_that("record geometry resolves every unmatched WFS candidate without title-only exclusion", {
   contract <- read_stage2_contract(at_root("config", "stage2_record_screening_contract.json"))
-  screened <- read.csv(at_root("metadata", "stage2_emodnet_wfs_screening.csv"),
+  screened <- read.csv(at_root("metadata", "stage2", "screening", "emodnet_wfs_screening.csv"),
                        stringsAsFactors = FALSE, check.names = FALSE,
                        colClasses = c(wfs_dataset_id = "character"))
-  evidence <- read.csv(at_root("metadata", "stage2_emodnet_wfs_geometry_evidence.csv"),
+  evidence <- read.csv(at_root("metadata", "stage2", "screening", "emodnet_wfs_geometry_evidence.csv"),
                        stringsAsFactors = FALSE, check.names = FALSE,
                        colClasses = c(wfs_dataset_id = "character"))
   expect_silent(validate_stage2_wfs_queue(screened, contract, require_initial = FALSE))
@@ -159,7 +255,7 @@ test_that("record geometry resolves every unmatched WFS candidate without title-
 })
 
 test_that("official metadata routes WFS survivors to canonical scientific roles", {
-  resolution <- read.csv(at_root("metadata", "stage2_emodnet_wfs_survivor_resolution.csv"),
+  resolution <- read.csv(at_root("metadata", "stage2", "screening", "emodnet_wfs_survivor_resolution.csv"),
                          stringsAsFactors = FALSE, check.names = FALSE,
                          colClasses = c(wfs_dataset_id = "character"))
   expect_setequal(resolution$wfs_dataset_id, c("2453", "5951", "6698"))
@@ -177,16 +273,17 @@ test_that("official metadata routes WFS survivors to canonical scientific roles"
   expect_identical(belgian$screening_decision, "exploratory")
   expect_match(belgian$scientific_reason, "two years cannot satisfy")
 
-  work <- read.csv(at_root("metadata", "stage2_acquisition_work_order.csv"), stringsAsFactors = FALSE)
+  work <- read.csv(at_root("metadata", "stage2", "control", "acquisition_work_order.csv"),
+                   stringsAsFactors = FALSE)
   expect_equal(sum(work$work_item_id == "REGISTER:DS06"), 1L)
   expect_false(any(grepl("EMODNET-WFS", work$work_item_id)))
 })
 
 test_that("rank-1 DS06 canonical SHARK acquisition is complete and pinned", {
   contract <- read_stage2_contract(at_root("config", "stage2_record_screening_contract.json"))
-  pin <- read.csv(at_root("metadata", "stage2_ds06_smhi_shark_active_run.csv"),
+  pin <- read.csv(at_root("metadata", "stage2", "acquisition", "ds06_smhi_shark_active_run.csv"),
                   stringsAsFactors = FALSE, check.names = FALSE)
-  manifest <- read.csv(at_root("metadata", "stage2_ds06_smhi_shark_acquisition_manifest.csv"),
+  manifest <- read.csv(at_root("metadata", "stage2", "acquisition", "ds06_smhi_shark_acquisition_manifest.csv"),
                        stringsAsFactors = FALSE, check.names = FALSE)
   expect_equal(nrow(pin), 1L)
   expect_identical(pin$work_item_id, "REGISTER:DS06")
@@ -214,11 +311,11 @@ test_that("rank-1 DS06 canonical SHARK acquisition is complete and pinned", {
 
 test_that("DS06 variable inventory and exact spatial screen reconcile every source row", {
   contract <- read_stage2_contract(at_root("config", "stage2_record_screening_contract.json"))
-  registry <- read.csv(at_root("metadata", "stage2_ds06_smhi_shark_output_registry.csv"),
+  registry <- read.csv(at_root("metadata", "stage2", "screening", "ds06_smhi_shark_output_registry.csv"),
                        stringsAsFactors = FALSE, check.names = FALSE)
-  packages <- read.csv(at_root("metadata", "stage2_ds06_smhi_shark_package_summary.csv"),
+  packages <- read.csv(at_root("metadata", "stage2", "screening", "ds06_smhi_shark_package_summary.csv"),
                        stringsAsFactors = FALSE, check.names = FALSE)
-  inventory <- read.csv(at_root("metadata", "stage2_ds06_smhi_shark_variable_inventory.csv"),
+  inventory <- read.csv(at_root("metadata", "stage2", "screening", "ds06_smhi_shark_variable_inventory.csv"),
                         stringsAsFactors = FALSE, check.names = FALSE)
   expect_equal(nrow(registry), 4L)
   expect_equal(registry$row_count[registry$artifact_role == "record_screening"], 909693L)
@@ -241,17 +338,17 @@ test_that("DS06 variable inventory and exact spatial screen reconcile every sour
 test_that("DS06 cross-package duplicate evidence preserves distinct scientific rows", {
   contract <- read_stage2_contract(at_root("config", "stage2_record_screening_contract.json"))
   summary <- read.csv(
-    at_root("metadata", "stage2_ds06_smhi_shark_duplicate_resolution_summary.csv"),
+    at_root("metadata", "stage2", "screening", "ds06_smhi_shark_duplicate_resolution_summary.csv"),
     stringsAsFactors = FALSE,
     check.names = FALSE
   )
-  overlap <- read.csv(at_root("metadata", "stage2_ds06_smhi_shark_sample_overlap.csv"),
+  overlap <- read.csv(at_root("metadata", "stage2", "screening", "ds06_smhi_shark_sample_overlap.csv"),
                       stringsAsFactors = FALSE, check.names = FALSE)
   duplicate_map <- read.csv(at_root("data", "interim", "stage2_ds06_smhi_shark_duplicate_map.csv"),
                             stringsAsFactors = FALSE, check.names = FALSE,
                             colClasses = "character")
   registry <- read.csv(
-    at_root("metadata", "stage2_ds06_smhi_shark_duplicate_resolution_registry.csv"),
+    at_root("metadata", "stage2", "screening", "ds06_smhi_shark_duplicate_resolution_registry.csv"),
     stringsAsFactors = FALSE,
     check.names = FALSE
   )
@@ -273,7 +370,7 @@ test_that("DS06 cross-package duplicate evidence preserves distinct scientific r
 
 test_that("DS06 remains pending despite its provisional direct-carbon tier", {
   contract <- read_stage2_contract(at_root("config", "stage2_record_screening_contract.json"))
-  summary <- read.csv(at_root("metadata", "stage2_ds06_smhi_shark_screening_summary.csv"),
+  summary <- read.csv(at_root("metadata", "stage2", "screening", "ds06_smhi_shark_screening_summary.csv"),
                       stringsAsFactors = FALSE, check.names = FALSE)
   expect_silent(validate_stage2_table(summary, "dataset_screening_summary", contract))
   expect_identical(summary$work_item_id, "REGISTER:DS06")
@@ -288,11 +385,11 @@ test_that("DS06 remains pending despite its provisional direct-carbon tier", {
 
 test_that("rank-2 DS26 recurrent SMHI IFCB observations are acquired and pinned", {
   contract <- read_stage2_contract(at_root("config", "stage2_record_screening_contract.json"))
-  pin <- read.csv(at_root("metadata", "stage2_ds26_smhi_ifcb_active_run.csv"),
+  pin <- read.csv(at_root("metadata", "stage2", "acquisition", "ds26_smhi_ifcb_active_run.csv"),
                   stringsAsFactors = FALSE, check.names = FALSE)
-  manifest <- read.csv(at_root("metadata", "stage2_ds26_smhi_ifcb_acquisition_manifest.csv"),
+  manifest <- read.csv(at_root("metadata", "stage2", "acquisition", "ds26_smhi_ifcb_acquisition_manifest.csv"),
                        stringsAsFactors = FALSE, check.names = FALSE)
-  files <- read.csv(at_root("metadata", "stage2_ds26_smhi_ifcb_figshare_file_inventory.csv"),
+  files <- read.csv(at_root("metadata", "stage2", "acquisition", "ds26_smhi_ifcb_figshare_file_inventory.csv"),
                     stringsAsFactors = FALSE, check.names = FALSE,
                     colClasses = c(file_id = "character"))
   expect_equal(nrow(pin), 1L)
@@ -318,19 +415,19 @@ test_that("rank-2 DS26 recurrent SMHI IFCB observations are acquired and pinned"
 
 test_that("DS26 exact screening supports only the prespecified secondary IFCB role", {
   contract <- read_stage2_contract(at_root("config", "stage2_record_screening_contract.json"))
-  tables <- read.csv(at_root("metadata", "stage2_ds26_smhi_ifcb_table_summary.csv"),
+  tables <- read.csv(at_root("metadata", "stage2", "screening", "ds26_smhi_ifcb_table_summary.csv"),
                      stringsAsFactors = FALSE, check.names = FALSE)
-  measurements <- read.csv(at_root("metadata", "stage2_ds26_smhi_ifcb_measurement_summary.csv"),
+  measurements <- read.csv(at_root("metadata", "stage2", "screening", "ds26_smhi_ifcb_measurement_summary.csv"),
                            stringsAsFactors = FALSE, check.names = FALSE)
-  events <- read.csv(at_root("metadata", "stage2_ds26_smhi_ifcb_event_summary.csv"),
+  events <- read.csv(at_root("metadata", "stage2", "screening", "ds26_smhi_ifcb_event_summary.csv"),
                      stringsAsFactors = FALSE, check.names = FALSE)
-  linkage <- read.csv(at_root("metadata", "stage2_ds26_smhi_ifcb_event_linkage_audit.csv"),
+  linkage <- read.csv(at_root("metadata", "stage2", "screening", "ds26_smhi_ifcb_event_linkage_audit.csv"),
                       stringsAsFactors = FALSE, check.names = FALSE)
-  inventory <- read.csv(at_root("metadata", "stage2_ds26_smhi_ifcb_variable_inventory.csv"),
+  inventory <- read.csv(at_root("metadata", "stage2", "screening", "ds26_smhi_ifcb_variable_inventory.csv"),
                         stringsAsFactors = FALSE, check.names = FALSE)
-  summary <- read.csv(at_root("metadata", "stage2_ds26_smhi_ifcb_screening_summary.csv"),
+  summary <- read.csv(at_root("metadata", "stage2", "screening", "ds26_smhi_ifcb_screening_summary.csv"),
                       stringsAsFactors = FALSE, check.names = FALSE)
-  registry <- read.csv(at_root("metadata", "stage2_ds26_smhi_ifcb_output_registry.csv"),
+  registry <- read.csv(at_root("metadata", "stage2", "screening", "ds26_smhi_ifcb_output_registry.csv"),
                        stringsAsFactors = FALSE, check.names = FALSE)
   expect_identical(tables$row_count, c(17731L, 121103L, 1111062L))
   expect_equal(nrow(inventory), 85L)
@@ -378,11 +475,11 @@ test_that("DS26 exact screening supports only the prespecified secondary IFCB ro
 
 test_that("the DS26 annotated image library is method evidence not a second network", {
   contract <- read_stage2_contract(at_root("config", "stage2_record_screening_contract.json"))
-  pin <- read.csv(at_root("metadata", "stage2_ds26_ifcb_reference_active_run.csv"),
+  pin <- read.csv(at_root("metadata", "stage2", "acquisition", "ds26_ifcb_reference_active_run.csv"),
                   stringsAsFactors = FALSE, check.names = FALSE)
-  manifest <- read.csv(at_root("metadata", "stage2_ds26_ifcb_reference_acquisition_manifest.csv"),
+  manifest <- read.csv(at_root("metadata", "stage2", "acquisition", "ds26_ifcb_reference_acquisition_manifest.csv"),
                        stringsAsFactors = FALSE, check.names = FALSE)
-  summary <- read.csv(at_root("metadata", "stage2_ds26_ifcb_reference_summary.csv"),
+  summary <- read.csv(at_root("metadata", "stage2", "screening", "ds26_ifcb_reference_summary.csv"),
                       stringsAsFactors = FALSE, check.names = FALSE)
   expect_equal(nrow(pin), 1L)
   expect_equal(pin$file_count, 4L)
@@ -402,9 +499,9 @@ test_that("the DS26 annotated image library is method evidence not a second netw
 
 test_that("rank-3 DS02 starts from the canonical RWS catalogue without substituting PLET", {
   contract <- read_stage2_contract(at_root("config", "stage2_record_screening_contract.json"))
-  pin <- read.csv(at_root("metadata", "stage2_ds02_rws_catalogue_active_run.csv"),
+  pin <- read.csv(at_root("metadata", "stage2", "acquisition", "ds02_rws_catalogue_active_run.csv"),
                   stringsAsFactors = FALSE, check.names = FALSE)
-  manifest <- read.csv(at_root("metadata", "stage2_ds02_rws_catalogue_acquisition_manifest.csv"),
+  manifest <- read.csv(at_root("metadata", "stage2", "acquisition", "ds02_rws_catalogue_acquisition_manifest.csv"),
                        stringsAsFactors = FALSE, check.names = FALSE)
   expect_equal(nrow(pin), 1L)
   expect_identical(pin$work_item_id, "REGISTER:DS02")
@@ -426,15 +523,15 @@ test_that("rank-3 DS02 starts from the canonical RWS catalogue without substitut
 
 test_that("DS02 observation screening supersedes catalogue-only checkpoint", {
   contract <- read_stage2_contract(at_root("config", "stage2_record_screening_contract.json"))
-  links <- read.csv(at_root("metadata", "stage2_ds02_rws_catalogue_link_summary.csv"),
+  links <- read.csv(at_root("metadata", "stage2", "screening", "ds02_rws_catalogue_link_summary.csv"),
                     stringsAsFactors = FALSE, check.names = FALSE)
-  summary <- read.csv(at_root("metadata", "stage2_ds02_rws_screening_summary.csv"),
+  summary <- read.csv(at_root("metadata", "stage2", "screening", "ds02_rws_screening_summary.csv"),
                       stringsAsFactors = FALSE, check.names = FALSE)
-  registry <- read.csv(at_root("metadata", "stage2_ds02_rws_catalogue_output_registry.csv"),
+  registry <- read.csv(at_root("metadata", "stage2", "screening", "ds02_rws_catalogue_output_registry.csv"),
                        stringsAsFactors = FALSE, check.names = FALSE)
-  access <- read.csv(at_root("metadata", "stage2_ds02_rws_v3_access_diagnosis.csv"),
+  access <- read.csv(at_root("metadata", "stage2", "acquisition", "ds02_rws_v3_access_diagnosis.csv"),
                      stringsAsFactors = FALSE, check.names = FALSE)
-  access_pin <- read.csv(at_root("metadata", "stage2_ds02_rws_v3_access_active_run.csv"),
+  access_pin <- read.csv(at_root("metadata", "stage2", "acquisition", "ds02_rws_v3_access_active_run.csv"),
                          stringsAsFactors = FALSE, check.names = FALSE)
   expect_equal(links$catalogue_metadata_rows, 2757L)
   expect_equal(links$catalogue_location_rows, 2635L)
@@ -476,18 +573,18 @@ test_that("DS02 manual Waterinfo export is pinned and supports record screening"
     at_root("config", "stage2_ds02_rws_manual_export_intake.json"),
     simplifyVector = FALSE
   )
-  pin <- read.csv(at_root("metadata", "stage2_ds02_rws_manual_export_active_run.csv"),
+  pin <- read.csv(at_root("metadata", "stage2", "acquisition", "ds02_rws_manual_export_active_run.csv"),
                   stringsAsFactors = FALSE, check.names = FALSE)
   manifest <- read.csv(
-    at_root("metadata", "stage2_ds02_rws_manual_export_acquisition_manifest.csv"),
+    at_root("metadata", "stage2", "acquisition", "ds02_rws_manual_export_acquisition_manifest.csv"),
     stringsAsFactors = FALSE, check.names = FALSE
   )
   inventory <- read.csv(
-    at_root("metadata", "stage2_ds02_rws_manual_export_file_inventory.csv"),
+    at_root("metadata", "stage2", "acquisition", "ds02_rws_manual_export_file_inventory.csv"),
     stringsAsFactors = FALSE, check.names = FALSE
   )
   intake <- read.csv(
-    at_root("metadata", "stage2_ds02_rws_manual_export_intake_summary.csv"),
+    at_root("metadata", "stage2", "acquisition", "ds02_rws_manual_export_intake_summary.csv"),
     stringsAsFactors = FALSE, check.names = FALSE
   )
 

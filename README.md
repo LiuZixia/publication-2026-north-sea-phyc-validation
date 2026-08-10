@@ -66,7 +66,7 @@ Daily, 3-day, 7-day, and sampling-cadence-matched windows may be compared inside
 
 ## Dataset Search and Evidence Hierarchy
 
-The systematic dataset search, completed-search log, inclusion criteria, and candidate register are in [docs/DATASET_SYSTEMATIC_SEARCH.md](docs/DATASET_SYSTEMATIC_SEARCH.md).
+The systematic dataset search, inclusion criteria, and candidate register are in [docs/DATASET_SYSTEMATIC_SEARCH.md](docs/DATASET_SYSTEMATIC_SEARCH.md). The single operational descriptions and replay commands are [Stage 1](docs/stages/STAGE1.md) and [Stage 2](docs/stages/STAGE2.md).
 
 The intended acquisition order is:
 
@@ -87,7 +87,7 @@ The executed Stage 1 search (`DATASET_SYSTEMATIC_SEARCH.md` §13) establishes th
 2. **Lifeform stratification.** No available source measures lifeform dominance as a carbon share directly; DS08 was the only one, through the datasets now unavailable. Dominance must therefore be derived from abundance via `PEG_BVOL` at every source, with the conversion uncertainty carried into the `phaeocystis_handoff_pass` decision that authorizes PhyC use in 02B, 02C, and 02E.
 3. **Spatial.** Every high-tier candidate lies at a coastal margin or in the Skagerrak/Kattegat transition. Offshore central and northern North Sea coverage rests entirely on the CPR records (DS12) reachable through OBIS/EurOBIS, at Tier D/E; DS19 and DS20 yielded no usable route.
 
-**The basin-wide framing above is retained.** The paper is not narrowed to coastal and transition waters. Instead, every subregion is pursued through every open route — including the Tier D/E offshore CPR arm, which is a required component rather than an optional one — and a subregion is declared an observation-adequacy limit only after that has been done, always before PhyC is inspected. Datasets the study proceeds without are listed in `metadata/stage1_unavailable_candidates.csv`; access is a documented reason for a limit, never a reason a result was excluded.
+**The basin-wide framing above is retained.** The paper is not narrowed to coastal and transition waters. Instead, every subregion is pursued through every open route — including the Tier D/E offshore CPR arm, which is a required component rather than an optional one — and a subregion is declared an observation-adequacy limit only after that has been done, always before PhyC is inspected. Datasets the study proceeds without are listed in `metadata/stage1/qualification/unavailable_candidates.csv`; access is a documented reason for a limit, never a reason a result was excluded.
 
 ## Fixed Inputs
 

@@ -2,6 +2,16 @@
 
 Every systematic-search request and every operation that creates a raw input belongs in this directory as a version-controlled R script.
 
+Stage-owned acquisition modules are grouped beneath this directory. Stage 1 catalogue searches are
+in `scripts/00_downloads/stage1/`; Stage 2 provider acquisitions are in
+`scripts/00_downloads/stage2/`, separately from their downstream screening scripts. Operational
+descriptions are in `docs/stages/`.
+
+Ordinary Stage 2 development and publication validation uses existing checksum-pinned raw files:
+`Rscript scripts/02_stage2/00_run_stage2.R`. It does not call any script in this directory. A Stage 2
+acquisition script must be invoked explicitly only when a new or resumed provider acquisition is
+authorized.
+
 Each script must:
 
 1. run non-interactively from the repository root;

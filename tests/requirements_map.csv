@@ -18,7 +18,7 @@ stage,action,requirement,test_file,test_name,coverage
 1,12,Diagnose overlap between the direct EMODnet Biology inventory and prior archived catalogues,tests/test_stage1_search.R,the direct EMODnet WFS inventory has an explicit overlap diagnosis,automated
 1,13,Resolve every register entry against the executed search and rank the acquisition shortlist,tests/test_stage1_search.R,every register entry resolves to archived evidence or is diagnosed,automated
 1,14,Treat contact-required datasets as unavailable and record the consequence applied now,tests/test_stage1_search.R,contact-required datasets are excluded from acquisition and their consequence is recorded,automated
-1,quality,Repeating the query against the archived response produces the same registry rows,scripts/01_validate_stage1.R,deterministic rebuild checksum comparison,automated
+1,quality,Repeating the query against the archived response produces the same registry rows,scripts/01_stage1/99_validate_stage1.R,deterministic rebuild checksum comparison,automated
 1,quality,Inclusion and exclusion categories are mutually exclusive and complete,tests/test_stage1_search.R,candidate registry has every essential field and points to raw evidence,automated
 1,quality,Screening and identity rules are versioned separately from the pinned search configuration,tests/test_stage1_search.R,screening rules are versioned separately from the pinned search configuration,automated
 1,quality,Dataset-level geography is recorded and never silently enforced,tests/test_stage1_search.R,dataset-level geography is recorded for every row and never silently enforced,automated

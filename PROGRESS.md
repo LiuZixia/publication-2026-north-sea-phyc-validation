@@ -1,29 +1,171 @@
 # Project Progress
 
-**Current Stage:** 3 (Harmonization and Screening)
-**Last Update:** 2026-08-10T08:18:00Z
-**Last Milestone:** Stage 2 Complete (Dataset Acquisition and Screening)
-**Session Objective:** Finalize Stage 2 acquisition, verify downloaded data files, update tracking protocol, and proceed to Stage 3.
+**Last update (UTC):** 2026-08-10T13:11:20Z
+**Current project stage:** Stage 2 gate passed; completed Stage 1/2 consolidation is ready for direct Git commit and push
+**Session objective:** Commit and push the complete Stage 1/2 traceability consolidation and Stage 2 closure as one intentional repository change set.
+**Starting branch/commit:** `main` at `4d8665d0042a3218a5c041715ee450e599499db8`, one local commit ahead of `origin/main` at `c740fff744edec2c9af625682d1e5592fb419ff3`.
+**Relevant starting dirty files:** the 229-path Stage 1/2 consolidation worktree recorded below; the scope inspection found no unrelated diagnostics, but nothing has been staged.
+**First concrete next action:** stage the reviewed Stage 1/2 consolidation, commit it on the current `main` branch, and push `main` to `origin` using Bash `git` as explicitly authorized by the user.
 
-## Completed Work
+## Completed Work This Session
 
-### Stage 2: Dataset Acquisition
-*   **Resolved Manual Acquisitions:** Removed DS08, DS10, and DS12 from `metadata/provider_access_requests.csv` and successfully acquired their data.
-    *   `scripts/00_downloads/24_acquire_ds10_vliz_imis.R`
-    *   `scripts/00_downloads/25_acquire_ds12_dassh_ipt.R`
-    *   `scripts/00_downloads/26_acquire_ds08_pangaea_abundance.R`
-*   **DS28 Setup:** Created script stub `scripts/00_downloads/27_acquire_ds28_lifewatch_hplc.R` (waiting on exact manual DOI or resource name since the browser interface was inaccessible).
-*   **Excluded Aggregators:** Confirmed that DS13, DS14, and DS25 (services) are explicitly excluded from bulk download to prevent massive duplication, per project protocol.
-*   **Verification:** Verified that all executed downloads (DS03 to DS27) successfully downloaded valid structural data files (CSV, DwC-A, NetCDF, Text, JSON).
-*   **Inventory Tracking:** Automatically generated `data/raw/stage2/downloaded_files_inventory.md` summarizing sizes, files, and records for all datasets downloaded in Stage 2.
+- Read the required scientific and implementation sources in prescribed order.
+- Reconciled the live tracking claims with `git status` and the visible repository structure.
+- Archived the unchanged starting tracking files as `docs/agent_tracking/archive/20260810T084320Z_PROGRESS.md` and `docs/agent_tracking/archive/20260810T084320Z_PENDING.md`.
+- Generated complete Stage 1 and Stage 2 file inventories from the worktree and raw acquisition manifests with `scripts/00_traceability/01_build_stage_file_inventory.R`.
+- Inventoried 3,039 files. All Stage 1 artifacts are traceable; one Stage 2 raw payload (`DS10` legacy PLET CSV) has a registered checksum but no version-controlled producing/intake script.
+- Established the pre-refactor validation baseline: Stage 0 tests pass; the Stage 1 test fails on a stale provider-request count; the Stage 2 test fails on stale work-state counts. The existing Stage 1 wrapper also mutates `stage1_search_flow.csv` by writing the current time.
+- Consolidated Stage 1 under `scripts/00_downloads/stage1/`, `scripts/01_stage1/`, and `metadata/stage1/{input,search,qualification,inventory}/` without moving immutable raw responses.
+- Added the single operational description `docs/stages/STAGE1.md` and publication-facing entry point `scripts/01_stage1/00_run_stage1.R`.
+- Repaired Stage 1 determinism by deriving search-flow generation time from pinned query evidence and by making the Stage 1 gate own only Stage 0 dependencies plus Stage 1 tests.
+- Replaced the stale literal provider-request test count with a count derived from the current generated registry.
+- Completed the Stage 1 gate; its inventory reports no unresolved generated or raw artifact.
+- Consolidated Stage 2 scripts into `scripts/00_downloads/stage2/` and `scripts/02_stage2/{control,wfs,datasets}/`, and metadata into `metadata/stage2/{control,acquisition,screening,inventory}/`.
+- Preserved checksum-frozen configurations byte-for-byte and added `stage2_relocated_path()` to resolve the three historical metadata paths whose files moved.
+- Replayed the EMODnet WFS control batch using the existing geometry run `20260808T183226Z` and survivor-metadata run `20260808T190338Z`; all raw and run-summary checksums reconciled, 40 queue rows were rebuilt, and the three exact-domain survivors were resolved.
+- Added and executed the non-downloading DS10 legacy registration script, which verifies the archived exact request, returned raw URL, file size, manifest, and payload checksum.
+- Regenerated the inventories for 3,045 files; `metadata/stage_file_inventory_unresolved.csv` now has zero data rows.
+- Added a guarded generated-registry relocation helper and replayed DS06, DS26, and DS02. Existing scientific artifacts matched their registered checksums, so only registry paths and current summaries were regenerated.
+- Passed the complete `tests/test_stage2_contract.R` suite after the provider replay batch.
+- Replayed all remaining implemented Stage 2 provider screens and summaries from existing raw evidence: PLET datasets, DS03, DS09, DS24, and the DS15/DS22 reference summaries.
+- Removed the DS27 zero-row placeholder processors and their ignored placeholder outputs because “not parsed” is unknown/incomplete, not zero evidence.
+- Added `docs/stages/STAGE2.md`, the offline publication entry point `scripts/02_stage2/00_run_stage2.R`, and a validation gate that cannot invoke acquisition scripts.
+- Condensed duplicated Stage 1/2 execution narration in `docs/DATASET_SYSTEMATIC_SEARCH.md` to generated-evidence links and preserved scientific dispositions.
+- Updated `scripts/99_stage_status.R`; the generated report now derives Stage 2 workflow counts and distinguishes Stages 3–12.
+- Passed both publication entry points. The Stage 2 inventory contains no unresolved artifacts, while the scientific workflow correctly remains incomplete.
+- Removed the unreferenced root diagnostics `ds02_unique_stations.txt`, `unique_stations.txt`, and `tmp.json` after explicit user authorization.
+- Started a new Stage 2 closure session; reconciled the live 19-item status (3 complete, 11 in progress, 5 not started), archived unchanged tracking snapshots as `20260810T105508Z_PROGRESS.md` and `20260810T105508Z_PENDING.md`, and confirmed that no new provider downloads are authorized for this development pass.
+- Generated `metadata/stage2/control/access_dispositions.csv` from frozen policy, existing request records, and checksum-pinned local payloads. Eight email-required cases are temporarily unavailable; DS12 remains usable from its public archive because its email request is only an optional metadata enhancement.
+- Verified that the pinned DS08 response is a PANGAEA login HTML page rather than an observation ZIP. It remains evidence of unavailable access, never a zero-row biological result.
+- Added the missing DS23 and DS28 provider-request drafts, each stating why provider contact is necessary and the consequence of proceeding without the data.
+- Refreshed the live work order to 3 complete, 3 unavailable, 11 in progress, and 2 not started; Stage 2 tests passed and the regenerated 3,051-file inventory reports zero unresolved artifacts.
+- Generated the DS12 public CPR screening entirely from the existing checksum-pinned DwC-A: 267,284 event records have linked PCI or taxon evidence, including 70,826 core-domain and 2,562 external-transfer events. The generated decision is secondary Tier D lifeform/recurrence evidence and explicitly not total-community biomass.
+- Generated the DS27 FerryBox screening across all 679 checksum-pinned NetCDF transects through the documented R-controlled `ncdump` bridge. It retained 3,899,374 QC-eligible chlorophyll-fluorescence rows as a Tier E comparator and excluded the separately archived pCO2-only collection from phytoplankton evidence.
+- Corrected the live-state rule so a dataset with acquired, screened records can finish Stage 2 while retaining a scientific `pending` decision for later observation-only audits. The refreshed ranked work order is fully dispositioned: 16 complete, 3 temporarily unavailable, 0 in progress, and 0 not started.
+- Passed the complete Stage 2 contract test suite against the generated DS12/DS27 artifacts and their output-registry checksums.
+- Passed the complete publication-facing Stage 2 offline replay gate without provider calls or downloads; it rebuilt both large new screens, asserted the fully dispositioned work order, reran the contract tests, wrote a dated session log, and regenerated the inventories.
+- Passed the Stage 1 publication regression after Stage 2 closure, parsed all 94 repository R files, and passed `git diff --check`.
+- Updated the generated stage-status report to derive all nine email dispositions from the Stage 2 access register rather than showing only the six older Stage 1 request rows.
+- Regenerated a final 3,077-file inventory with zero unresolved artifacts and confirmed all four inventory outputs are byte-identical across an immediate rerun.
+- Audited the requested publish scope with `git status -sb`, `git diff --stat`, `git diff --summary`, and the untracked-file list. The complete worktree is the Stage 1/2 consolidation described in this ledger; no commit or push action was taken.
+- Checked the required publishing prerequisite. `gh --version` and `gh auth status` both failed because the GitHub CLI is not installed, so the publish workflow stopped before branch creation or staging.
+- The user explicitly authorized resuming with Bash `git` despite the unavailable GitHub CLI. `git fetch origin` passed and confirmed no remote divergence: local `main` is one commit ahead and remote `main` is zero commits ahead.
 
-## File Change Ledger
+## File-Change Ledger
 
-*   `metadata/provider_access_requests.csv`: Removed datasets that were directly downloaded (DS08, DS10, DS12).
-*   `scripts/00_downloads/24_...`, `25_...`, `26_...`, `27_...`: Created acquisition scripts for missing Stage 2 datasets.
-*   `scripts/99_generate_inventory.R`: Added helper script to summarize downloaded payload files.
-*   `data/raw/stage2/downloaded_files_inventory.md`: Newly generated data artifact tracking physical downloads.
+- Added `docs/agent_tracking/archive/20260810T084320Z_PROGRESS.md`: unchanged starting `PROGRESS.md` snapshot.
+- Added `docs/agent_tracking/archive/20260810T084320Z_PENDING.md`: unchanged starting `PENDING.md` snapshot.
+- Modified `PROGRESS.md`: initialized this consolidation session and recorded conservative starting state.
+- Modified `PENDING.md`: carried forward unresolved work and ordered the consolidation milestones.
+- Added `R/04_stage_inventory.R`: reusable stage assignment, producer mapping, manifest checksum, and file inventory functions.
+- Added `scripts/00_traceability/01_build_stage_file_inventory.R`: non-interactive inventory generator.
+- Added generated `metadata/stage1/inventory/file_inventory.csv` and `metadata/stage2/inventory/file_inventory.csv`.
+- Added generated `metadata/stage_file_inventory_summary.csv` and `metadata/stage_file_inventory_unresolved.csv`.
+- Added `docs/agent_tracking/archive/20260810T090007Z_PROGRESS.md` and `20260810T090007Z_PENDING.md`: milestone snapshots.
+- Renamed Stage 1 download scripts into `scripts/00_downloads/stage1/` and processing/validation scripts into `scripts/01_stage1/`; updated live references.
+- Renamed Stage 1 metadata into `metadata/stage1/input/`, `search/`, `qualification/`, and `inventory/`; updated scripts, configurations, tests, and live documentation.
+- Added `docs/stages/STAGE1.md` and `scripts/01_stage1/00_run_stage1.R`.
+- Modified `scripts/01_stage1/01_compile_candidate_registry.R`, `99_validate_stage1.R`, and `tests/test_stage1_search.R` for deterministic generation and stage-owned validation.
+- Modified `scripts/00_downloads/README.md` to document stage-owned acquisition folders.
+- Added `docs/agent_tracking/archive/20260810T091650Z_PROGRESS.md` and `20260810T091650Z_PENDING.md`: Stage 1 gate snapshots.
+- Renamed all Stage 2 acquisition, control, WFS, dataset-processing, and metadata artifacts into the stage-owned folders listed above; all live script and test references now use those paths.
+- Modified `R/03_stage2_contract.R` to resolve relocated checksum-frozen inputs without altering the frozen JSON files.
+- Modified `R/04_stage_inventory.R` and `scripts/00_traceability/01_build_stage_file_inventory.R` for the consolidated Stage 2 layout.
+- Added `scripts/00_downloads/stage2/15_register_ds10_plet_vliz_legacy.R` to close the historical DS10 producer gap without provider contact.
+- Modified `scripts/02_stage2/control/01_refresh_acquisition_status.R` to discover summaries in `metadata/stage2/screening/`.
+- Modified `tests/test_stage2_contract.R` for the new paths and calculated work-state assertions.
+- Added `docs/agent_tracking/archive/20260810T093235Z_PROGRESS.md` and `20260810T093235Z_PENDING.md`: Stage 2 control/WFS milestone snapshots.
+- Modified the DS02, DS06, and DS26 inventory/deduplication scripts to migrate verified generated-registry paths safely and idempotently.
+- Added `docs/agent_tracking/archive/20260810T094152Z_PROGRESS.md` and `20260810T094152Z_PENDING.md`: DS02/DS06/DS26 replay milestone snapshots.
+- Modified all implemented remaining provider screening/summary scripts only through their moved paths and regenerated their owned metadata outputs from existing raw evidence.
+- Added `docs/stages/STAGE2.md` and `scripts/02_stage2/00_run_stage2.R`; rewrote `scripts/02_stage2/control/99_validate_stage2.R` as an offline-only gate.
+- Renamed `scripts/99_generate_inventory.R` to `scripts/02_stage2/control/98_legacy_raw_inventory.R` and guarded it against rewriting the superseded immutable raw Markdown inventory.
+- Deleted the non-authoritative DS27 stub scripts and the two ignored zero-row stub CSVs they generated during audit.
+- Modified `README.md`, `scripts/00_downloads/README.md`, `docs/DATASET_SYSTEMATIC_SEARCH.md`, and `scripts/99_stage_status.R` to point to the stage-owned descriptions and calculated state.
+- Added `docs/agent_tracking/archive/20260810T101302Z_PROGRESS.md` and `20260810T101302Z_PENDING.md`: completed provider-replay and publication-entrypoint milestone snapshots.
+- Deleted untracked `ds02_unique_stations.txt`, `unique_stations.txt`, and `tmp.json`: obsolete ad hoc diagnostics with no repository references.
+- Added `docs/agent_tracking/archive/20260810T105508Z_PROGRESS.md` and `20260810T105508Z_PENDING.md`: unchanged snapshots at the start of the Stage 2 closure session.
+- Added `scripts/02_stage2/control/02_build_access_dispositions.R`: validates DS08/DS12 pins and generates all access/email dispositions without provider calls.
+- Added generated `metadata/stage2/control/access_dispositions.csv`: nine-case access register with explicit email reasons, current consequences, evidence paths, and revisit triggers.
+- Modified `scripts/02_stage2/control/01_refresh_acquisition_status.R`: maps ranked unavailable cases to the controlled `unavailable` work state.
+- Modified `scripts/02_stage2/control/99_validate_stage2.R`, `tests/test_stage2_contract.R`, and `R/04_stage_inventory.R`: integrate and validate the access register and its producer.
+- Modified `docs/access_requests/DRAFT_EMAILS.md`: added DS23 and DS28 drafts and corrected the draft count to nine.
+- Modified `docs/stages/STAGE2.md`: documented the generated access-disposition step.
+- Added `scripts/02_stage2/datasets/02_screen_ds12_cpr.R`: checksum-validates and event-screens the existing public CPR DwC-A and generates schema, location, measurement, taxon, record, duplicate, summary, and output-registry artifacts.
+- Added `scripts/02_stage2/datasets/02_screen_ds27_ferrybox.R`: checksum-validates and screens every pinned FerryBox NetCDF through an R-controlled system decoder, and records the non-phytoplankton pCO2 exclusion.
+- Added generated DS12 outputs under `metadata/stage2/screening/` and `data/interim/`, including `stage2_ds12_cpr_record_screening.csv` and its checksum registry.
+- Added generated DS27 outputs under `metadata/stage2/screening/`, including the 679-file audit, variable inventory, component disposition, dataset summary, and checksum registry.
+- Modified `scripts/02_stage2/control/01_refresh_acquisition_status.R`: distinguishes completed Stage 2 screening from later scientific eligibility and gives controlled unavailable dispositions precedence.
+- Modified `scripts/02_stage2/control/99_validate_stage2.R` and `tests/test_stage2_contract.R`: rebuild and validate DS12/DS27, enforce a fully dispositioned work order, and verify generated artifact checksums.
+- Modified `R/04_stage_inventory.R`: includes generated interim/processed data and consumes generated output registries when assigning checksums and producers.
+- Modified `docs/stages/STAGE2.md`, `docs/DATASET_SYSTEMATIC_SEARCH.md`, and `PENDING.md`: record the fully dispositioned work-order boundary, email-required gaps, dataset roles, and later-stage scientific audits.
+- Modified `scripts/99_stage_status.R`: reports all generated Stage 2 email dispositions, including required/unavailable versus optional/open cases, and clarifies that unavailable data are not ecological negatives.
+- Regenerated `outputs/stage_status.md`: reports 16 complete and 3 temporarily unavailable ranked Stage 2 items, with no in-progress or not-started items.
+- Added `docs/agent_tracking/archive/20260810T125000Z_PROGRESS.md` and `20260810T125000Z_PENDING.md`: unchanged snapshots at the start of the requested commit-and-push session.
+- Modified `PROGRESS.md` and `PENDING.md`: recorded the missing GitHub CLI blocker and exact safe resume point; no scientific artifact or pipeline result changed.
 
-## Validation and State
-*   **Stage 2 Validated:** All required data files (except those explicitly needing PI contact like DS23, and manual URL assignment for DS28) have been safely cached in the `data/raw/stage2/` directory and manually inspected for valid schema content.
-*   **Stage 3 Ready:** The project is now ready to begin harmonizing columns, handling deduplication, and preparing the standard dataset schema.
+## Validation Commands and Outcomes
+
+- `git status --short`: passed as a worktree-state check; three pre-existing untracked diagnostic files were identified.
+- `readlink -f data/raw`: resolved to the required `/mnt/hdd/publication-2026-north-sea-phyc-validation` external store.
+- `Rscript scripts/00_traceability/01_build_stage_file_inventory.R`: passed twice; the four generated inventory files had identical SHA-256 checksums across reruns.
+- `Rscript -e 'testthat::test_file(...)'`: Stage 0 governance, identifiers, and spatial tests passed; Stage 1 and Stage 2 tests exposed pre-existing stale expected counts recorded above.
+- `Rscript scripts/01_stage1/99_validate_stage1.R`: failed at the pre-refactor baseline because it incorrectly included the failing Stage 2 test and suppressed its detailed assertion output.
+- `Rscript scripts/01_stage1/01_compile_candidate_registry.R`: passed after migration; regenerated all search results from pinned responses.
+- `Rscript scripts/01_stage1/02_build_ds_crosswalk.R`: passed after migration; regenerated the Stage 2 shortlist and qualification results.
+- `Rscript -e 'testthat::test_file("tests/test_stage1_search.R", ...)'`: passed after fixing migrated paths and calculated request-state assertions.
+- `Rscript scripts/01_stage1/00_run_stage1.R`: passed; latest log `outputs/logs/stage1_validation_20260810T091604Z.log`.
+- `Rscript scripts/02_stage2/control/00_initialize_contract.R`: passed after consolidation; the 19-row work order and 40-row WFS queue regenerate deterministically.
+- `Rscript scripts/02_stage2/wfs/00_register_geometry_run.R data/raw/stage2/emodnet_wfs_geometry/20260808T183226Z`: passed; existing raw run pinned without download.
+- `Rscript scripts/02_stage2/wfs/01_screen_geometry.R`: passed against the existing archived geometry responses.
+- `Rscript scripts/02_stage2/wfs/02_register_metadata_run.R data/raw/stage2/emodnet_wfs_survivor_metadata/20260808T190338Z` and `03_resolve_survivors.R`: passed without download.
+- `Rscript scripts/00_downloads/stage2/15_register_ds10_plet_vliz_legacy.R`: passed; existing DS10 payload verified and re-pinned without download.
+- `Rscript scripts/00_traceability/01_build_stage_file_inventory.R`: passed after Stage 2 migration; 3,045 files inventoried and zero unresolved artifacts reported.
+- DS06 replay (`02_inventory_screen`, `02_resolve`, `02_summarize`): passed; existing derived outputs verified and consolidated registry paths regenerated.
+- DS26 replay (`02_inventory_screen`, `02_summarize_ds26_ifcb_reference_library`): passed; existing outputs verified, including hashing the archived 8.1 GB method-reference library, with no download.
+- DS02 replay (`02_screen_catalogue`, `02_inventory_screen`, `02_resolve`, `02_summarize`): passed; catalogue results rebuilt and existing record-level outputs verified.
+- `Rscript -e 'testthat::test_file("tests/test_stage2_contract.R", ...)'`: passed after the DS02/DS06/DS26 replay.
+- PLET replay (`02_screen_ds04`, `ds05`, `ds07`, `ds16`, `ds10`, `ds11`, then `02_summarize_plet_datasets.R`): passed from existing raw files.
+- DS03, DS09, and DS24 screen-and-summary pairs: passed from existing raw files; DS24 exact spatial replay completed over its archived records.
+- `Rscript scripts/02_stage2/datasets/02_summarize_ds15_ds22_screening.R`: passed from existing raw files.
+- `Rscript scripts/02_stage2/00_run_stage2.R`: passed in `offline_replay_existing_raw_no_provider_calls` mode; log `outputs/logs/stage2_contract_validation_20260810T100642Z.log`.
+- `Rscript scripts/99_stage_status.R`: passed and generated a Stage 2 section from the live status and inventory.
+- `Rscript scripts/01_stage1/00_run_stage1.R`: final cross-stage regression passed; log `outputs/logs/stage1_validation_20260810T101158Z.log`.
+- Final `Rscript scripts/02_stage2/00_run_stage2.R`: passed without downloads after rebuilding the freeze for normalized protocol-file line endings; log `outputs/logs/stage2_contract_validation_20260810T101915Z.log`.
+- Inventory determinism check: all four generated inventory files retained identical SHA-256 values across an immediate rerun; the final refresh reports 3,049 files and zero unresolved artifacts.
+- Repository-wide R syntax check: all 91 files under `R/`, `scripts/`, and `tests/` parsed successfully.
+- `git diff --check`: passed after normalizing the two touched CSV files to LF and removing trailing whitespace.
+- Post-normalization Stage 0 governance/identifier/spatial tests and `tests/test_stage1_search.R`: passed.
+- `Rscript scripts/02_stage2/control/02_build_access_dispositions.R`: passed; checksum-validated the pinned DS08 login response and valid DS12 ZIP, then generated 8 required/unavailable and 1 optional/open dispositions.
+- `Rscript scripts/02_stage2/control/01_refresh_acquisition_status.R`: passed; generated 3 complete, 3 unavailable, 11 in-progress, and 2 not-started work items.
+- Stage 2 contract tests: initially failed because the pre-existing state-count assertion omitted the controlled `unavailable` level; updated the assertion and reran successfully.
+- `Rscript scripts/00_traceability/01_build_stage_file_inventory.R`: passed with 3,051 files and zero unresolved generated/raw artifacts.
+- `Rscript scripts/02_stage2/datasets/02_screen_ds12_cpr.R`: passed after normalizing the all-empty provider quality-flag field to the explicit generated value `not_reported`; output registry reconciles all seven generated artifacts.
+- `Rscript scripts/02_stage2/datasets/02_screen_ds27_ferrybox.R`: passed across all 679 NetCDF files after replacing the too-slow sequential loop with deterministic ordered parallel processing; generated 3,899,374 usable Tier E rows and excluded PANGAEA.930383 as non-phytoplankton evidence.
+- `Rscript scripts/02_stage2/control/01_refresh_acquisition_status.R`: passed; generated 16 complete, 3 unavailable, 0 in-progress, and 0 not-started ranked work items.
+- `Rscript -e 'testthat::test_file("tests/test_stage2_contract.R", reporter="summary", stop_on_failure=TRUE)'`: passed with the DS12/DS27 role, count, component, and checksum assertions.
+- `Rscript scripts/02_stage2/00_run_stage2.R`: passed in `offline_replay_existing_raw_no_provider_calls` mode; log `outputs/logs/stage2_contract_validation_20260810T115216Z.log`; 3,076 files inventoried at that gate point and zero unresolved artifacts.
+- `Rscript scripts/01_stage1/00_run_stage1.R`: passed as the final cross-stage regression; log `outputs/logs/stage1_validation_20260810T115724Z.log`.
+- `Rscript scripts/99_stage_status.R`: passed after deriving the nine-case provider-access section from `access_dispositions.csv`.
+- Repository-wide syntax check: all 94 R files parsed successfully; final `git diff --check` passed.
+- Final inventory refresh and immediate rerun: passed with 3,077 files, zero unresolved artifacts, and identical hashes (`stage1` inventory `736454b2...`, `stage2` inventory `a07758cb...`, summary `aae76b70...`, unresolved report `63421d21...`).
+- `git status -sb`: confirmed `main` is one commit ahead of `origin/main` and has the completed Stage 1/2 consolidation unstaged.
+- `gh --version` and `gh auth status`: failed with `gh: command not found`; publishing is blocked before staging.
+- `git fetch origin` and `git rev-list --left-right --count origin/main...HEAD`: passed; result `0 1`, so direct fast-forward push remains possible.
+
+## Conservative State
+
+- No Stage 1 or Stage 2 scientific count, screening decision, or scientific result has been intentionally changed in this session.
+- `metadata/stage1/search/search_flow.csv` now uses the latest pinned response timestamp and regenerates byte-identically.
+- The ranked Stage 2 work order is fully dispositioned at 16 complete and 3 temporarily unavailable. This is a workflow-gate claim, not final scientific eligibility; later observation-only audits remain pending where recorded.
+- The Stage 2 publication gate and Stage 1 regression pass from clean non-interactive R sessions. Stage 3 coverage—not more Stage 2 acquisition—is the next active project stage unless provider replies supply dated new evidence.
+- The GitHub CLI remains absent, but the user has explicitly selected direct Bash `git` commit and push; no pull request is requested.
+- No Stage 2 download script was run during consolidation. All validation uses the exact existing raw files and request records.
+- Git diffs for the retained Stage 2 acquisition scripts change only organization-dependent input/output paths and frozen-path adapters; provider request construction remains unchanged. The new DS10 legacy script only verifies the exact archived request and returned URL.
+- The generated Stage 2 status and access-disposition registers remain authoritative. Email-required unavailable datasets contribute no observation evidence and are not treated as ecological zeros.
+- No CMEMS PhyC value has been inspected.
+
+## Last Completed Milestone
+
+- Completed milestone: Stage 2 publication gate passed without downloads, with the ranked work order fully dispositioned, cross-stage regression clean, and deterministic inventories complete.
+- Latest archive snapshot: `20260810T125000Z_PROGRESS.md` / `20260810T125000Z_PENDING.md`.

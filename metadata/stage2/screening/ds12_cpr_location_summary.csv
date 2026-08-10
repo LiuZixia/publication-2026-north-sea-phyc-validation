@@ -1,0 +1,2 @@
+"event_rows","usable_secondary_event_rows","occurrence_rows","measurement_rows","pci_measurement_rows","events_with_pci","events_with_occurrences","unique_reported_taxa","core_event_rows","external_transfer_event_rows","outside_domain_event_rows","invalid_coordinate_event_rows","parseable_datetime_rows","first_parseable_datetime_utc","last_parseable_datetime_utc","unique_years","duplicate_event_id_rows","open_licence_event_rows"
+267284,267284,3543114,4350538,267284,267284,267284,748,70826,2562,193896,0,267284,"1946-01-07T18:02:00Z","2020-12-23T07:39:00Z",75,0,267284

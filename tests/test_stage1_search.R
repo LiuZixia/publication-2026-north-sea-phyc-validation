@@ -36,7 +36,7 @@ test_that("scientific review is recorded honestly and does not overstate indepen
   expect_true(nzchar(strategy$independent_review$must_complete_before))
   expect_true(nzchar(strategy$independent_review$risk_if_not_completed))
 
-  registry <- read.csv(at_root("metadata", "candidate_registry.csv"), stringsAsFactors = FALSE)
+  registry <- read.csv(at_root("metadata", "stage1", "search", "candidate_registry.csv"), stringsAsFactors = FALSE)
   expect_true(all(grepl("independent_second_review_deferred", registry$reviewer, fixed = TRUE)))
   expect_false(any(grepl("Dr. Researcher", registry$reviewer, fixed = TRUE)))
 
@@ -49,7 +49,7 @@ test_that("scientific review is recorded honestly and does not overstate indepen
 })
 
 test_that("one complete active run is pinned for every required source family", {
-  active <- read.csv(at_root("metadata", "stage1_active_runs.csv"), stringsAsFactors = FALSE)
+  active <- read.csv(at_root("metadata", "stage1", "search", "active_runs.csv"), stringsAsFactors = FALSE)
   expected <- c("PLET", "ICES_DOME", "EMODNET_ERDDAP", "OBIS", "SMHI_SHARK", "PANGAEA", "GBIF",
                 "MARINE_SCOTLAND", "CEFAS_DASSH", "ICES_FIGSHARE")
   expect_setequal(active$source_key, expected)
@@ -69,7 +69,7 @@ test_that("one complete active run is pinned for every required source family", 
 })
 
 test_that("the direct EMODnet Biology WFS update is append-only and complete", {
-  append <- read.csv(at_root("metadata", "stage1_append_runs.csv"), stringsAsFactors = FALSE)
+  append <- read.csv(at_root("metadata", "stage1", "search", "append_runs.csv"), stringsAsFactors = FALSE)
   expect_identical(names(append), c("source_key", "search_run_id", "configuration_path"))
   expect_true(nrow(append) >= 1L)
   expect_true(all(append$source_key == "EMODNET_BIOLOGY_WFS"))
@@ -100,7 +100,7 @@ test_that("the direct EMODnet Biology WFS update is append-only and complete", {
 })
 
 test_that("query log has exact scalar requests and checksum-verified raw evidence", {
-  log <- read.csv(at_root("metadata", "stage1_query_log.csv"), stringsAsFactors = FALSE, check.names = FALSE)
+  log <- read.csv(at_root("metadata", "stage1", "search", "query_log.csv"), stringsAsFactors = FALSE, check.names = FALSE)
   required <- c("search_run_id", "source_family", "provider", "endpoint", "api_version", "license", "method",
     "request_text", "query_hash_sha256", "query_label", "geographic_bounds", "page_or_cursor", "retrieved_utc",
     "http_status", "retry_max_tries", "raw_response_path", "checksum_sha256", "size_bytes", "content_type",
@@ -121,7 +121,7 @@ test_that("query log has exact scalar requests and checksum-verified raw evidenc
 })
 
 test_that("provider totals and terminal pages reconcile", {
-  log <- read.csv(at_root("metadata", "stage1_query_log.csv"), stringsAsFactors = FALSE, check.names = FALSE)
+  log <- read.csv(at_root("metadata", "stage1", "search", "query_log.csv"), stringsAsFactors = FALSE, check.names = FALSE)
 
   pangaea <- log[log$source_family == "PANGAEA", ]
   expect_equal(sum(pangaea$records_returned), unique(pangaea$total_reported))
@@ -161,7 +161,7 @@ test_that("provider totals and terminal pages reconcile", {
 })
 
 test_that("candidate registry has every essential field and points to raw evidence", {
-  registry <- read.csv(at_root("metadata", "candidate_registry.csv"), stringsAsFactors = FALSE, check.names = FALSE)
+  registry <- read.csv(at_root("metadata", "stage1", "search", "candidate_registry.csv"), stringsAsFactors = FALSE, check.names = FALSE)
   required <- c("search_run_id", "source", "endpoint", "api_version", "query_hash_sha256", "execution_time_utc",
     "raw_response_path", "raw_response_checksum_sha256", "provider_dataset_id", "catalogue_id", "title",
     "doi_or_stable_url", "version", "geographic_metadata", "temporal_metadata", "measurement_types", "taxonomic_content",
@@ -184,8 +184,8 @@ test_that("candidate registry has every essential field and points to raw eviden
 })
 
 test_that("search-flow counts are generated and exactly reproducible", {
-  registry <- read.csv(at_root("metadata", "candidate_registry.csv"), stringsAsFactors = FALSE)
-  flow <- read.csv(at_root("metadata", "stage1_search_flow.csv"), stringsAsFactors = FALSE)
+  registry <- read.csv(at_root("metadata", "stage1", "search", "candidate_registry.csv"), stringsAsFactors = FALSE)
+  flow <- read.csv(at_root("metadata", "stage1", "search", "search_flow.csv"), stringsAsFactors = FALSE)
   value <- setNames(flow$count, flow$stage)
   expect_equal(value[["records_identified"]], 29771L)
   expect_equal(value[["duplicate_catalogue_or_query_records"]], value[["records_identified"]] - nrow(registry))
@@ -199,10 +199,10 @@ test_that("search-flow counts are generated and exactly reproducible", {
 })
 
 test_that("the direct EMODnet WFS inventory has an explicit overlap diagnosis", {
-  overlap <- read.csv(at_root("metadata", "stage1_emodnet_wfs_overlap.csv"), stringsAsFactors = FALSE)
-  summary <- read.csv(at_root("metadata", "stage1_emodnet_wfs_overlap_summary.csv"), stringsAsFactors = FALSE)
+  overlap <- read.csv(at_root("metadata", "stage1", "search", "emodnet_wfs_overlap.csv"), stringsAsFactors = FALSE)
+  summary <- read.csv(at_root("metadata", "stage1", "search", "emodnet_wfs_overlap_summary.csv"), stringsAsFactors = FALSE)
   value <- setNames(summary$count, summary$metric)
-  registry <- read.csv(at_root("metadata", "candidate_registry.csv"), stringsAsFactors = FALSE)
+  registry <- read.csv(at_root("metadata", "stage1", "search", "candidate_registry.csv"), stringsAsFactors = FALSE)
 
   expect_equal(nrow(overlap), 1517L)
   expect_equal(anyDuplicated(overlap$wfs_dataset_id), 0L)
@@ -226,7 +226,7 @@ test_that("the direct EMODnet WFS inventory has an explicit overlap diagnosis", 
 })
 
 test_that("all prespecified known items are recalled from archived evidence", {
-  recall <- read.csv(at_root("metadata", "stage1_known_item_recall.csv"), stringsAsFactors = FALSE)
+  recall <- read.csv(at_root("metadata", "stage1", "search", "known_item_recall.csv"), stringsAsFactors = FALSE)
   # The set deliberately includes candidates the search modules were not built around: the
   # offshore evidence base (DS12), the restricted German series (DS17, DS18), the second Wadden
   # Sea sentinel (DS09), the Dutch historical extension (DS03), the GBIF-only record (DS23), and
@@ -243,11 +243,11 @@ test_that("all prespecified known items are recalled from archived evidence", {
 test_that("no prespecified benchmark is discarded by the dataset-metadata screen", {
   # Recall proves only that a benchmark reached the registry. A benchmark that is present but
   # screened out never reaches Stage 2, so presence and retention must be asserted separately.
-  recall <- read.csv(at_root("metadata", "stage1_known_item_recall.csv"), stringsAsFactors = FALSE)
+  recall <- read.csv(at_root("metadata", "stage1", "search", "known_item_recall.csv"), stringsAsFactors = FALSE)
   expect_true(all(recall$screening_status != "excluded"))
   expect_true(all(nzchar(recall$canonical_provider_dataset_id)))
 
-  registry <- read.csv(at_root("metadata", "candidate_registry.csv"), stringsAsFactors = FALSE)
+  registry <- read.csv(at_root("metadata", "stage1", "search", "candidate_registry.csv"), stringsAsFactors = FALSE)
   # Provider titles abbreviate "phytoplankton"; matching only the full word discarded the Dutch
   # (RWS) and German (BSH) national series while known-item recall still reported them found.
   for (id in c("RWS_Fpzout_2000-2019_phyto", "BSH_Phyto_Zoo")) {
@@ -258,7 +258,7 @@ test_that("no prespecified benchmark is discarded by the dataset-metadata screen
 })
 
 test_that("a shared provider DOI does not merge distinct observatories into one family", {
-  registry <- read.csv(at_root("metadata", "candidate_registry.csv"), stringsAsFactors = FALSE)
+  registry <- read.csv(at_root("metadata", "stage1", "search", "candidate_registry.csv"), stringsAsFactors = FALSE)
   # PLET publishes eight distinct Marine Scotland series under the single DOI 10.17031/1637.
   mss <- registry[grepl("^MSS ", registry$title), ]
   expect_gte(nrow(mss), 8L)
@@ -293,7 +293,7 @@ test_that("registry identity rules fold case and reject collection DOIs", {
 })
 
 test_that("dataset-level geography is recorded for every row and never silently enforced", {
-  registry <- read.csv(at_root("metadata", "candidate_registry.csv"), stringsAsFactors = FALSE)
+  registry <- read.csv(at_root("metadata", "stage1", "search", "candidate_registry.csv"), stringsAsFactors = FALSE)
   states <- c("in_domain_by_server_side_query_geometry", "dataset_metadata_matches_frozen_domain_terms",
               "dataset_metadata_indicates_out_of_domain", "dataset_metadata_lacks_domain_evidence")
   expect_true(all(registry$geographic_screen_state %in% states))
@@ -314,7 +314,7 @@ test_that("dataset-level geography is recorded for every row and never silently 
 })
 
 test_that("DS22 is the actual validated and pinned PEG_BVOL file", {
-  registry <- read.csv(at_root("metadata", "candidate_registry.csv"), stringsAsFactors = FALSE)
+  registry <- read.csv(at_root("metadata", "stage1", "search", "candidate_registry.csv"), stringsAsFactors = FALSE)
   ds22 <- registry[registry$provider_dataset_id == "PEG_BVOL_2025", ]
   expect_equal(nrow(ds22), 1L)
   expect_identical(ds22$screening_status, "advanced_to_acquisition")
@@ -326,7 +326,7 @@ test_that("DS22 is the actual validated and pinned PEG_BVOL file", {
 })
 
 test_that("search modules contain no stubs, artificial page truncation, or PhyC lookup", {
-  scripts <- list.files(at_root("scripts", "00_downloads"), pattern = "01_.*\\.R$", full.names = TRUE)
+  scripts <- list.files(at_root("scripts", "00_downloads", "stage1"), pattern = "search_.*\\.R$", full.names = TRUE)
   expect_gte(length(scripts), 11L)
   text <- paste(vapply(c(scripts, at_root("R", "02_stage1_search_modules.R")), function(path) paste(readLines(path, warn = FALSE), collapse = "\n"), character(1)), collapse = "\n")
   expect_false(grepl("not fully implemented|creating stub|max_pages", text, ignore.case = TRUE))
@@ -334,7 +334,7 @@ test_that("search modules contain no stubs, artificial page truncation, or PhyC 
 })
 
 test_that("DS08 contact-only access state remains separately logged", {
-  log_df <- read.csv(at_root("metadata", "manual_discovery_log.csv"), stringsAsFactors = FALSE)
+  log_df <- read.csv(at_root("metadata", "stage1", "input", "manual_discovery_log.csv"), stringsAsFactors = FALSE)
   expect_true(any(log_df$identifier == "DS08" & log_df$verification_status == "manual_contact"))
 })
 
@@ -342,7 +342,7 @@ test_that("every archived PLET catalogue row reaches the registry", {
   # A parser that skips records it cannot fully populate biases discovery in a direction no count
   # reveals. Requiring a DOI cell dropped seven real datasets, including the restricted German
   # coastal series DS17, because restricted holdings are the least likely to carry a DOI.
-  active <- read.csv(at_root("metadata", "stage1_active_runs.csv"), stringsAsFactors = FALSE)
+  active <- read.csv(at_root("metadata", "stage1", "search", "active_runs.csv"), stringsAsFactors = FALSE)
   run <- active$search_run_id[active$source_key == "PLET"]
   html <- paste(readLines(at_root("data", "raw", "search_runs", run, "catalogue.html"), warn = FALSE), collapse = "\n")
   trs <- regmatches(html, gregexpr("(?s)<tr[^>]*>.*?</tr>", html, perl = TRUE))[[1]]
@@ -350,7 +350,7 @@ test_that("every archived PLET catalogue row reaches the registry", {
     length(regmatches(tr, gregexpr("(?s)<td[^>]*>.*?</td>", tr, perl = TRUE))[[1]]) == 5L
   }, logical(1)))
 
-  registry <- read.csv(at_root("metadata", "candidate_registry.csv"), stringsAsFactors = FALSE)
+  registry <- read.csv(at_root("metadata", "stage1", "search", "candidate_registry.csv"), stringsAsFactors = FALSE)
   expect_equal(sum(registry$source == "PLET"), data_rows)
   expect_true(any(registry$provider_dataset_id == "OSPAR_LLUR-SH_2010-2020"))
   no_doi <- registry[registry$source == "PLET" & !nzchar(registry$doi_or_stable_url), ]
@@ -365,7 +365,7 @@ test_that("screening rules are versioned separately from the pinned search confi
   expect_true("PLET" %in% vapply(rules$biological_scope$scope_guaranteed_sources, `[[`, character(1), "source"))
   expect_true(all(nzchar(vapply(rules$biological_scope$scope_guaranteed_sources, `[[`, character(1), "reason"))))
 
-  active <- read.csv(at_root("metadata", "stage1_active_runs.csv"), stringsAsFactors = FALSE)
+  active <- read.csv(at_root("metadata", "stage1", "search", "active_runs.csv"), stringsAsFactors = FALSE)
   search_config <- calculate_checksum(at_root("config", "stage1_search_config.json"))
   for (id in active$search_run_id) {
     summary <- jsonlite::fromJSON(at_root("data", "raw", "search_runs", id, "run_summary.json"), simplifyVector = FALSE)
@@ -376,7 +376,7 @@ test_that("screening rules are versioned separately from the pinned search confi
 })
 
 test_that("every register entry resolves to archived evidence or is diagnosed", {
-  crosswalk <- read.csv(at_root("metadata", "stage1_ds_crosswalk.csv"), stringsAsFactors = FALSE)
+  crosswalk <- read.csv(at_root("metadata", "stage1", "qualification", "ds_crosswalk.csv"), stringsAsFactors = FALSE)
   spec <- jsonlite::fromJSON(at_root("config", "ds_register_crosswalk.json"), simplifyVector = FALSE)
   expect_equal(nrow(crosswalk), length(spec$entries))
   expect_true(all(nzchar(crosswalk$register_section)))
@@ -385,11 +385,11 @@ test_that("every register entry resolves to archived evidence or is diagnosed", 
   # dataset the study proceeds without. An entry that is neither has simply gone missing.
   observational <- crosswalk[crosswalk$entry_type %in% c("dataset", "dataset_group", "conversion_reference"), ]
   unresolved <- observational$ds_id[!observational$resolved]
-  unavailable <- read.csv(at_root("metadata", "stage1_unavailable_candidates.csv"), stringsAsFactors = FALSE)
+  unavailable <- read.csv(at_root("metadata", "stage1", "qualification", "unavailable_candidates.csv"), stringsAsFactors = FALSE)
   expect_true(all(unresolved %in% unavailable$ds_id),
     info = paste(setdiff(unresolved, unavailable$ds_id), collapse = ", "))
 
-  shortlist <- read.csv(at_root("metadata", "stage1_acquisition_shortlist.csv"), stringsAsFactors = FALSE)
+  shortlist <- read.csv(at_root("metadata", "stage1", "qualification", "acquisition_shortlist.csv"), stringsAsFactors = FALSE)
   expect_gt(nrow(shortlist), 15L)
   expect_equal(nrow(shortlist), 19L)
   expect_equal(shortlist$acquisition_rank, seq_len(nrow(shortlist)))
@@ -417,9 +417,9 @@ test_that("access classes are read from archived evidence and handle the empty c
 })
 
 test_that("contact-required datasets are excluded from acquisition and their consequence is recorded", {
-  shortlist <- read.csv(at_root("metadata", "stage1_acquisition_shortlist.csv"), stringsAsFactors = FALSE)
-  unavailable <- read.csv(at_root("metadata", "stage1_unavailable_candidates.csv"), stringsAsFactors = FALSE)
-  requests <- read.csv(at_root("metadata", "provider_access_requests.csv"), stringsAsFactors = FALSE)
+  shortlist <- read.csv(at_root("metadata", "stage1", "qualification", "acquisition_shortlist.csv"), stringsAsFactors = FALSE)
+  unavailable <- read.csv(at_root("metadata", "stage1", "qualification", "unavailable_candidates.csv"), stringsAsFactors = FALSE)
+  requests <- read.csv(at_root("metadata", "stage1", "qualification", "provider_access_requests.csv"), stringsAsFactors = FALSE)
   policy <- jsonlite::fromJSON(at_root("config", "access_and_licence_policy.json"), simplifyVector = FALSE)
 
   expect_true(nzchar(policy$availability_rule$no_deadlines))
@@ -496,8 +496,11 @@ test_that("generated status distinguishes diagnosed absence and unsent requests"
   expect_equal(status, 0L, info = paste(output, collapse = "\n"))
 
   report <- paste(readLines(file.path(root_dir, "outputs", "stage_status.md"), warn = FALSE), collapse = "\n")
+  requests <- read.csv(file.path(root_dir, "metadata", "stage1", "qualification",
+                                 "provider_access_requests.csv"), stringsAsFactors = FALSE)
+  sent <- !is.na(requests$sent_utc) & nzchar(trimws(requests$sent_utc))
   expect_match(report, "\\*\\*Sent:\\*\\* 0")
-  expect_match(report, "\\*\\*Drafted, awaiting a human to send:\\*\\* 7")
+  expect_match(report, sprintf("\\*\\*Drafted, awaiting a human to send:\\*\\* %d", sum(!sent)))
   expect_match(report, "\\*\\*Diagnosed without retained registry evidence:\\*\\* DS20, DS21, DS31, DS33")
   expect_match(report, "\\*\\*Undiagnosed search failures requiring query/API review:\\*\\* none")
 })

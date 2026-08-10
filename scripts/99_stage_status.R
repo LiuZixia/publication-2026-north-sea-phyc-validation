@@ -33,13 +33,13 @@ if (any(register$approval_status == "pending")) {
 }
 
 # ---- Stage 1 -----------------------------------------------------------------
-registry <- utils::read.csv("metadata/candidate_registry.csv", stringsAsFactors = FALSE, check.names = FALSE)
-flow <- utils::read.csv("metadata/stage1_search_flow.csv", stringsAsFactors = FALSE)
-recall <- utils::read.csv("metadata/stage1_known_item_recall.csv", stringsAsFactors = FALSE)
-qlog <- utils::read.csv("metadata/stage1_query_log.csv", stringsAsFactors = FALSE, check.names = FALSE)
-active <- utils::read.csv("metadata/stage1_active_runs.csv", stringsAsFactors = FALSE)
-append <- if (file.exists("metadata/stage1_append_runs.csv")) {
-  utils::read.csv("metadata/stage1_append_runs.csv", stringsAsFactors = FALSE)
+registry <- utils::read.csv("metadata/stage1/search/candidate_registry.csv", stringsAsFactors = FALSE, check.names = FALSE)
+flow <- utils::read.csv("metadata/stage1/search/search_flow.csv", stringsAsFactors = FALSE)
+recall <- utils::read.csv("metadata/stage1/search/known_item_recall.csv", stringsAsFactors = FALSE)
+qlog <- utils::read.csv("metadata/stage1/search/query_log.csv", stringsAsFactors = FALSE, check.names = FALSE)
+active <- utils::read.csv("metadata/stage1/search/active_runs.csv", stringsAsFactors = FALSE)
+append <- if (file.exists("metadata/stage1/search/append_runs.csv")) {
+  utils::read.csv("metadata/stage1/search/append_runs.csv", stringsAsFactors = FALSE)
 } else data.frame()
 value <- stats::setNames(flow$count, flow$stage)
 
@@ -49,13 +49,13 @@ lines <- c(lines, section("Stage 1 — Reproducible Systematic Search"),
   kv("Append-only update runs", nrow(append)),
   kv("Query-log rows", nrow(qlog)),
   kv("Pagination complete for every query", all(qlog$pagination_complete)),
-  kv("Registry SHA-256", calculate_checksum("metadata/candidate_registry.csv")),
+  kv("Registry SHA-256", calculate_checksum("metadata/stage1/search/candidate_registry.csv")),
   kv("Initial search-config SHA-256", calculate_checksum("config/stage1_search_config.json")),
   kv("Screening-rules SHA-256 (versioned, not pinned)", calculate_checksum("config/screening_rules.json")),
   "")
 
-if (nrow(append) && file.exists("metadata/stage1_emodnet_wfs_overlap_summary.csv")) {
-  wfs <- utils::read.csv("metadata/stage1_emodnet_wfs_overlap_summary.csv", stringsAsFactors = FALSE)
+if (nrow(append) && file.exists("metadata/stage1/search/emodnet_wfs_overlap_summary.csv")) {
+  wfs <- utils::read.csv("metadata/stage1/search/emodnet_wfs_overlap_summary.csv", stringsAsFactors = FALSE)
   wfs_value <- stats::setNames(wfs$count, wfs$metric)
   lines <- c(lines, section("Stage 1 — EMODnet Biology WFS Append Audit"),
     kv("Direct WFS inventory rows", wfs_value[["wfs_dataset_inventory_rows"]]),
@@ -83,9 +83,9 @@ lines <- c(lines, "| Dataset-level geographic screen | Rows |", "|---|---|",
   "", "Geography is recorded, not enforced, at dataset level; Stage 2 performs the record-level intersection.", "")
 
 # ---- Register crosswalk and acquisition shortlist -----------------------------
-if (file.exists("metadata/stage1_ds_crosswalk.csv")) {
-  cw <- utils::read.csv("metadata/stage1_ds_crosswalk.csv", stringsAsFactors = FALSE)
-  sl <- utils::read.csv("metadata/stage1_acquisition_shortlist.csv", stringsAsFactors = FALSE)
+if (file.exists("metadata/stage1/qualification/ds_crosswalk.csv")) {
+  cw <- utils::read.csv("metadata/stage1/qualification/ds_crosswalk.csv", stringsAsFactors = FALSE)
+  sl <- utils::read.csv("metadata/stage1/qualification/acquisition_shortlist.csv", stringsAsFactors = FALSE)
   diagnosed_absence <- !cw$resolved & (cw$availability == "no_route" | cw$entry_type == "excluded_decision")
   undiagnosed <- cw$ds_id[!cw$resolved & !diagnosed_absence]
   diagnosed <- cw$ds_id[diagnosed_absence]
@@ -100,8 +100,8 @@ if (file.exists("metadata/stage1_ds_crosswalk.csv")) {
     kv("Shortlisted needing a licence resolved before Stage 7",
        sum(sl$licence_action == "resolve_licence_before_stage7_manifest_freeze")),
     "")
-  if (file.exists("metadata/stage1_unavailable_candidates.csv")) {
-    un <- utils::read.csv("metadata/stage1_unavailable_candidates.csv", stringsAsFactors = FALSE)
+  if (file.exists("metadata/stage1/qualification/unavailable_candidates.csv")) {
+    un <- utils::read.csv("metadata/stage1/qualification/unavailable_candidates.csv", stringsAsFactors = FALSE)
     lines <- c(lines,
       kv("Datasets the study proceeds without", if (nrow(un)) paste(un$ds_id, collapse = ", ") else "none"),
       "", "| DS | Name | Availability | Tier | Domain |", "|---|---|---|---|---|",
@@ -116,8 +116,29 @@ if (file.exists("metadata/stage1_ds_crosswalk.csv")) {
 }
 
 # ---- Provider access ---------------------------------------------------------
-if (file.exists("metadata/provider_access_requests.csv")) {
-  req <- utils::read.csv("metadata/provider_access_requests.csv", stringsAsFactors = FALSE)
+stage2_access_path <- "metadata/stage2/control/access_dispositions.csv"
+if (file.exists(stage2_access_path)) {
+  access <- utils::read.csv(stage2_access_path, stringsAsFactors = FALSE, check.names = FALSE)
+  required <- access$email_requirement == "required"
+  ranked_unavailable <- access$in_ranked_work_order &
+    access$current_stage_action == "proceed_without_dataset"
+  lines <- c(lines, section("Provider Access Requests"),
+    kv("Documented email dispositions", nrow(access)),
+    kv("Required and temporarily unavailable", sum(required)),
+    kv("Optional metadata enhancements", sum(access$email_requirement == "optional_enhancement")),
+    kv("Ranked Stage 2 items unavailable", sum(ranked_unavailable)),
+    kv("Drafts", "docs/access_requests/DRAFT_EMAILS.md"),
+    "",
+    "No request carries a deadline. Required-email datasets are unavailable under the frozen policy",
+    "and contribute no observations in the current pass. A dated provider response can trigger",
+    "reassessment; optional requests do not block use of already archived open evidence.",
+    "",
+    "| DS | Provider | Requirement | Current action | Why email is needed |", "|---|---|---|---|---|",
+    sprintf("| %s | %s | %s | %s | %s |", access$ds_id, substr(access$provider, 1, 40),
+      access$email_requirement, access$current_stage_action,
+      substr(gsub("[|]", "/", access$reason_email_needed), 1, 110)), "")
+} else if (file.exists("metadata/stage1/qualification/provider_access_requests.csv")) {
+  req <- utils::read.csv("metadata/stage1/qualification/provider_access_requests.csv", stringsAsFactors = FALSE)
   sent <- !is.na(req$sent_utc) & nzchar(trimws(req$sent_utc))
   lines <- c(lines, section("Provider Access Requests"),
     kv("Registered requests", nrow(req)),
@@ -134,9 +155,38 @@ if (file.exists("metadata/provider_access_requests.csv")) {
       substr(req$availability_treatment, 1, 46), substr(req$consequence_applied_now, 1, 90)), "")
 }
 
+# ---- Stage 2 -----------------------------------------------------------------
+stage2_status_path <- "metadata/stage2/control/acquisition_status.csv"
+if (file.exists(stage2_status_path)) {
+  stage2 <- utils::read.csv(stage2_status_path, stringsAsFactors = FALSE, check.names = FALSE)
+  state <- table(factor(stage2$current_work_state,
+                        levels = c("complete", "unavailable", "in_progress", "not_started")))
+  decision <- table(stage2$screening_decision)
+  inventory_path <- "metadata/stage2/inventory/file_inventory.csv"
+  unresolved_path <- "metadata/stage_file_inventory_unresolved.csv"
+  inventory <- if (file.exists(inventory_path)) {
+    utils::read.csv(inventory_path, stringsAsFactors = FALSE, check.names = FALSE)
+  } else data.frame()
+  unresolved <- if (file.exists(unresolved_path)) {
+    utils::read.csv(unresolved_path, stringsAsFactors = FALSE, check.names = FALSE)
+  } else data.frame(stage = character())
+  lines <- c(lines, section("Stage 2 — Acquisition Evidence and Record Screening"),
+    kv("Frozen work items", nrow(stage2)),
+    kv("Current complete", unname(state[["complete"]])),
+    kv("Current temporarily unavailable", unname(state[["unavailable"]])),
+    kv("Current in progress", unname(state[["in_progress"]])),
+    kv("Current not started", unname(state[["not_started"]])),
+    kv("Screening decisions", paste(names(decision), as.integer(decision), sep = "=", collapse = ", ")),
+    kv("Inventoried Stage 2 files", nrow(inventory)),
+    kv("Unresolved Stage 2 artifacts", sum(unresolved$stage == "stage2")),
+    kv("Operational description", "docs/stages/STAGE2.md"),
+    "", "The prospective work order remains unchanged; current state is a generated overlay.",
+    "A pending scientific decision or an unavailable dataset is not an ecological negative.", "")
+}
+
 # ---- Downstream stages -------------------------------------------------------
-lines <- c(lines, section("Stages 2-12"),
-  "Not started. No observation records, coverage audit, recurrence labels, validation splits, or CMEMS data exist.",
+lines <- c(lines, section("Stages 3-12"),
+  "Not started. Coverage adequacy, harmonization, recurrence labels, validation splits, and CMEMS acquisition remain pending.",
   "", "No CMEMS PhyC value has been acquired or inspected.", "")
 
 dir.create("outputs", showWarnings = FALSE)

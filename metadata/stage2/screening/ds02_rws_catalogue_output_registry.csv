@@ -1,0 +1,4 @@
+"artifact_role","path","row_count","checksum_sha256","generated_from_manifest_sha256"
+"catalogue_metadata","metadata/stage2/screening/ds02_rws_catalogue_metadata.csv",2757,"e4537623a900d6c663f7469e5279d7b09446990df866e9a2515f3991d33ad5e8","9b0a78459a42d55b98eaea1177138f933cab8093e3f944abf500e916672a9c20"
+"catalogue_location_screen","metadata/stage2/screening/ds02_rws_catalogue_location_screen.csv",2635,"374e613a04724957ae454e207e1469364319f61ee6d7097f6506f2cc73641389","9b0a78459a42d55b98eaea1177138f933cab8093e3f944abf500e916672a9c20"
+"catalogue_link_summary","metadata/stage2/screening/ds02_rws_catalogue_link_summary.csv",1,"5c3afb5663a179a6b230ecf9a4fbc4b75ac8751043885e1e888aa88b2d8d0a73","9b0a78459a42d55b98eaea1177138f933cab8093e3f944abf500e916672a9c20"
