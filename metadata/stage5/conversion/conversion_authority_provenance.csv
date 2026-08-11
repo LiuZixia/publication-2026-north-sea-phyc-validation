@@ -1,0 +1,2 @@
+"authority_id","authority_version","raw_outer_zip_path","raw_outer_zip_checksum_sha256","inner_workbook","worksheet","parser","acquisition_state","phy_c_values_accessed"
+"DS22","PEG_BVOL2026","data/raw/stage2/ds22_peg_bvol/DS22_PEG_BVOL_20260811T104017Z/PEG_BVOL.zip","e5cb8b2f4c416e186c4a56f350fb855b866204892c3946e7fafca42d2f6e4492","PEG_BVOL2026.xlsx","Biovolume file","R/07_stage5_contract.R:stage5_read_peg_bvol_xlsx","canonical_stage2_provider_archive",FALSE

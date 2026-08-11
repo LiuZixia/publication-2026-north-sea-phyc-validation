@@ -41,6 +41,16 @@ inventory_stage <- function(path) {
     return("stage4")
   }
 
+  if (grepl("^data/raw/stage5/", p) || grepl("^data/interim/stage5/", p) ||
+      grepl("^metadata/stage5/", p) || grepl("^scripts/05_stage5/", p) ||
+      grepl("^scripts/00_downloads/stage5/", p) || grepl("^config/stage5_", p) ||
+      identical(p, "R/07_stage5_contract.R") ||
+      identical(p, "tests/test_stage5_harmonization.R") ||
+      identical(p, "docs/stages/STAGE5.md") ||
+      grepl("^outputs/(reports/stage5_|logs/stage5_)", p)) {
+    return("stage5")
+  }
+
   NA_character_
 }
 
@@ -91,13 +101,15 @@ producer_for_inventory <- function(path, category, scripts = script_files_for_in
   if (grepl("^outputs/logs/stage2_contract_validation_", p)) return("scripts/02_stage2/control/99_validate_stage2.R")
   if (grepl("^outputs/logs/stage3_validation_", p)) return("scripts/03_stage3/00_run_stage3.R")
   if (grepl("^outputs/logs/stage4_validation_", p)) return("scripts/04_stage4/00_run_stage4.R")
+  if (grepl("^outputs/logs/stage5_validation_", p)) return("scripts/05_stage5/00_run_stage5.R")
   if (grepl("^data/interim/stage3_support/ds[0-9]{2}_sample_support[.]csv$", p)) {
     return("scripts/03_stage3/01_build_coverage.R")
   }
   if (p %in% c("metadata/stage1/inventory/file_inventory.csv",
                "metadata/stage2/inventory/file_inventory.csv",
                "metadata/stage3/inventory/file_inventory.csv",
-               "metadata/stage4/inventory/file_inventory.csv")) {
+               "metadata/stage4/inventory/file_inventory.csv",
+               "metadata/stage5/inventory/file_inventory.csv")) {
     return("scripts/00_traceability/01_build_stage_file_inventory.R")
   }
 
@@ -140,13 +152,33 @@ producer_for_inventory <- function(path, category, scripts = script_files_for_in
       ds24_figshare = "scripts/00_downloads/stage2/18_acquire_ds24_figshare.R",
       ds09_pangaea = "scripts/00_downloads/stage2/19_acquire_ds09_pangaea_sylt.R",
       ds27_pangaea_ferrybox = "scripts/00_downloads/stage2/20_acquire_ds27_pangaea_ferrybox.R",
-      ds22_figshare = "scripts/00_downloads/stage2/22_acquire_ds22_figshare.R",
+      ds22_figshare = "historical_superseded_raw_evidence",
+      ds22_peg_bvol = "scripts/00_downloads/stage2/22_acquire_ds22_peg_bvol.R",
       ds15_emodnet_presence = "scripts/00_downloads/stage2/23_acquire_ds15_emodnet_presence.R",
       ds10_vliz_imis = "scripts/00_downloads/stage2/24_acquire_ds10_vliz_imis.R",
       ds12_dassh_ipt = "scripts/00_downloads/stage2/25_acquire_ds12_dassh_ipt.R",
       ds08_pangaea_abundance = "scripts/00_downloads/stage2/26_acquire_ds08_pangaea_abundance.R"
     )
     if (folder %in% names(map)) return(unname(map[[folder]]))
+  }
+
+  if (grepl("^data/raw/stage5/", p)) {
+    folder <- strsplit(sub("^data/raw/stage5/", "", p), "/", fixed = TRUE)[[1]][1]
+    map <- c(
+      ds04_plet_bsh_corrected = "scripts/00_downloads/stage2/11_acquire_ds04_plet_bsh.R",
+      worms_taxonomy = "scripts/00_downloads/stage5/02_acquire_worms_taxonomy.R"
+    )
+    if (folder %in% names(map)) return(unname(map[[folder]]))
+  }
+
+  if (grepl("^data/interim/stage5/canonical/ds[0-9]{2}_taxon_observations[.]csv$", p)) {
+    return("scripts/05_stage5/03_build_provisional_canonical.R")
+  }
+  if (identical(p, "data/interim/stage5/reference/peg_bvol_2026.csv")) {
+    return("scripts/05_stage5/01_extract_conversion_authority.R")
+  }
+  if (identical(p, "data/interim/stage5/sample_method_completeness.csv")) {
+    return("scripts/05_stage5/07_build_provisional_sample_audit.R")
   }
 
   exact <- c(
@@ -200,6 +232,9 @@ producer_for_inventory <- function(path, category, scripts = script_files_for_in
     "stage4_gate_status.csv" = "scripts/04_stage4/99_validate_stage4.R",
     "stage4_output_registry.csv" = "scripts/04_stage4/98_build_output_registry.R",
     "stage4_feasibility.md" = "scripts/04_stage4/01_build_report.R",
+    "stage5_gate_status.csv" = "scripts/05_stage5/99_validate_stage5.R",
+    "stage5_output_registry.csv" = "scripts/05_stage5/98_build_output_registry.R",
+    "stage5_harmonization.md" = "scripts/05_stage5/08_build_report.R",
     "stage_status.md" = "scripts/99_stage_status.R",
     "downloaded_files_inventory.md" = "scripts/02_stage2/control/98_legacy_raw_inventory.R"
   )
@@ -265,7 +300,7 @@ read_manifest_checksum_map <- function(raw_root = "data/raw") {
   # Large generated datasets are checksum-pinned by their stage-owned output registries. Reading
   # those checksums avoids rehashing multi-gigabyte interim tables on every inventory refresh while
   # still keeping every derived file visible and traceable.
-  registries <- list.files("metadata", pattern = "registry\\.csv$", recursive = TRUE,
+  registries <- list.files("metadata", pattern = "(registry|manifest)\\.csv$", recursive = TRUE,
                            full.names = TRUE, include.dirs = FALSE)
   for (registry_path in registries) {
     tab <- tryCatch(utils::read.csv(registry_path, stringsAsFactors = FALSE, check.names = FALSE),
@@ -301,7 +336,9 @@ git_tracked_paths <- function() {
 }
 
 build_stage_inventory <- function(stage, raw_checksum_map, scripts = script_files_for_inventory()) {
-  stopifnot(stage %in% c("stage1", "stage2", "stage3", "stage4"))
+  stopifnot(stage %in% c("stage1", "stage2", "stage3", "stage4", "stage5"))
+  raw_stage_root <- if (stage == "stage1") "data/raw/search_runs" else
+    if (stage == "stage5") "data/raw/stage5" else "data/raw/stage2"
   repo_files <- c(
     list.files("metadata", recursive = TRUE, full.names = TRUE, all.files = FALSE),
     list.files("config", recursive = TRUE, full.names = TRUE, all.files = FALSE),
@@ -312,7 +349,7 @@ build_stage_inventory <- function(stage, raw_checksum_map, scripts = script_file
     list.files("outputs", recursive = TRUE, full.names = TRUE, all.files = FALSE),
     list.files("data/interim", recursive = TRUE, full.names = TRUE, all.files = FALSE),
     list.files("data/processed", recursive = TRUE, full.names = TRUE, all.files = FALSE),
-    list.files(if (stage == "stage1") "data/raw/search_runs" else "data/raw/stage2",
+    list.files(raw_stage_root,
                recursive = TRUE, full.names = TRUE, all.files = FALSE)
   )
   repo_files <- sort(unique(normalize_repo_path(repo_files[file.exists(repo_files) & !dir.exists(repo_files)])))
@@ -337,7 +374,8 @@ build_stage_inventory <- function(stage, raw_checksum_map, scripts = script_file
   self_inventory <- paths %in% c("metadata/stage1/inventory/file_inventory.csv",
                                  "metadata/stage2/inventory/file_inventory.csv",
                                  "metadata/stage3/inventory/file_inventory.csv",
-                                 "metadata/stage4/inventory/file_inventory.csv")
+                                 "metadata/stage4/inventory/file_inventory.csv",
+                                 "metadata/stage5/inventory/file_inventory.csv")
   safe_to_hash[self_inventory] <- FALSE
   sha[safe_to_hash] <- vapply(paths[safe_to_hash], calculate_checksum, character(1))
   checksum_source[safe_to_hash] <- "calculated_by_inventory_script"

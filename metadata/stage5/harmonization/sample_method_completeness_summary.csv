@@ -1,0 +1,7 @@
+"ds_id","monitoring_network","samples_audited","samples_in_frozen_subregions","provider_carbon_candidate_samples","provider_biovolume_candidate_samples","abundance_conversion_candidate_samples","samples_with_resolved_method_epoch","total_biomass_outcome_eligible_samples","audit_state"
+"DS02","RWS_MWTL",18267,4853,0,0,18267,0,0,"provisional_no_biomass_constructed"
+"DS04","BSH",715,368,0,0,715,0,0,"provisional_no_biomass_constructed"
+"DS05","NOVANA",3130,1439,0,0,3130,0,0,"provisional_no_biomass_constructed"
+"DS06","SMHI_SHARK",8102,4491,5108,656,2338,0,0,"provisional_no_biomass_constructed"
+"DS07","CEFAS_SMARTBUOY",868,606,0,0,868,0,0,"provisional_no_biomass_constructed"
+"DS16","MSS_STONEHAVEN",865,865,0,0,865,0,0,"provisional_no_biomass_constructed"

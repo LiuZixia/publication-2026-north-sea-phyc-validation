@@ -1,0 +1,8 @@
+"ds_id","monitoring_network","stage5_role","source_format","raw_artifact_count","raw_size_bytes","checksum_state","provenance_state","harmonization_state","stage5_action","phy_c_values_accessed"
+"DS02","RWS_MWTL","primary_conversion_candidate","rws_semicolon_csv",4,76933080,"verified","stage2_active_pin_authoritative","provisional_canonical_taxonomy_audited_biomass_not_ready","harmonize_and_resolve_taxonomy",FALSE
+"DS04","BSH","primary_conversion_candidate","plet_csv",3,78281451,"verified","stage2_active_pin_authoritative","provisional_canonical_taxonomy_audited_biomass_not_ready","harmonize_and_convert_abundance",FALSE
+"DS05","NOVANA","primary_conversion_candidate","plet_csv",1,13419497,"verified","stage2_active_pin_authoritative","provisional_canonical_taxonomy_audited_biomass_not_ready","harmonize_and_convert_abundance",FALSE
+"DS06","SMHI_SHARK","primary_direct_carbon_anchor","shark_zip_tsv",219,27700519,"verified","stage2_active_pin_authoritative","provisional_canonical_taxonomy_audited_biomass_not_ready","harmonize_provider_carbon_biovolume_and_abundance",FALSE
+"DS07","CEFAS_SMARTBUOY","primary_conversion_candidate","plet_csv",1,179481141,"verified","stage2_active_pin_authoritative","provisional_canonical_taxonomy_audited_biomass_not_ready","harmonize_and_convert_abundance",FALSE
+"DS16","MSS_STONEHAVEN","primary_conversion_candidate","plet_csv",1,32405356,"verified","stage2_active_pin_authoritative","provisional_canonical_taxonomy_audited_biomass_not_ready","harmonize_and_convert_abundance",FALSE
+"DS22","HELCOM_PEG","conversion_authority","peg_bvol_outer_zip_xlsx",2,1790892,"verified","stage2_active_pin_authoritative","conversion_authority_parsed_and_audited","extract_and_audit_conversion_authority",FALSE

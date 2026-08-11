@@ -1,0 +1,2 @@
+"path","row_count","file_size_bytes","checksum_sha256","row_unit","table_state"
+"data/interim/stage5/sample_method_completeness.csv",31947,9459445,"94d409f9a7b9c28286c9910dce457e3fe59a555492d464776711ff89c1728d1e","provider_defined_sample","provisional_method_and_completeness_unknown"

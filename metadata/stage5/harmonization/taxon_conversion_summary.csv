@@ -1,0 +1,7 @@
+"ds_id","monitoring_network","source_rows_profiled","distinct_reported_taxon_keys","rows_with_reported_aphia_id","rows_with_any_peg_candidate","rows_with_unique_peg_candidate","rows_with_multiple_candidates","rows_with_name_only_candidate","rows_unmatched","provider_unit_state","biomass_conversion_state"
+"DS02","RWS_MWTL",505452,2791,0,298821,0,0,298821,206631,"unit_preserved_from_provider","not_ready_pending_taxonomy_size_unit_and_method_audit"
+"DS04","BSH",365548,499,365548,141710,18594,123116,0,223838,"unit_not_reported_in_plet_export","not_ready_pending_taxonomy_size_unit_and_method_audit"
+"DS05","NOVANA",71607,383,71607,32961,2621,30340,0,38646,"unit_not_reported_in_plet_export","not_ready_pending_taxonomy_size_unit_and_method_audit"
+"DS06","SMHI_SHARK",909693,4077,856220,690849,37027,607147,46675,218844,"unit_preserved_from_provider","provider_carbon_and_biovolume_routes_present"
+"DS07","CEFAS_SMARTBUOY",359879,440,359879,235555,64041,171514,0,124324,"unit_not_reported_in_plet_export","not_ready_pending_taxonomy_size_unit_and_method_audit"
+"DS16","MSS_STONEHAVEN",157344,187,157344,92675,74716,17959,0,64669,"unit_not_reported_in_plet_export","not_ready_pending_taxonomy_size_unit_and_method_audit"

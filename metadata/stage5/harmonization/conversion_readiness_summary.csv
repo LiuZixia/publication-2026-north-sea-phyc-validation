@@ -1,0 +1,7 @@
+"ds_id","monitoring_network","source_rows_profiled","rows_with_accepted_taxonomy","rows_with_unique_authority_row","rows_with_ambiguous_authority_rows","rows_without_authority_row","rows_with_unresolved_taxonomy","rows_authorized_for_abundance_conversion","readiness_state"
+"DS02","RWS_MWTL",505452,422681,57316,151501,213864,82771,0,"conversion_candidates_audited_none_authorized"
+"DS04","BSH",365548,364118,20024,123833,220261,1430,0,"conversion_candidates_audited_none_authorized"
+"DS05","NOVANA",71607,71607,2572,29410,39625,0,0,"conversion_candidates_audited_none_authorized"
+"DS06","SMHI_SHARK",909693,861748,36314,566269,259165,47945,0,"provider_carbon_preserved_but_sample_completeness_not_yet_established"
+"DS07","CEFAS_SMARTBUOY",359879,357275,58833,159622,138820,2604,0,"conversion_candidates_audited_none_authorized"
+"DS16","MSS_STONEHAVEN",157344,157344,72202,18824,66318,0,0,"conversion_candidates_audited_none_authorized"

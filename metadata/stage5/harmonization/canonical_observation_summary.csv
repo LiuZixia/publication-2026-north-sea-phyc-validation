@@ -1,0 +1,7 @@
+"ds_id","monitoring_network","source_rows","in_frozen_subregion_rows","rows_with_reported_aphia_id","provider_carbon_rows","provider_biovolume_rows","abundance_or_count_rows","total_biomass_ready_rows","canonical_state"
+"DS02","RWS_MWTL",505452,194411,0,0,0,505452,0,"provisional_not_stage5_gate_passed"
+"DS06","SMHI_SHARK",909693,486808,856220,209656,186334,513703,0,"provisional_not_stage5_gate_passed"
+"DS04","BSH",365548,187362,365548,0,0,365548,0,"provisional_not_stage5_gate_passed"
+"DS05","NOVANA",71607,35171,71607,0,0,71607,0,"provisional_not_stage5_gate_passed"
+"DS07","CEFAS_SMARTBUOY",359879,251037,359879,0,0,359879,0,"provisional_not_stage5_gate_passed"
+"DS16","MSS_STONEHAVEN",157344,157344,157344,0,0,157344,0,"provisional_not_stage5_gate_passed"

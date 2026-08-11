@@ -1,0 +1,9 @@
+{
+  "schema_version": "1.0.0",
+  "dataset_id": "DS22",
+  "provider": "ICES / HELCOM EG PHYTO",
+  "endpoint": "https://www.ices.dk/data/Documents/ENV/PEG_BVOL.zip",
+  "provider_version_state": "current provider file acquired as a versioned immutable run",
+  "minimum_zip_bytes": 1000000,
+  "expected_inner_workbook": "PEG_BVOL2026.xlsx"
+}

@@ -1,0 +1,8 @@
+"lifeform_primary","authority_rows","crosswalk_version","observation_rows_assigned","use_state"
+"coccolithophore",32,"PEG_BVOL2026_stage5_v1",0,"not_yet_applied_pending_conversion_and_sample_compatibility"
+"diatom",1293,"PEG_BVOL2026_stage5_v1",0,"not_yet_applied_pending_conversion_and_sample_compatibility"
+"dinoflagellate_autotroph",355,"PEG_BVOL2026_stage5_v1",0,"not_yet_applied_pending_conversion_and_sample_compatibility"
+"heterotroph_or_mixotroph_uncertain",441,"PEG_BVOL2026_stage5_v1",0,"not_yet_applied_pending_conversion_and_sample_compatibility"
+"other_autotrophic_phytoplankton",1383,"PEG_BVOL2026_stage5_v1",0,"not_yet_applied_pending_conversion_and_sample_compatibility"
+"phaeocystis_haptophyte",4,"PEG_BVOL2026_stage5_v1",0,"not_yet_applied_pending_conversion_and_sample_compatibility"
+"unresolved_autotroph",31,"PEG_BVOL2026_stage5_v1",0,"not_yet_applied_pending_conversion_and_sample_compatibility"

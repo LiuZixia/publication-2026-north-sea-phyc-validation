@@ -73,3 +73,16 @@ stage,action,requirement,test_file,test_name,coverage
 2,2,Register manual provider exports through a version-controlled intake with immutable checksums,tests/test_stage2_contract.R,DS02 manual Waterinfo export is pinned without claiming record screening,automated
 2,3,Diagnose schemas periods partitions duplicates and provider export anomalies before DS02 screening,tests/test_stage2_contract.R,DS02 manual Waterinfo export is pinned without claiming record screening,automated
 2,7,Keep acquired but unscreened DS02 observations pending and never treat rows as events or negatives,tests/test_stage2_contract.R,DS02 manual Waterinfo export is pinned without claiming record screening,automated
+2,2,Pin the DS04 taxon abundance export in its responsible Stage 2 acquisition,tests/test_stage2_contract.R,DS04 active pin owns a validated Stage 2 abundance payload,automated
+2,2,Pin the DS22 PEG_BVOL provider archive in its responsible Stage 2 acquisition,tests/test_stage2_contract.R,DS22 active pin owns the canonical PEG_BVOL provider archive,automated
+5,1,Preserve reported timestamps coordinates depths values units and identifiers in canonical records,tests/test_stage5_harmonization.R,canonical Stage 2 PLET and PEG_BVOL inputs are explicit,automated
+5,2,Validate every Stage 5 source artifact against its immutable checksum,tests/test_stage5_harmonization.R,Stage 5 audits the complete authorized source set without PhyC,automated
+5,3,Resolve taxonomy through cached WoRMS responses while retaining fuzzy and unresolved terms,tests/test_stage5_harmonization.R,taxonomy resolution preserves exact fuzzy and unresolved states,automated
+5,4,Build the protocol lifeform categories without inferring Phaeocystis form or trophic certainty,tests/test_stage5_harmonization.R,lifeform rules preserve trophic and Phaeocystis uncertainty,automated
+5,5,Keep method epochs and sample compatibility unresolved until provider method fields are joined,tests/test_stage5_harmonization.R,sample audit retains unknown completeness and blocks Stage 6,automated
+5,6,Use provider carbon before conversion while retaining completeness requirements,tests/test_stage5_harmonization.R,sample audit retains unknown completeness and blocks Stage 6,automated
+5,7,Do not promote PEG candidates without a sourced lower central upper uncertainty contract,tests/test_stage5_harmonization.R,conversion candidates are not promoted to biomass,automated
+5,8,Calculate and preserve unknown sample completeness rather than manufacturing total biomass,tests/test_stage5_harmonization.R,sample audit retains unknown completeness and blocks Stage 6,automated
+5,9,Preserve Phaeocystis form uncertainty in the authority crosswalk,tests/test_stage5_harmonization.R,lifeform rules preserve trophic and Phaeocystis uncertainty,automated
+5,10,Carry no biomass series forward until lower central and upper estimates all exist,tests/test_stage5_harmonization.R,conversion candidates are not promoted to biomass,automated
+5,gate,Authorize neither Stage 6 nor CMEMS while zero samples pass total biomass compatibility,tests/test_stage5_harmonization.R,sample audit retains unknown completeness and blocks Stage 6,automated

@@ -246,8 +246,32 @@ if (file.exists(stage4_gate_path)) {
     "In progress. A generated Stage 4 gate is not yet present.", "")
 }
 
-lines <- c(lines, section("Stages 5-12"),
-  "Stage 5 may proceed only for the roles named by Stage 4; later stages remain unauthorized.",
+# ---- Stage 5 and downstream stages -------------------------------------------
+stage5_gate_path <- "metadata/stage5/gate/stage5_gate_status.csv"
+if (file.exists(stage5_gate_path)) {
+  stage5 <- utils::read.csv(stage5_gate_path, stringsAsFactors = FALSE, check.names = FALSE)
+  if (nrow(stage5) == 1L) {
+    lines <- c(lines, section("Stage 5 — In-Situ Harmonization and Biomass Construction"),
+      kv("Gate state", stage5$gate_state),
+      kv("Source inputs verified", stage5$source_inputs_verified),
+      kv("Canonical observation rows", fmt(stage5$canonical_observation_rows)),
+      kv("Provisional samples audited", fmt(stage5$provisional_samples_audited)),
+      kv("Accepted-taxonomy rows", fmt(stage5$accepted_taxonomy_rows)),
+      kv("Abundance rows authorized for conversion", stage5$abundance_rows_authorized_for_conversion),
+      kv("Total-biomass eligible samples", stage5$total_biomass_outcome_eligible_samples),
+      kv("Stage 6 outcomes authorized", stage5$stage6_outcome_authorized),
+      kv("CMEMS acquisition authorized", stage5$cmems_acquisition_authorized),
+      kv("Operational description", "docs/stages/STAGE5.md"),
+      "", "Taxonomy and conversion candidates are audited, but units, method epochs, completeness,",
+      "and conversion uncertainty still block biomass construction.", "")
+  }
+} else {
+  lines <- c(lines, section("Stage 5 — In-Situ Harmonization and Biomass Construction"),
+    "In progress. A generated Stage 5 gate is not yet present.", "")
+}
+
+lines <- c(lines, section("Stages 6-12"),
+  "Later stages remain unauthorized until the Stage 5 biomass gate passes.",
   "", "No CMEMS PhyC value has been acquired or inspected.", "")
 
 dir.create("outputs", showWarnings = FALSE)

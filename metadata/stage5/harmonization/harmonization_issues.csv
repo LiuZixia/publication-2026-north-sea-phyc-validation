@@ -1,0 +1,6 @@
+"issue_id","ds_id","issue_type","state","evidence","consequence"
+"S5-PLET-001","DS04|DS05|DS07|DS16","measurement_unit_absent","unresolved","metadata/stage5/harmonization/taxon_conversion_summary.csv","cannot_normalize_plet_abundance_until_provider_unit_is_verified"
+"S5-DS02-001","DS02","accepted_taxonomy_unresolved","partly_resolved_exact_worms_matches_fuzzy_and_unresolved_retained","metadata/stage5/taxonomy/worms_taxonomy_summary.csv","accept_exact_matches_only_and_retain_fuzzy_or_unmatched_names_for_review"
+"S5-CONV-001","DS02|DS04|DS05|DS07|DS16","conversion_not_yet_authorized","unresolved","metadata/stage5/harmonization/taxon_conversion_summary.csv","do_not_calculate_total_biomass_or_lifeform_carbon_share"
+"S5-CONV-002","DS02|DS04|DS05|DS06|DS07|DS16","conversion_uncertainty_rule_not_registered","unresolved","metadata/stage5/harmonization/conversion_readiness_summary.csv","candidate_envelopes_are_diagnostic_only_and_no_lower_central_upper_reference_series_exists"
+"S5-METHOD-001","DS02|DS04|DS05|DS06|DS07|DS16","sample_method_epoch_and_completeness_unresolved","unresolved","metadata/stage5/harmonization/sample_method_completeness_summary.csv","no_sample_can_be_authorized_for_total_biomass_outcomes"

@@ -41,6 +41,6 @@ ds22 <- data.frame(
 )
 
 validate_stage2_table(ds22, "dataset_screening_summary", contract)
-write_csv_atomic(ds22, "metadata/stage2/screening/ds22_ices_figshare_screening_summary.csv")
+write_csv_atomic(ds22, "metadata/stage2/screening/ds22_peg_bvol_screening_summary.csv")
 
 message("Screening summaries for DS15 and DS22 written.")

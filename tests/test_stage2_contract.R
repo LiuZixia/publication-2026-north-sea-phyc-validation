@@ -628,3 +628,43 @@ test_that("DS02 manual Waterinfo export is pinned and supports record screening"
   expect_identical(calculate_checksum(file.path(run_dir, "intake_summary.csv")),
                    pin$intake_summary_checksum_sha256[[1]])
 })
+
+test_that("DS04 active pin owns a validated Stage 2 abundance payload", {
+  config <- jsonlite::fromJSON(at_root("config", "stage2_ds04_plet_bsh_acquisition.json"))
+  pin <- read.csv(at_root("metadata/stage2/acquisition/ds04_plet_bsh_active_run.csv"),
+                  stringsAsFactors = FALSE, check.names = FALSE)
+  expect_equal(nrow(pin), 1L)
+  expect_match(pin$run_relative_path, "^stage2/ds04_plet_bsh/DS04_PLET_BSH_ABUNDANCE_")
+  run_dir <- at_root("data", "raw", pin$run_relative_path[[1]])
+  manifest <- read.csv(file.path(run_dir, "manifest.csv"), stringsAsFactors = FALSE,
+                       check.names = FALSE)
+  expect_identical(calculate_checksum(file.path(run_dir, "manifest.csv")),
+                   pin$manifest_checksum_sha256[[1]])
+  expect_equal(sum(manifest$artifact_role == "observation_payload"), 1L)
+  payload <- file.path(run_dir, manifest$file_name[manifest$artifact_role == "observation_payload"])
+  probe <- read.csv(payload, stringsAsFactors = FALSE, check.names = FALSE, nrows = 1L)
+  expect_true(all(config$expected_columns %in% names(probe)))
+  expect_false("biomass_param_units" %in% names(probe))
+  summary <- read.csv(at_root("metadata/stage2/screening/ds04_plet_bsh_screening_summary.csv"),
+                      stringsAsFactors = FALSE, check.names = FALSE)
+  expect_equal(summary$record_count, 365548L)
+  expect_equal(summary$core_record_count, 187362L)
+})
+
+test_that("DS22 active pin owns the canonical PEG_BVOL provider archive", {
+  config <- jsonlite::fromJSON(at_root("config", "stage2_ds22_peg_bvol_acquisition.json"))
+  pin <- read.csv(at_root("metadata/stage2/acquisition/ds22_peg_bvol_active_run.csv"),
+                  stringsAsFactors = FALSE, check.names = FALSE)
+  expect_equal(nrow(pin), 1L)
+  expect_match(pin$run_relative_path, "^stage2/ds22_peg_bvol/DS22_PEG_BVOL_")
+  run_dir <- at_root("data", "raw", pin$run_relative_path[[1]])
+  manifest <- read.csv(file.path(run_dir, "manifest.csv"), stringsAsFactors = FALSE,
+                       check.names = FALSE)
+  expect_identical(calculate_checksum(file.path(run_dir, "manifest.csv")),
+                   pin$manifest_checksum_sha256[[1]])
+  expect_equal(sum(manifest$artifact_role == "conversion_authority_archive"), 1L)
+  archive <- file.path(run_dir,
+                       manifest$file_name[manifest$artifact_role == "conversion_authority_archive"])
+  expect_true(config$expected_inner_workbook %in% unzip(archive, list = TRUE)$Name)
+  expect_true(file.exists(at_root("metadata/stage2/screening/ds22_peg_bvol_screening_summary.csv")))
+})

@@ -1,4 +1,4 @@
 "path","sha256"
-"metadata/stage2/control/acquisition_status.csv","d9ba34c57cadc421218cdc72deaae6ab3ed5669ca16ad89f4e9dcf571bf5872a"
+"metadata/stage2/control/acquisition_status.csv","985ee148a683765fba3a9c4bd207fdd949c5a288b3fc736ff785ba78ffed9557"
 "config/stage3_source_adapters.csv","11c5a668c37a35bee75f6860bf1fac11061224dd4d7b76672619e010bd6296b5"
-"metadata/stage3/input/stage3_input_manifest.csv","4a92f1347ad587ed8684a39f0b18770a1e826ff42091897412322c40b7d74bc9"
+"metadata/stage3/input/stage3_input_manifest.csv","f87dd60740430b34d892e1c4992bdc24365c3a31bc7523be37c04928b505868c"

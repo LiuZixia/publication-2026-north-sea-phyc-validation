@@ -18,10 +18,15 @@ if (!identical(calculate_checksum(manifest_path), pin$manifest_checksum_sha256[[
 }
 
 manifest <- utils::read.csv(manifest_path, stringsAsFactors = FALSE, check.names = FALSE)
-if (nrow(manifest) != 1L) stop("DS04 manifest should have exactly one file.", call. = FALSE)
+if (!all(c("file_name", "checksum_sha256", "file_size_bytes", "artifact_role") %in% names(manifest)) ||
+    nrow(manifest) != 3L || sum(manifest$artifact_role == "observation_payload") != 1L) {
+  stop("DS04 manifest does not identify one canonical observation payload.", call. = FALSE)
+}
 
-csv_path <- file.path(run_dir, manifest$file_name[[1]])
-if (!identical(calculate_checksum(csv_path), manifest$checksum_sha256[[1]])) {
+payload <- which(manifest$artifact_role == "observation_payload")
+csv_path <- file.path(run_dir, manifest$file_name[[payload]])
+if (!identical(calculate_checksum(csv_path), manifest$checksum_sha256[[payload]]) ||
+    file.size(csv_path) != manifest$file_size_bytes[[payload]]) {
   stop("DS04 raw CSV checksum does not match manifest.", call. = FALSE)
 }
 
@@ -29,7 +34,8 @@ if (!identical(calculate_checksum(csv_path), manifest$checksum_sha256[[1]])) {
 raw_data <- utils::read.csv(csv_path, stringsAsFactors = FALSE, check.names = FALSE)
 
 # Basic column checks
-required_cols <- c("latitude", "longitude", "date", "taxon")
+required_cols <- c("dataset_name", "latitude", "longitude", "date", "aphia_id", "taxon",
+                   "abundance", "lifeforms", "plankton_type")
 missing_cols <- setdiff(required_cols, names(raw_data))
 if (length(missing_cols) > 0) {
   stop(sprintf("DS04 missing required columns: %s", paste(missing_cols, collapse = ", ")), call. = FALSE)
@@ -76,12 +82,9 @@ if (any(domain_hit)) {
   locations$subregion_id[selected_rows] <- subregions$subregion_id[region_index]
 }
 
-has_lifeforms <- "lifeforms" %in% names(raw_data)
-explicit_marine_phytoplankton_signal <- rep(TRUE, nrow(raw_data)) # Default to true
-if (has_lifeforms) {
-  explicit_marine_phytoplankton_signal <- grepl("phytoplankton|dinoflagellate|diatom", raw_data$lifeforms, ignore.case = TRUE) |
-                                          grepl("phytoplankton", raw_data$plankton_type, ignore.case = TRUE)
-}
+explicit_marine_phytoplankton_signal <-
+  grepl("phytoplankton|dinoflagellate|diatom", raw_data$lifeforms, ignore.case = TRUE) |
+  grepl("phytoplankton", raw_data$plankton_type, ignore.case = TRUE)
 
 screening_summary <- data.frame(
   total_raw_rows = nrow(raw_data),

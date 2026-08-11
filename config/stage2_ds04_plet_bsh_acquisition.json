@@ -1,0 +1,17 @@
+{
+  "schema_version": "1.0.0",
+  "dataset_id": "DS04",
+  "provider": "Plankton Lifeform Extraction Tool",
+  "endpoint": "https://www.dassh.ac.uk/plet/cgi-bin/get_form.py",
+  "dataset_parameter": "BSH_Phyto_Zoo_abundance",
+  "start_date": "2000-01-01",
+  "end_date": "2019-12-31",
+  "north": 63,
+  "south": 48,
+  "east": 14,
+  "west": -6,
+  "format": "csv",
+  "raw": true,
+  "minimum_csv_bytes": 1000000,
+  "expected_columns": ["dataset_name", "date", "latitude", "longitude", "aphia_id", "taxon", "abundance", "lifeforms", "plankton_type"]
+}

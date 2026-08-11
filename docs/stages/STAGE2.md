@@ -62,4 +62,6 @@ Closing this Stage 2 work-order gate does not resolve later scientific eligibili
 
 Every generated Stage 2 result must identify a version-controlled producer; every raw payload must reconcile to a manifest checksum or an explicitly registered historical intake. The historical `data/raw/stage2/downloaded_files_inventory.md` is immutable but superseded by the generated CSV inventory.
 
+DS04 is acquired by `scripts/00_downloads/stage2/11_acquire_ds04_plet_bsh.R` as the validated `BSH_Phyto_Zoo_abundance` payload. DS22 is acquired by `scripts/00_downloads/stage2/22_acquire_ds22_peg_bvol.R` as the provider PEG_BVOL archive containing `PEG_BVOL2026.xlsx`. These Stage 2 active pins are the only authoritative inputs for downstream stages; historical malformed or schematic-only raw runs remain immutable but inactive.
+
 Use the generated acquisition manifests, screening summaries, status overlay, inventories, and validation logs for manuscript numbers and decisions. Do not transcribe counts from this description. Stage 2 provisional tiers are routing evidence only; final eligibility, recurrence, and reference construction belong to later observation-only stages.

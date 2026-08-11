@@ -2,30 +2,24 @@
 
 ## Ordered Actions
 
-1. **FIRST PRIORITY — Execute Stage 5 observation harmonization.** Build source-specific acquisition/parsing and harmonization paths for DS02, DS04, DS05, DS06, DS07, and DS16, with DS22 retained as conversion authority. Completion requires immutable registered inputs, preserved original fields, validated keys/units/quality flags, and reproducible interim tables.
-2. **Audit identity and conversion feasibility.** Resolve provider-versus-aggregator overlap and document whether the five Tier C candidates can be converted using defensible taxon/life-stage/method mappings anchored to DS06/DS22. Completion requires data-level duplicate evidence and conversion eligibility records, not narrative assumptions.
-3. **Freeze the remaining observation-only design inputs before Stage 6.** Obtain and register prospective target-season definitions, minimum observations, maximum allowable gaps, and the decision on whether an offshore central/northern spatial unit requires a protocol amendment. Completion requires machine-readable parameters and a dated rationale before outcomes are constructed.
-4. **Reassess the Stage 4 gate from harmonized observations.** Calculate adequately sampled years, independent network support, event-count potential, and lifeform recurrence potential without PhyC. Completion requires an updated deterministic gate that either authorizes Stage 6 or records the specific failed criteria.
+1. **FIRST PRIORITY — Resolve source units and method epochs.** Use provider documentation or reproducibly archived provider responses to determine the PLET abundance units and join sampling/analysis methods and dated method epochs for DS02, DS04, DS05, DS06, DS07, and DS16. Completion evidence: version-controlled acquisition/intake scripts, immutable checksums, populated canonical method fields, and updated issue states.
+2. **Freeze a conversion-uncertainty contract.** Register sourced, prospective rules for PEG size/stage ambiguity and lower/central/upper carbon estimates without inspecting PhyC. Completion evidence: machine-readable configuration, citations/provenance, tests, and parallel reference fields.
+3. **Resolve remaining taxonomy and authority ambiguity.** Review fuzzy/unmatched names and multiple PEG size/stage candidates while preserving unresolved states. Completion evidence: cached source evidence and a regenerated conversion-readiness audit.
+4. **Construct and validate compatible total-biomass samples.** Apply provider-carbon-first and qualified conversion routes only after actions 1–3. Completion evidence: nonzero eligible samples supported by completeness classes, lower/central/upper series, checksum manifests, and passing Stage 5 gate tests.
 
 ## Blockers and Missing Inputs
 
-- Numeric target-season adequacy parameters are not prospectively specified: target seasons, minimum observations, and maximum gaps require a scientific decision before Stage 6.
-- The two frozen hydrographic polygons cannot separately diagnose the anticipated offshore central/northern evidence gap; changing spatial units requires a prospective protocol amendment.
-- Event counts and observed recurrence remain unavailable until Stage 5 harmonization and Stage 6 observation-only construction.
-- Exact CMEMS product identifier, version, variable, depth, extraction, masking, and collocation metadata remain unfrozen; CMEMS acquisition is not authorized.
-- Source access, licenses, schemas, and downloadable records for the six primary candidates must be confirmed through the scripted Stage 5 acquisition workflow.
+- Provider documentation or correspondence may be required to establish PLET abundance units and historical sampling/analysis method epochs.
+- A citable scientific authority and prespecified decision rule are required for conversion uncertainty; these values must not be inferred or supplied by an agent.
 
 ## Known Warnings and Scientific Risks
 
-- The Stage 4 gate is `conditional_proceed_to_stage5_harmonization`; primary validation feasibility is `not_yet_demonstrated`.
-- Coverage-year counts are feasibility ceilings, not adequately sampled years, negative windows, or recurrence evidence.
-- Stage 3 `eligible` means permitted to enter compatibility/design checks, not final inclusion.
-- DS06 is the only Tier A direct-carbon anchor. The other five primary networks depend on scientifically defensible Tier C conversion and may fail after record-level audit.
-- Daily validation is not a confirmatory candidate on current evidence. The primary window remains unresolved between `7_day` and `cadence_matched` pending adequacy and event auditing.
-- Confirmatory lifeform strata are not frozen; Stage 4 contains only recurrence potential and protocol-defined reference routes.
+- Zero currently authorized biomass samples means harmonization is unfinished, not that the six observation networks lack usable records.
+- Raw counts across lifeforms cannot be compared as biomass; cross-lifeform dominance requires carbon or biovolume shares.
+- Provider carbon in DS06 cannot be treated as complete total phytoplankton biomass until autotrophic scope and sample completeness are demonstrated.
+- Any source or rule discovered after outcome/model inspection must be classified prospectively, as sensitivity work, or as a documented protocol deviation.
 
 ## Deferred / Out of Scope
 
-- Stage 6 outcomes, events, recurrence strata, and validation splits remain unauthorized.
-- CMEMS PhyC acquisition, inspection, matching, tuning, and performance evaluation remain unauthorized.
-- Dataset discovery is not being reopened merely because only six networks currently have a primary Stage 5 role; all 19 retained Stage 2 datasets remain represented in the provisional manifest.
+- Stage 6 outcome/event construction and all CMEMS acquisition remain unauthorized until the Stage 5 gate passes.
+- PhyC performance, bloom classification, model fitting, and manuscript result claims remain out of scope at the current gate.
